@@ -21,7 +21,7 @@ func InitializePlayerDefaultValue(idPlayer int) PlayerInGame {
 		NbAirBomb:  0}
 
 	policy := PlayerModifierPolicy{
-		RecruitmentPolicy: 1}
+		RecruitmentPolicy: 5}
 
 	var player = PlayerInGame{
 		PlayerID:       idPlayer,
@@ -44,8 +44,6 @@ func PASetRecruitementPolicy(player *PlayerInGame, value float32) {
 
 func createGame(conf GameConf, queue chan GameMsg) Game {
 	var gameID = uuid.New()
-	fmt.Println("Creating game")
-	// Go grab player profile in base
 	var mockP1 = InitializePlayerDefaultValue(conf.PlayerIDS[0])
 	var mockP2 = InitializePlayerDefaultValue(conf.PlayerIDS[1])
 	var listPlayer = []PlayerInGame{mockP1, mockP2}
@@ -59,16 +57,10 @@ func createGame(conf GameConf, queue chan GameMsg) Game {
 }
 
 func GameEvent(queue chan GameMsg, game Game, player1, player2 *PlayerInGame) {
-	// var ActionMapping = map[int]PlayerAction{1: PASetRecruitementPolicy}
-
 	ActionMapping := map[string]interface{}{
 		"PASetRecruitementPolicy": PASetRecruitementPolicy,
 	}
-
-	fmt.Println("Running game event")
 	for msg := range queue {
-		fmt.Println("RECIEVE MSG")
-		fmt.Println(msg)
 		if player1.PlayerID == msg.PlayerID {
 			ActionMapping[msg.Action].(func(*PlayerInGame, float32))(player1, msg.Value)
 		} else {
@@ -88,8 +80,8 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 
 	fmt.Println("Start game ", player1.nick, " vs ", player2.nick)
 
-	for game.CurrentTurn < 5 {
-		timer1 := time.NewTimer(time.Second)
+	for game.CurrentTurn < 999 {
+		timer1 := time.NewTimer(time.Second / 4)
 		//Resolve combat
 		var preFightP1 = player1
 		var preFightP2 = player2
@@ -103,6 +95,16 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 		player2.NbPop -= AlgoReinforcement(player2)
 		player1.NbPop -= AlgoReinforcement(player1)
 
+		if player1.NbPop <= 0 || player1.Army.NbSoldier <= 0 {
+			fmt.Println("PLAYER 2 WIN ! ", game)
+			queueGameOut <- game
+			break
+		}
+		if player2.NbPop <= 0 || player2.Army.NbSoldier <= 0 {
+			fmt.Println("PLAYER 1 WIN ! ", game)
+			queueGameOut <- game
+			break
+		}
 		<-timer1.C
 		game.CurrentTurn++
 		queueGameOut <- game
@@ -188,41 +190,41 @@ func FromChanToZMQ(queue chan Game) {
 }
 
 func main() {
-	pushSockMsg := ZMQPusherMockMSG()
 	fmt.Printf("Enter Main")
 	queueGameOut := make(chan Game, 100)
-	queueGameCreate := make(chan [][]byte, 100)
+	queueGameIn := make(chan [][]byte, 100)
 
-	go GameManagerF(queueGameOut, queueGameCreate)
-	go ZMQReader(queueGameCreate)
+	go GameManagerF(queueGameOut, queueGameIn)
+	go ZMQReader(queueGameIn)
 	go FromChanToZMQ(queueGameOut)
 
-	gConf := GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
-	jsonMsg, err := json.Marshal(gConf)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("SEND CREATE GAME!")
-	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
-
-	gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
-	jsonMsg, err = json.Marshal(gConf)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("SEND CREATE GAME!")
-	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
+	// pushSockMsg := ZMQPusherMockMSG()
+	// gConf := GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
+	// jsonMsg, err := json.Marshal(gConf)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println("SEND CREATE GAME!")
+	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
+	//
+	// gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
+	// jsonMsg, err = json.Marshal(gConf)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println("SEND CREATE GAME!")
+	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
 
 	//MOCK TO SEND EVENT
-	time.Sleep(2 * time.Second)
-	lGmsg := GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 999, Text: "Change rec value to 5", Value: 5.0}
-	jsonMsg, err = json.Marshal(lGmsg)
-	if err != nil {
-		fmt.Println(err)
-	}
-	var gsa GameMsg
-	json.Unmarshal(jsonMsg, &gsa)
-	pushSockMsg.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	// time.Sleep(2 * time.Second)
+	// lGmsg := GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 999, Text: "Change rec value to 5", Value: 15.0}
+	// jsonMsg, err = json.Marshal(lGmsg)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// var gsa GameMsg
+	// json.Unmarshal(jsonMsg, &gsa)
+	// pushSockMsg.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
 	// time.Sleep(1 * time.Second)
 	// lGmsg = GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 1, Text: "Change rec value to 15", Value: 15}
 	// jsonMsg, err = json.Marshal(lGmsg)
