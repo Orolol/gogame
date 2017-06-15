@@ -17,7 +17,7 @@ type GameConf struct {
 type Game struct {
 	GameID      uuid.UUID
 	CurrentTurn int
-	ListPlayers map[int]PlayerInGame
+	ListPlayers []PlayerInGame
 	Conf        GameConf
 	Queue       chan GameMsg
 }

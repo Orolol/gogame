@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
-	"github.com/pebbe/zmq4"
+	"github.com/zeromq/goczmq"
 	"github.com/google/uuid"
 )
 
@@ -47,7 +47,7 @@ func createGame(idp1 int, idp2 int, conf GameConf, queue chan GameMsg) Game {
 	// Go grab player profile in base
 	var mockP1 = InitializePlayerDefaultValue(1)
 	var mockP2 = InitializePlayerDefaultValue(2)
-	var listPlayer = map[int]PlayerInGame{mockP1.PlayerID: mockP1, mockP2.PlayerID: mockP2}
+	var listPlayer = []PlayerInGame{mockP1,mockP2}
 	var game = Game{
 		GameID:      gameID,
 		CurrentTurn: 0,
@@ -62,42 +62,28 @@ func GameEvent (queue chan GameMsg, game Game, player1, player2 *PlayerInGame) {
 	fmt.Println("Running game event")
 	for msg := range queue {
 		fmt.Println(msg.Text)
-		player, ok := game.ListPlayers[msg.PlayerID]
-		if ok {
-			fmt.Println("FOUND")
-			if player1.PlayerID == player.PlayerID {
-				player1 = msg.Action(player1, msg.value)
-			} else {
-				player2 = msg.Action(player2, msg.value)
-			}
-			fmt.Println(player)
-			fmt.Println(game.ListPlayers)
+
+		if player1.PlayerID == msg.PlayerID {
+			player1 = msg.Action(player1, msg.value)
 		} else {
-			fmt.Println("Erreur de destinataire", msg)
+			player2 = msg.Action(player2, msg.value)
 		}
+		fmt.Println(game.ListPlayers)
+
 	}
 }
 
 func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
-	var player1, player2 PlayerInGame
-	for key, value := range game.ListPlayers {
-		if key == 1 {
-			player1 = value
-		} else if key == 2 {
-			player2 = value
-		}
-	}
+	var player1, player2 *PlayerInGame
+	player1 = &game.ListPlayers[0]
+	player2 = &game.ListPlayers[1]
 
-	go GameEvent (queue, game, &player1, &player2)
+	go GameEvent (queue, game,player1, player2)
 
 	fmt.Println("Start game ", player1.nick, " vs ", player2.nick)
 
-
-
-
 	for game.CurrentTurn < 5 {
 		timer1 := time.NewTimer(time.Second)
-		//Read the stack
 		//Resolve combat
 		var preFightP1 = player1
 		var preFightP2 = player2
@@ -113,7 +99,9 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 
 		<-timer1.C
 		game.CurrentTurn++
+		fmt.Println("Sending new game state")
 		queueGameOut <- game
+		fmt.Println("Sent")
 
 		fmt.Println("Next turn ", game.CurrentTurn)
 	}
@@ -121,7 +109,7 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 }
 
 //AlgoDamageDealt Calculate dmg dealt
-func AlgoDamageDealt(player PlayerInGame) float32 {
+func AlgoDamageDealt(player *PlayerInGame) float32 {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	var rollp1 = r1.Float32()
@@ -131,14 +119,14 @@ func AlgoDamageDealt(player PlayerInGame) float32 {
 }
 
 //AlgoReinforcement calc reinforcement
-func AlgoReinforcement(player PlayerInGame) float32 {
+func AlgoReinforcement(player *PlayerInGame) float32 {
 	reinforcement := player.NbPop * 0.001 * player.ModifierPolicy.RecruitmentPolicy
 	fmt.Println("Calculating renf for ", player, " :: ", reinforcement)
 	return reinforcement
 }
 
 //AlgoDamageRepartition Calculate loses
-func AlgoDamageRepartition(player PlayerInGame, dmgIncoming float32) PlayerInGame {
+func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInGame {
 	player.Army.NbSoldier -= dmgIncoming
 	return player
 }
@@ -159,48 +147,34 @@ func GameManagerF(queueGameOut chan Game) {
 }
 
 func ZMQReader() {
+	fmt.Printf("Init Reader")
+	pull := goczmq.NewRouterChanneler("tcp://127.0.0.1:31337")
+	for msg := range pull.RecvChan {
+		fmt.Println("Recieving new game state in ZMQ !! GameID : ", string(msg[1]))
+
+	}
 
 }
-func ZMQPusher() {
+func ZMQPusher() *goczmq.Channeler{
+	fmt.Printf("Init Pusher")
+	push := goczmq.NewDealerChanneler("tcp://127.0.0.1:31337")
 
+	return push
 }
 
 func main() {
-
-	push, err := zmq4.NewSocket(zmq4.REQ)
-	if err != nil {
-		panic(err)
-	}
-	push.Connect("tcp://127.0.0.1:31337")
-	fmt.Printf("PUSH Queue connected\n")
-	pull, err := zmq4.NewSocket(zmq4.REP)
-	if err != nil {
-		panic(err)
-	}
-	time.Sleep(1 * time.Second)
-	pull.Connect("tcp://127.0.0.1:31338")
-	fmt.Printf("PULL Queue connected\n")
-	res, err := push.SendMessage("Hello World", zmq4.DONTWAIT)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("HW sent\n")
-	time.Sleep(1* time.Second)
-	sz, err := pull.RecvMessage(zmq4.DONTWAIT)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("HW rcv\n")
-	for _,m := range sz{
-		fmt.Printf(m)
-	}
-
-	fmt.Printf("We received a message of size ", res)
-
-
-	var queueGameOut chan Game
+	pushSock := ZMQPusher()
+	fmt.Printf("Enter Main")
+	queueGameOut := make(chan Game, 100)
 
 	go GameManagerF(queueGameOut)
+	go ZMQReader()
+	for msg := range queueGameOut{
+		fmt.Println("Recieving new game state")
+		fmt.Println(msg)
+		pushSock.SendChan <- [][]byte{[]byte(msg.GameID.String()),[]byte("World")}
+		fmt.Println("Sent to the ZMQ")
+	}
 
 	var lGmsg []GameMsg
 	lGmsg = append(lGmsg, GameMsg{Action: PASetRecruitementPolicy, PlayerID: 1, Text: "Change rec value to 5", value: 5.0})
