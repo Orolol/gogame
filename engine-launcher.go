@@ -1,12 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"math/rand"
 	"strconv"
 	"time"
-	"github.com/zeromq/goczmq"
+
 	"github.com/google/uuid"
+	"github.com/zeromq/goczmq"
 )
 
 //InitializePlayerDefaultValue init player
@@ -33,40 +34,45 @@ func InitializePlayerDefaultValue(idPlayer int) PlayerInGame {
 }
 
 //PlayerAction player action
-type PlayerAction func(player *PlayerInGame, value float32) *PlayerInGame
+type PlayerAction func(player *PlayerInGame, value float32)
 
 //PASetRecruitementPolicy change recruitement policy to the value
-func PASetRecruitementPolicy(player *PlayerInGame, value float32) *PlayerInGame {
+func PASetRecruitementPolicy(player *PlayerInGame, value float32) {
+	fmt.Println("Change Rec policy to ", value)
 	player.ModifierPolicy.RecruitmentPolicy = value
-	return player
 }
 
-func createGame(idp1 int, idp2 int, conf GameConf, queue chan GameMsg) Game {
+func createGame(conf GameConf, queue chan GameMsg) Game {
 	var gameID = uuid.New()
 	fmt.Println("Creating game")
 	// Go grab player profile in base
-	var mockP1 = InitializePlayerDefaultValue(1)
-	var mockP2 = InitializePlayerDefaultValue(2)
-	var listPlayer = []PlayerInGame{mockP1,mockP2}
+	var mockP1 = InitializePlayerDefaultValue(conf.PlayerIDS[0])
+	var mockP2 = InitializePlayerDefaultValue(conf.PlayerIDS[1])
+	var listPlayer = []PlayerInGame{mockP1, mockP2}
 	var game = Game{
 		GameID:      gameID,
 		CurrentTurn: 0,
 		ListPlayers: listPlayer,
-		Conf:        conf,
-		Queue:       queue}
+		Conf:        conf}
 
 	return game
 }
 
-func GameEvent (queue chan GameMsg, game Game, player1, player2 *PlayerInGame) {
+func GameEvent(queue chan GameMsg, game Game, player1, player2 *PlayerInGame) {
+	// var ActionMapping = map[int]PlayerAction{1: PASetRecruitementPolicy}
+
+	ActionMapping := map[string]interface{}{
+		"PASetRecruitementPolicy": PASetRecruitementPolicy,
+	}
+
 	fmt.Println("Running game event")
 	for msg := range queue {
-		fmt.Println(msg.Text)
-
+		fmt.Println("RECIEVE MSG")
+		fmt.Println(msg)
 		if player1.PlayerID == msg.PlayerID {
-			player1 = msg.Action(player1, msg.value)
+			ActionMapping[msg.Action].(func(*PlayerInGame, float32))(player1, msg.Value)
 		} else {
-			player2 = msg.Action(player2, msg.value)
+			ActionMapping[msg.Action].(func(*PlayerInGame, float32))(player2, msg.Value)
 		}
 		fmt.Println(game.ListPlayers)
 
@@ -78,7 +84,7 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 	player1 = &game.ListPlayers[0]
 	player2 = &game.ListPlayers[1]
 
-	go GameEvent (queue, game,player1, player2)
+	go GameEvent(queue, game, player1, player2)
 
 	fmt.Println("Start game ", player1.nick, " vs ", player2.nick)
 
@@ -99,86 +105,134 @@ func runGame(game Game, queue chan GameMsg, queueGameOut chan Game) {
 
 		<-timer1.C
 		game.CurrentTurn++
-		fmt.Println("Sending new game state")
 		queueGameOut <- game
-		fmt.Println("Sent")
 
-		fmt.Println("Next turn ", game.CurrentTurn)
+		fmt.Println("Current State ", game)
 	}
 	fmt.Println("End game")
 }
 
-//AlgoDamageDealt Calculate dmg dealt
-func AlgoDamageDealt(player *PlayerInGame) float32 {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	var rollp1 = r1.Float32()
-	var dmg = player.Army.NbSoldier * 0.05 * rollp1
-	fmt.Println("Calculating dmg for ", player, " :: ", dmg)
-	return dmg
-}
+func GameManagerF(queueGameOut chan Game, queueCreation chan [][]byte) {
 
-//AlgoReinforcement calc reinforcement
-func AlgoReinforcement(player *PlayerInGame) float32 {
-	reinforcement := player.NbPop * 0.001 * player.ModifierPolicy.RecruitmentPolicy
-	fmt.Println("Calculating renf for ", player, " :: ", reinforcement)
-	return reinforcement
-}
+	var GameList = make(map[uuid.UUID]chan GameMsg)
 
-//AlgoDamageRepartition Calculate loses
-func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInGame {
-	player.Army.NbSoldier -= dmgIncoming
-	return player
-}
+	var gcM = GameConf{GameType: "FIRST MOCK", NbPlayers: 2, PlayerIDS: []int{999, 666}}
+	queueGameInc := make(chan GameMsg, 100)
+	game := createGame(gcM, queueGameInc)
+	go runGame(game, queueGameInc, queueGameOut)
+	uuid, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
+	if err != nil {
+		fmt.Println("err")
+	}
+	GameList[uuid] = queueGameInc
 
-func GameManagerF(queueGameOut chan Game) {
-	var conf = GameConf{
-		GameType:  "test",
-		NbPlayers: 2}
-	var GameList = make(map[uuid.UUID]Game)
-	GameManager := GameManager{GameList: GameList}
-	queue := make(chan GameMsg)
-	game := createGame(11, 22, conf, queue)
-	fmt.Println(game.GameID)
-	go runGame(game, queue, queueGameOut)
+	for msg := range queueCreation {
+		switch string(msg[1]) {
+		case "CREATE":
+			var gc GameConf
+			json.Unmarshal(msg[2], &gc)
+			fmt.Println("GAME CREATE : ", gc)
+			fmt.Printf("Launch Game from this msg ", gc)
+			queueGameInc := make(chan GameMsg, 100)
+			game := createGame(gc, queueGameInc)
+			go runGame(game, queueGameInc, queueGameOut)
+			GameList[game.GameID] = queueGameInc
+			fmt.Println("CURRENT LIST OF GAME ", GameList)
+		case "MSG":
+			var gs GameMsg
+			json.Unmarshal(msg[2], &gs)
+			fmt.Println("GameMSG : ", gs)
+			if val, ok := GameList[gs.GameID]; ok {
+				val <- gs
+			} else {
+				fmt.Println("Game not found ", gs.GameID)
+			}
 
-	GameManager.GameList[game.GameID] = game
-
-}
-
-func ZMQReader() {
-	fmt.Printf("Init Reader")
-	pull := goczmq.NewRouterChanneler("tcp://127.0.0.1:31337")
-	for msg := range pull.RecvChan {
-		fmt.Println("Recieving new game state in ZMQ !! GameID : ", string(msg[1]))
-
+		}
 	}
 
 }
-func ZMQPusher() *goczmq.Channeler{
+
+func ZMQReader(queueCreation chan [][]byte) {
+	fmt.Printf("Init Reader")
+	pull := goczmq.NewRouterChanneler("tcp://127.0.0.1:31337")
+	for msg := range pull.RecvChan {
+		fmt.Println("Recieving new game msg in ZMQ !! TYPE : ", string(msg[1]))
+		queueCreation <- msg
+	}
+}
+func ZMQPusher() *goczmq.Channeler {
+	fmt.Printf("Init Pusher")
+	push := goczmq.NewDealerChanneler("tcp://127.0.0.1:31338")
+
+	return push
+}
+func ZMQPusherMockMSG() *goczmq.Channeler {
 	fmt.Printf("Init Pusher")
 	push := goczmq.NewDealerChanneler("tcp://127.0.0.1:31337")
 
 	return push
 }
 
-func main() {
+func FromChanToZMQ(queue chan Game) {
 	pushSock := ZMQPusher()
+	for msg := range queue {
+		fmt.Println("Recieving new game state")
+		jsonMsg, err := json.Marshal(msg)
+		if err != nil {
+			fmt.Println("fail :(")
+			fmt.Println(err)
+		}
+		pushSock.SendChan <- [][]byte{[]byte(msg.GameID.String()), []byte(jsonMsg)}
+	}
+}
+
+func main() {
+	pushSockMsg := ZMQPusherMockMSG()
 	fmt.Printf("Enter Main")
 	queueGameOut := make(chan Game, 100)
+	queueGameCreate := make(chan [][]byte, 100)
 
-	go GameManagerF(queueGameOut)
-	go ZMQReader()
-	for msg := range queueGameOut{
-		fmt.Println("Recieving new game state")
-		fmt.Println(msg)
-		pushSock.SendChan <- [][]byte{[]byte(msg.GameID.String()),[]byte("World")}
-		fmt.Println("Sent to the ZMQ")
+	go GameManagerF(queueGameOut, queueGameCreate)
+	go ZMQReader(queueGameCreate)
+	go FromChanToZMQ(queueGameOut)
+
+	gConf := GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
+	jsonMsg, err := json.Marshal(gConf)
+	if err != nil {
+		fmt.Println(err)
 	}
+	fmt.Println("SEND CREATE GAME!")
+	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
 
-	var lGmsg []GameMsg
-	lGmsg = append(lGmsg, GameMsg{Action: PASetRecruitementPolicy, PlayerID: 1, Text: "Change rec value to 5", value: 5.0})
+	gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
+	jsonMsg, err = json.Marshal(gConf)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("SEND CREATE GAME!")
+	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
 
+	//MOCK TO SEND EVENT
+	time.Sleep(2 * time.Second)
+	lGmsg := GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 999, Text: "Change rec value to 5", Value: 5.0}
+	jsonMsg, err = json.Marshal(lGmsg)
+	if err != nil {
+		fmt.Println(err)
+	}
+	var gsa GameMsg
+	json.Unmarshal(jsonMsg, &gsa)
+	pushSockMsg.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	// time.Sleep(1 * time.Second)
+	// lGmsg = GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 1, Text: "Change rec value to 15", Value: 15}
+	// jsonMsg, err = json.Marshal(lGmsg)
+	// if err != nil {
+	// 	fmt.Println("fail :(")
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println("SEND EVENT MOCK !")
+	// fmt.Println(jsonMsg)
+	// pushSockMsg.SendChan <- [][]byte{[]byte(GID.String()), []byte(jsonMsg)}
 	var input string
 	fmt.Scanln(&input)
 	fmt.Println("done")

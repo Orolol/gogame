@@ -11,6 +11,7 @@ type GameManager struct {
 type GameConf struct {
 	GameType  string
 	NbPlayers int
+	PlayerIDS []int
 }
 
 //Game Game state
@@ -19,7 +20,6 @@ type Game struct {
 	CurrentTurn int
 	ListPlayers []PlayerInGame
 	Conf        GameConf
-	Queue       chan GameMsg
 }
 
 //ListPlayer list of players
@@ -54,9 +54,9 @@ type PlayerModifierPolicy struct {
 
 //GameMsg msg send to the routine
 type GameMsg struct {
-	GameID   int
+	GameID   uuid.UUID
 	Text     string
 	PlayerID int
-	Action   PlayerAction
-	value    float32
+	Action   string
+	Value    float32
 }
