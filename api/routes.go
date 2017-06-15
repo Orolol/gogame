@@ -24,4 +24,10 @@ var routes = Routes{
 		"/CreateGame",
 		CreateGame,
 	},
+	Route{
+		"SendMessage",
+		"POST",
+		"/SendMessage",
+		CreateGame,
+	},
 }

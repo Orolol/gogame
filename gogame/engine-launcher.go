@@ -199,15 +199,16 @@ func main() {
 	go ZMQReader(queueGameIn)
 	go FromChanToZMQ(queueGameOut)
 
-	// pushSockMsg := ZMQPusherMockMSG()
-	// gConf := GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
-	// jsonMsg, err := json.Marshal(gConf)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println("SEND CREATE GAME!")
-	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
-	//
+	pushSockMsg := ZMQPusherMockMSG()
+	gConf := utils.GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
+	jsonMsg, err := json.Marshal(gConf)
+	fmt.Println(string(jsonMsg))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("SEND CREATE GAME!")
+	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
+
 	// gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
 	// jsonMsg, err = json.Marshal(gConf)
 	// if err != nil {
