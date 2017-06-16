@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -25,17 +25,12 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 	var gc utils.GameConf
 	fmt.Println("HAndler create gme")
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	fmt.Println(body)
-	fmt.Println(string(body))
-	fmt.Println("Z")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("A")
 	if err := r.Body.Close(); err != nil {
 		panic(err)
 	}
-	fmt.Println("B")
 	if err := json.Unmarshal(body, &gc); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
@@ -44,9 +39,6 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
-	fmt.Println("UNMARSHALL OK")
-	fmt.Println(gc)
-	fmt.Println("SEND TO ZMQ")
 
 	jsonMsg, err := json.Marshal(gc)
 	fmt.Println(string(jsonMsg))
