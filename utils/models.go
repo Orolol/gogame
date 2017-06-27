@@ -1,6 +1,9 @@
 package utils
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
+)
 
 //GameManager list of current game.
 type GameManager struct {
@@ -59,4 +62,11 @@ type GameMsg struct {
 	PlayerID int
 	Action   string
 	Value    float32
+}
+
+//Account Account Model
+type Account struct {
+	gorm.Model
+	Name  string
+	Email string
 }

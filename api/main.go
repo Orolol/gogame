@@ -8,10 +8,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/orolol/gogame/utils"
 )
 
-var addr = flag.String("addr", ":5000", "http service address")
+var addr = flag.String("addr", ":5001", "http service address")
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -71,6 +73,15 @@ func goSocket() {
 }
 
 func main() {
+	db, err := gorm.Open("sqlite3", "test.db")
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer db.Close()
+	db.AutoMigrate(&utils.Account{})
+
+	// Create
+	db.Create(&utils.Account{Name: "gamer", Email: "test@mail.com"})
 	go goSocket()
 
 	router := NewRouter()
