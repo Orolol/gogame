@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/orolol/gogame/utils"
+	"github.com/orolol/utils"
 )
 
 var addr = flag.String("addr", ":5001", "http service address")
@@ -80,8 +80,6 @@ func main() {
 	defer db.Close()
 	db.AutoMigrate(&utils.Account{})
 
-	// Create
-	db.Create(&utils.Account{Name: "gamer", Email: "test@mail.com"})
 	go goSocket()
 
 	router := NewRouter()

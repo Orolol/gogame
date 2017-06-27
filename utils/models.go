@@ -67,6 +67,7 @@ type GameMsg struct {
 //Account Account Model
 type Account struct {
 	gorm.Model
-	Name  string
-	Email string
+	Name     string
+	Login    string
+	Password string
 }
