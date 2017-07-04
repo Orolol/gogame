@@ -19,15 +19,21 @@ var routes = Routes{
 		Index,
 	},
 	Route{
-		"CreateGame",
+		"JoinGame",
 		"POST",
-		"/CreateGame",
-		CreateGame,
+		"/JoinGame",
+		JoinGame,
 	},
 	Route{
-		"SendMessage",
+		"SignUp",
 		"POST",
-		"/SendMessage",
-		CreateGame,
+		"/SignUp",
+		SignUp,
+	},
+	Route{
+		"Login",
+		"POST",
+		"/Login",
+		Login,
 	},
 }

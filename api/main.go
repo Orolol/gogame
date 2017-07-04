@@ -7,10 +7,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 )
 
 var addr = flag.String("addr", ":5001", "http service address")
@@ -36,18 +37,22 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 		for client := range hub.clients {
 			if client.GameID == gs.GameID {
+				fmt.Println("GAMEID FOUND ")
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
 					return
 				}
 				w.Write(msg[2])
 			} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
+				fmt.Println("PLAYERID FOUND ")
 				client.GameID = gs.GameID
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
 					return
 				}
 				w.Write(msg[2])
+			} else {
+				fmt.Println("NOBODY FOUND. I'm so fucking alone ", client)
 			}
 		}
 	}
@@ -73,15 +78,21 @@ func goSocket() {
 }
 
 func main() {
+
 	db, err := gorm.Open("sqlite3", "test.db")
 	if err != nil {
 		panic("failed to connect database")
 	}
 	defer db.Close()
 	db.AutoMigrate(&utils.Account{})
+	db.AutoMigrate(&utils.Token{})
 
+	go matchmaking()
 	go goSocket()
 
 	router := NewRouter()
-	log.Fatal(http.ListenAndServe(":8080", router))
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
+	originsOk := handlers.AllowedOrigins([]string{"*", "localhost"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	log.Fatal(http.ListenAndServe(":8081", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }

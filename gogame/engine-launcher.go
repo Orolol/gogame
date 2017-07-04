@@ -3,16 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 	"github.com/zeromq/goczmq"
 )
 
 //InitializePlayerDefaultValue init player
-func InitializePlayerDefaultValue(idPlayer int) utils.PlayerInGame {
+func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	army := utils.PlayerArmy{
 		NbSoldier:  1000,
 		NbLigtTank: 100,
@@ -25,10 +24,10 @@ func InitializePlayerDefaultValue(idPlayer int) utils.PlayerInGame {
 		RecruitmentPolicy: 5}
 
 	var player = utils.PlayerInGame{
-		PlayerID:       idPlayer,
+		PlayerID:       int(acc.ID),
 		ModifierPolicy: policy,
 		Army:           army,
-		Nick:           "Player " + strconv.Itoa(idPlayer),
+		Nick:           acc.Name,
 		NbPop:          10000}
 
 	return player
@@ -45,8 +44,8 @@ func PASetRecruitementPolicy(player *utils.PlayerInGame, value float32) {
 
 func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 	var gameID = uuid.New()
-	var mockP1 = InitializePlayerDefaultValue(conf.PlayerIDS[0])
-	var mockP2 = InitializePlayerDefaultValue(conf.PlayerIDS[1])
+	var mockP1 = InitializePlayerDefaultValue(conf.Players[0])
+	var mockP2 = InitializePlayerDefaultValue(conf.Players[1])
 	var listPlayer = []utils.PlayerInGame{mockP1, mockP2}
 	var game = utils.Game{
 		GameID:      gameID,
@@ -119,16 +118,6 @@ func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
 
 	var GameList = make(map[uuid.UUID]chan utils.GameMsg)
 
-	var gcM = utils.GameConf{GameType: "FIRST MOCK", NbPlayers: 2, PlayerIDS: []int{999, 666}}
-	queueGameInc := make(chan utils.GameMsg, 100)
-	game := createGame(gcM, queueGameInc)
-	go runGame(game, queueGameInc, queueGameOut)
-	uuid, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
-	if err != nil {
-		fmt.Println("err")
-	}
-	GameList[uuid] = queueGameInc
-
 	for msg := range queueCreation {
 		switch string(msg[1]) {
 		case "CREATE":
@@ -199,15 +188,15 @@ func main() {
 	go ZMQReader(queueGameIn)
 	go FromChanToZMQ(queueGameOut)
 
-	pushSockMsg := ZMQPusherMockMSG()
-	gConf := utils.GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
-	jsonMsg, err := json.Marshal(gConf)
-	fmt.Println(string(jsonMsg))
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("SEND CREATE GAME!")
-	pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
+	// pushSockMsg := ZMQPusherMockMSG()
+	// gConf := utils.GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
+	// jsonMsg, err := json.Marshal(gConf)
+	// fmt.Println(string(jsonMsg))
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println("SEND CREATE GAME!")
+	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
 
 	// gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
 	// jsonMsg, err = json.Marshal(gConf)

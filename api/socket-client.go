@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -129,13 +130,16 @@ func (c *Client) writePump() {
 
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("SOMEONE CONNECT TO WS", r)
+	fmt.Println("SOMEONE CONNECT TO WS", r.Body)
+	fmt.Println("SOMEONE CONNECT TO WS", r.URL.Query()["id"])
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), PlayerID: len(hub.clients)}
+	id, _ := strconv.Atoi(r.URL.Query()["id"][0])
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), PlayerID: id}
 	client.hub.register <- client
 	go client.writePump()
 	client.readPump()
