@@ -15,6 +15,7 @@ func ZMQPusherMSG() *goczmq.Channeler {
 func ZMQReader(queueCreation chan [][]byte) {
 	fmt.Printf("Init Reader")
 	pull := goczmq.NewRouterChanneler("tcp://127.0.0.1:31338")
+	defer fmt.Println("End LISTENING ZMQ")
 	defer pull.Destroy()
 
 	for msg := range pull.RecvChan {

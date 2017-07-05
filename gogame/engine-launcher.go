@@ -109,7 +109,6 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		game.CurrentTurn++
 		queueGameOut <- game
 
-		fmt.Println("Current State ", game)
 	}
 	fmt.Println("End game")
 }
@@ -159,12 +158,6 @@ func ZMQPusher() *goczmq.Channeler {
 
 	return push
 }
-func ZMQPusherMockMSG() *goczmq.Channeler {
-	fmt.Printf("Init Pusher")
-	push := goczmq.NewDealerChanneler("tcp://127.0.0.1:31337")
-
-	return push
-}
 
 func FromChanToZMQ(queue chan utils.Game) {
 	pushSock := ZMQPusher()
@@ -175,14 +168,16 @@ func FromChanToZMQ(queue chan utils.Game) {
 			fmt.Println("fail :(")
 			fmt.Println(err)
 		}
+
 		pushSock.SendChan <- [][]byte{[]byte(msg.GameID.String()), []byte(jsonMsg)}
+		fmt.Println("SENT : ", msg)
 	}
 }
 
 func main() {
 	fmt.Printf("Enter Main")
-	queueGameOut := make(chan utils.Game, 100)
-	queueGameIn := make(chan [][]byte, 100)
+	queueGameOut := make(chan utils.Game)
+	queueGameIn := make(chan [][]byte)
 
 	go GameManagerF(queueGameOut, queueGameIn)
 	go ZMQReader(queueGameIn)

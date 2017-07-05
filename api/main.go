@@ -40,19 +40,19 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 				fmt.Println("GAMEID FOUND ")
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
-					return
+					fmt.Println("ERROR ", err)
+				} else {
+					w.Write(msg[2])
 				}
-				w.Write(msg[2])
 			} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
 				fmt.Println("PLAYERID FOUND ")
 				client.GameID = gs.GameID
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
-					return
+					fmt.Println("ERROR ", err)
+				} else {
+					w.Write(msg[2])
 				}
-				w.Write(msg[2])
-			} else {
-				fmt.Println("NOBODY FOUND. I'm so fucking alone ", client)
 			}
 		}
 	}
@@ -61,7 +61,7 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 func goSocket() {
 	flag.Parse()
 	hub := newHub()
-	var queueGameState = make(chan [][]byte, 100)
+	var queueGameState = make(chan [][]byte)
 	go ZMQReader(queueGameState)
 
 	go hub.run()
