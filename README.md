@@ -14,21 +14,21 @@ There's 3 separate modules :
 - API : Api RESTful, read and push with ZMQ, expose an API for the front (see https://github.com/orolol/gogame-front), and expose a websocket connection for FromChanToZMQ
 
 install Utils firt :
-    cd utils
-    go get
-    go build
-    go install
+- cd utils
+- go get
+- go build
+- go install
 
 install engine
-    cd ../gogame
-    go get
-    go build
-    ./gogame (launch the engine)
+- cd ../gogame
+- go get
+- go build
+- ./gogame (launch the engine)
 
 install Api
-    cd ../Api
-    go get
-    go build
-    ./Api
+- cd ../Api
+- go get
+- go build
+- ./Api
 
 Port used whold be 31338, 31337 for ZMQ, 5001 for web socket
