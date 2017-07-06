@@ -1,0 +1,27 @@
+package utils
+
+import (
+	"github.com/jinzhu/gorm"
+)
+
+//Account Account Model
+type Policy struct {
+	gorm.Model
+	Name           string `gorm:"not null;unique"`
+	ActionName     string
+	ConstraintName string
+	Description    string
+	possibleValue  string
+	TypePolicy     string
+	DefaultValue   string
+}
+
+type Technology struct {
+	gorm.Model
+	Name           string `gorm:"not null;unique"`
+	Description    string
+	TypeTechnology string
+	Tier           int
+	ActionName     string
+	ConstraintName string
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/orolol/gogame/utils"
+	"github.com/orolol/utils"
 )
 
 var addr = flag.String("addr", ":5001", "http service address")

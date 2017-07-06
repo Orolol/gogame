@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/jinzhu/gorm"
-	"github.com/orolol/gogame/utils"
+	"github.com/orolol/utils"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {

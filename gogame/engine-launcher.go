@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/orolol/gogame/utils"
+	"github.com/orolol/utils"
 	"github.com/zeromq/goczmq"
 )
 
