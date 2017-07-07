@@ -17,6 +17,9 @@ type GameConf struct {
 //Game Game state
 type Game struct {
 	GameID      uuid.UUID
+	State       string
+	Winner      PlayerInGame
+	Loser       PlayerInGame
 	CurrentTurn int
 	ListPlayers []PlayerInGame
 	Conf        GameConf

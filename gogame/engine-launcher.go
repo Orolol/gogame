@@ -79,9 +79,10 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	go GameEvent(queue, game, player1, player2)
 
 	fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
+	game.State = "Running"
 
 	for game.CurrentTurn < 999 {
-		timer1 := time.NewTimer(time.Second / 4)
+		timer1 := time.NewTimer(time.Second / 2)
 		//Resolve combat
 		var preFightP1 = player1
 		var preFightP2 = player2
@@ -97,11 +98,17 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 
 		if player1.NbPop <= 0 || player1.Army.NbSoldier <= 0 {
 			fmt.Println("PLAYER 2 WIN ! ", game)
+			game.State = "End"
+			game.Winner = game.ListPlayers[1]
+			game.Loser = game.ListPlayers[0]
 			queueGameOut <- game
 			break
 		}
 		if player2.NbPop <= 0 || player2.Army.NbSoldier <= 0 {
 			fmt.Println("PLAYER 1 WIN ! ", game)
+			game.State = "End"
+			game.Winner = game.ListPlayers[0]
+			game.Loser = game.ListPlayers[1]
 			queueGameOut <- game
 			break
 		}

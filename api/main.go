@@ -30,10 +30,26 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
+
 	for msg := range queueGameState {
 		var gs utils.Game
 		json.Unmarshal(msg[2], &gs)
 		fmt.Println("GAME STATE RECIEVE: ", gs)
+
+		if gs.State == "End" {
+			db, _ := gorm.Open("sqlite3", "test.db")
+
+			var winner utils.Account
+			var loser utils.Account
+			db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
+			db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
+
+			winner.ELO += 15
+			loser.ELO -= 15
+
+			db.Save(winner)
+			db.Save(loser)
+		}
 
 		for client := range hub.clients {
 			if client.GameID == gs.GameID {

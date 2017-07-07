@@ -92,6 +92,7 @@ func (c *Client) writePump() {
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
+		fmt.Println("Write pump close :()")
 	}()
 	for {
 		select {
@@ -100,11 +101,13 @@ func (c *Client) writePump() {
 			if !ok {
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				fmt.Println("HUB closed channel")
 				return
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				fmt.Println("Err ", err)
 				return
 			}
 			w.Write(message)
@@ -121,7 +124,9 @@ func (c *Client) writePump() {
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			fmt.Println("SENT PING")
 			if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				fmt.Println("ERROR WHEN PING PING", err)
 				return
 			}
 		}
