@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jinzhu/gorm"
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 )
 
 /*

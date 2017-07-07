@@ -11,7 +11,7 @@ type Policy struct {
 	ActionName     string
 	ConstraintName string
 	Description    string
-	possibleValue  string
+	PossibleValue  string
 	TypePolicy     string
 	DefaultValue   string
 }

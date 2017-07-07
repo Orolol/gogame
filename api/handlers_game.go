@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/jinzhu/gorm"
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +37,15 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Where(&acc).First(&acc)
+
+	var policies = getDefaultPolicies()
+	jsonMsg, err := json.Marshal(policies)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(jsonMsg))
 
 	matchmakingQueue <- acc
 }

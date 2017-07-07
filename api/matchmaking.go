@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/orolol/utils"
+	"github.com/orolol/gogame/utils"
 )
 
 func matchmaking() {

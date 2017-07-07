@@ -2,7 +2,7 @@ package utils
 
 import "github.com/jinzhu/gorm"
 
-func setBaseValueDB() {
+func SetBaseValueDB() {
 	db, _ := gorm.Open("sqlite3", "test.db")
 	db.DropTable(&Policy{})
 	db.CreateTable(&Policy{})
@@ -13,7 +13,7 @@ func setBaseValueDB() {
 		ConstraintName: "consPopRecPolicy",
 		Description:    "Set your recuitement policy",
 		TypePolicy:     "MIL",
-		possibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
+		PossibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
 		DefaultValue:   "0,01"}
 	db.Create(&popRecPol)
 
@@ -23,7 +23,7 @@ func setBaseValueDB() {
 		ConstraintName: "consTaxRatePolicy",
 		Description:    "Set your tax rate. ",
 		TypePolicy:     "ECO",
-		possibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
+		PossibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
 		DefaultValue:   "0,05"}
 	db.Create(&taxRatePol)
 
