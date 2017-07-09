@@ -36,4 +36,10 @@ var routes = Routes{
 		"/Login",
 		Login,
 	},
+	Route{
+		"ChangePolicy",
+		"POST",
+		"/ChangePolicy",
+		ChangePolicy,
+	},
 }

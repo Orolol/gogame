@@ -16,6 +16,11 @@ type Policy struct {
 	DefaultValue   string
 }
 
+type PolicyChange struct {
+	ID    int
+	Value string
+}
+
 type Technology struct {
 	gorm.Model
 	Name           string `gorm:"not null;unique"`

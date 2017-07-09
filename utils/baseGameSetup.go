@@ -13,7 +13,7 @@ func SetBaseValueDB() {
 		ConstraintName: "consPopRecPolicy",
 		Description:    "Set your recuitement policy",
 		TypePolicy:     "MIL",
-		PossibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
+		PossibleValue:  "[\"0,01\",\"0,02\",\"0,05\",\"0,07\",\"0,1\"]",
 		DefaultValue:   "0,01"}
 	db.Create(&popRecPol)
 
@@ -23,7 +23,7 @@ func SetBaseValueDB() {
 		ConstraintName: "consTaxRatePolicy",
 		Description:    "Set your tax rate. ",
 		TypePolicy:     "ECO",
-		PossibleValue:  "['0,01','0,02','0,05','0,07','0,1']",
+		PossibleValue:  "[\"0,01\",\"0,02\",\"0,05\",\"0,07\",\"0,1\"]",
 		DefaultValue:   "0,05"}
 	db.Create(&taxRatePol)
 

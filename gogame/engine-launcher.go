@@ -97,7 +97,6 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		player1.NbPop -= utils.AlgoReinforcement(player1)
 
 		if player1.NbPop <= 0 || player1.Army.NbSoldier <= 0 {
-			fmt.Println("PLAYER 2 WIN ! ", game)
 			game.State = "End"
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
@@ -105,7 +104,6 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			break
 		}
 		if player2.NbPop <= 0 || player2.Army.NbSoldier <= 0 {
-			fmt.Println("PLAYER 1 WIN ! ", game)
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]

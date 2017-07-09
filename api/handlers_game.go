@@ -16,6 +16,23 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func ChangePolicy(w http.ResponseWriter, r *http.Request) {
+	var polChange utils.PolicyChange
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(body, &polChange); err != nil {
+
+	}
+	fmt.Println("CHANGE POLICY, ", polChange)
+
+}
+
 func JoinGame(w http.ResponseWriter, r *http.Request) {
 	db, err := gorm.Open("sqlite3", "test.db")
 	fmt.Println("Seems like someone want to join a game ! ", r.Body)
