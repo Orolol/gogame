@@ -18,6 +18,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	var polChange utils.PolicyChange
+	var pol utils.Policy
+	var gMsg utils.GameMsg
+	db, _ := gorm.Open("sqlite3", "test.db")
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -27,9 +30,60 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	if err := json.Unmarshal(body, &polChange); err != nil {
-
+		panic(err)
 	}
 	fmt.Println("CHANGE POLICY, ", polChange)
+
+	db.Where("ID = ?", polChange.ID).First(&pol)
+	gMsg.Action = pol.ActionName
+	gMsg.GameID = polChange.GameID
+	gMsg.PlayerID = polChange.PlayerID
+	gMsg.Text = "Change pol"
+
+	gMsg.Value = polChange.Value
+
+	jsonMsg, err := json.Marshal(gMsg)
+	fmt.Println(string(jsonMsg))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("SEND Game MSG!")
+	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+
+}
+
+func Actions(w http.ResponseWriter, r *http.Request) {
+	var actionApi utils.PolicyChange
+	var action utils.PlayerActionOrder
+	var gMsg utils.GameMsg
+	db, _ := gorm.Open("sqlite3", "test.db")
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(body, &actionApi); err != nil {
+		panic(err)
+	}
+
+	db.Where("ID = ?", actionApi.ID).First(&action)
+	gMsg.Action = action.ActionName
+	gMsg.GameID = actionApi.GameID
+	gMsg.PlayerID = actionApi.PlayerID
+	gMsg.Text = "Change pol"
+
+	gMsg.Value = actionApi.Value
+
+	jsonMsg, err := json.Marshal(gMsg)
+	fmt.Println(string(jsonMsg))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("SEND Game MSG! ", gMsg)
+	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
 
 }
 
@@ -55,14 +109,17 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 
 	db.Where(&acc).First(&acc)
 
-	var policies = getDefaultPolicies()
-	jsonMsg, err := json.Marshal(policies)
+	var m = make(map[string]interface{})
+	m["policies"] = getDefaultPolicies()
+	m["actions"] = getDefaultActions()
+
+	jsonMsg, err := json.Marshal(m)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(jsonMsg))
+	w.Write(jsonMsg)
 
 	matchmakingQueue <- acc
 }

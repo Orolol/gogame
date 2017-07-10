@@ -25,3 +25,10 @@ func getDefaultPolicies() map[string][]utils.Policy {
 	return ret
 
 }
+
+func getDefaultActions() []utils.PlayerActionOrder {
+	db, _ := gorm.Open("sqlite3", "test.db")
+	var actions []utils.PlayerActionOrder
+	db.Find(&actions)
+	return actions
+}

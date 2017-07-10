@@ -67,6 +67,7 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 				if err != nil {
 					fmt.Println("ERROR ", err)
 				} else {
+					fmt.Println("WRITE !")
 					w.Write(msg[2])
 				}
 			}
@@ -103,6 +104,7 @@ func main() {
 	db.AutoMigrate(&utils.Account{})
 	db.AutoMigrate(&utils.Token{})
 	db.AutoMigrate(&utils.Policy{})
+	db.AutoMigrate(&utils.PlayerActionOrder{})
 
 	utils.SetBaseValueDB()
 

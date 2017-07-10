@@ -42,4 +42,10 @@ var routes = Routes{
 		"/ChangePolicy",
 		ChangePolicy,
 	},
+	Route{
+		"Actions",
+		"POST",
+		"/Actions",
+		Actions,
+	},
 }

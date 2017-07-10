@@ -36,8 +36,9 @@ type PlayerInGame struct {
 	PlayerID       int
 	Nick           string
 	Army           PlayerArmy
-	NbPop          float32
 	ModifierPolicy PlayerModifierPolicy
+	Civilian       PlayerCivilian
+	Economy        PlayerEconomy
 }
 
 //PlayerArmy current army of the player
@@ -48,11 +49,30 @@ type PlayerArmy struct {
 	NbArt      float32
 	NbAirSup   float32
 	NbAirBomb  float32
+	Morale     float32
+	Quality    float32
+}
+
+type PlayerCivilian struct {
+	NbTotalCivil       float32
+	NbManpower         float32
+	NbCivilianFactory  float32
+	NbLightTankFactory float32
+	NbHeavyTankFactory float32
+}
+
+type PlayerEconomy struct {
+	Money   float32
+	TaxRate float32
 }
 
 //PlayerModifierPolicy list of modifier policy
 type PlayerModifierPolicy struct {
-	RecruitmentPolicy float32
+	RecruitmentPolicy  float32
+	ManpowerSizePolicy float32
+	ArtOnFactory       bool
+	BuildLgtTankFac    bool
+	BuildHvyTankFac    bool
 }
 
 //GameMsg msg send to the routine

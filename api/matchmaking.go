@@ -16,7 +16,7 @@ func matchmaking() {
 		fmt.Println("Recieving new match making msg ", account)
 		poolPendingPlayer = append(poolPendingPlayer, account)
 		if len(poolPendingPlayer) == 2 {
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(2000 * time.Millisecond)
 			CreateGame(poolPendingPlayer[0], poolPendingPlayer[1])
 			poolPendingPlayer = []utils.Account{}
 		}

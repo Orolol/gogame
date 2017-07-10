@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
@@ -17,8 +18,25 @@ type Policy struct {
 }
 
 type PolicyChange struct {
-	ID    int
-	Value string
+	ID       int
+	Value    float32
+	PlayerID int
+	GameID   uuid.UUID
+}
+
+type PlayerActionOrderApi struct {
+	ID       int
+	Value    float32
+	PlayerID int
+	GameID   uuid.UUID
+}
+
+type PlayerActionOrder struct {
+	gorm.Model
+	Name           string `gorm:"not null;unique"`
+	ActionName     string
+	ConstraintName string
+	Description    string
 }
 
 type Technology struct {
