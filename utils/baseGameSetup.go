@@ -10,12 +10,12 @@ func SetBaseValueDB() {
 	db.CreateTable(&PlayerActionOrder{})
 
 	var popRecPol Policy = Policy{
-		Name:           "Recruitement Policy",
+		Name:           "Training Time",
 		ActionName:     "setPopRecPolicy",
 		ConstraintName: "consPopRecPolicy",
 		Description:    "Set your recuitement policy",
 		TypePolicy:     "MIL",
-		PossibleValue:  "[\"1\",\"2\",\"5\",\"7\",\"10\"]",
+		PossibleValue:  "{\"Full\" : 1,\"Long\" : 2,\"Hurry\" : 5,\"No time !\" : 10,\"Send everyone !\" : 30}",
 		DefaultValue:   "1"}
 	db.Create(&popRecPol)
 	var conscPol Policy = Policy{
@@ -24,7 +24,7 @@ func SetBaseValueDB() {
 		ConstraintName: "consPopRecPolicy",
 		Description:    "Set your recuitement policy",
 		TypePolicy:     "MIL",
-		PossibleValue:  "[\"1\",\"2\",\"5\",\"7\",\"10\"]",
+		PossibleValue:  "{\"Pro Army\" : 1,\"Volonteer\" : 2,\"War time\" : 5,\"All valids !\" : 10,\"Anyone who can hold a weapon\" : 30}",
 		DefaultValue:   "1"}
 	db.Create(&conscPol)
 
@@ -34,8 +34,8 @@ func SetBaseValueDB() {
 		ConstraintName: "consTaxRatePolicy",
 		Description:    "Set your tax rate. ",
 		TypePolicy:     "ECO",
-		PossibleValue:  "[\"1\",\"2\",\"5\",\"7\",\"10\"]",
-		DefaultValue:   "5"}
+		PossibleValue:  "{\"Low taxes\" : 1,\"Country effort\" : 1.5,\"War Economy\" : 2,\"Full Mobilization\" : 3,\"Total war\" : 5}",
+		DefaultValue:   "1.5"}
 	db.Create(&taxRatePol)
 
 	var lgtTankBuild Policy = Policy{
@@ -44,7 +44,7 @@ func SetBaseValueDB() {
 		ConstraintName: "consTaxRatePolicy",
 		Description:    "Set your tax rate. ",
 		TypePolicy:     "ECO",
-		PossibleValue:  "[\"1\",\"0\"]",
+		PossibleValue:  "{\"Yes\" : 1,\"No\" : 0}",
 		DefaultValue:   "1"}
 	db.Create(&lgtTankBuild)
 
@@ -54,7 +54,7 @@ func SetBaseValueDB() {
 		ConstraintName: "consTaxRatePolicy",
 		Description:    "Set your tax rate. ",
 		TypePolicy:     "ECO",
-		PossibleValue:  "[\"1\",\"0\"]",
+		PossibleValue:  "{\"Yes\" : 1,\"No\" : 0}",
 		DefaultValue:   "1"}
 	db.Create(&hvyTankBuild)
 

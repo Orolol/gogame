@@ -23,8 +23,8 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 	if player.Economy.Money > 0 {
 		var minRf float32 = 100.0
-		reinforcement := 10000 * player.ModifierPolicy.RecruitmentPolicy
-
+		reinforcement := 1000 * player.ModifierPolicy.RecruitmentPolicy
+		fmt.Println("REINFORCEMENT : ", reinforcement)
 		if reinforcement > player.Civilian.NbManpower {
 			reinforcement = 0.0
 		} else if reinforcement < minRf {
@@ -62,9 +62,9 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 	}
 	fmt.Println("DMG MODIFER", (player.Army.Morale/100.0)*(player.Army.Quality/100.0))
 	dmgModifier := 2 / (1 + (player.Army.Morale/100.0)*(player.Army.Quality/100.0))
-	player.Army.NbSoldier -= dmgIncoming * multiSoldier * dmgModifier
-	player.Army.NbLigtTank -= dmgIncoming * multiLgtTank * 0.2 * dmgModifier
-	player.Army.NbHvyTank -= dmgIncoming * multiHvyTank * 0.05 * dmgModifier
+	player.Army.NbSoldier -= dmgIncoming * multiSoldier * 0.1 * dmgModifier
+	player.Army.NbLigtTank -= dmgIncoming * multiLgtTank * 0.02 * dmgModifier
+	player.Army.NbHvyTank -= dmgIncoming * multiHvyTank * 0.005 * dmgModifier
 
 	if player.Army.NbSoldier < 0 {
 		player.Army.NbSoldier = 0.0
@@ -82,8 +82,8 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 }
 
 func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
-	armyUpkeep := (player.Army.NbSoldier * 100) + (player.Army.NbLigtTank * 1500) + (player.Army.NbHvyTank * 5000)
-	tax := (player.Economy.TaxRate * 0.1 * player.Civilian.NbTotalCivil)
+	armyUpkeep := (player.Army.NbSoldier * 100) + (player.Army.NbLigtTank * 150) + (player.Army.NbHvyTank * 200)
+	tax := (player.Economy.TaxRate * 0.2 * player.Civilian.NbTotalCivil)
 	fmt.Println("MONEY : ", player.Economy.Money)
 	fmt.Println("armyUpkeep : ", armyUpkeep)
 	fmt.Println("tax : ", tax)
@@ -91,12 +91,15 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 	if player.Economy.Money > 0 {
 
-		player.Army.NbLigtTank = player.Army.NbLigtTank + player.Civilian.NbLightTankFactory*2
-		player.Army.NbHvyTank = player.Army.NbHvyTank + player.Civilian.NbHeavyTankFactory*0.4
+		player.Army.NbLigtTank = player.Army.NbLigtTank + player.Civilian.NbLightTankFactory*3
+		player.Army.NbHvyTank = player.Army.NbHvyTank + player.Civilian.NbHeavyTankFactory*1
+
+		player.Economy.Money -= (player.Civilian.NbLightTankFactory * 10000) + (player.Civilian.NbHeavyTankFactory * 100000)
 
 		var nbThingToBuild float32 = 1.0
 
-		var civilianProduction = player.Civilian.NbCivilianFactory * 0.2 * (1 / player.Economy.TaxRate)
+		var civilianProduction = player.Civilian.NbCivilianFactory * 0.01 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
+		fmt.Println("CIVILIAN PROD :", civilianProduction)
 		if player.ModifierPolicy.BuildLgtTankFac {
 			nbThingToBuild += 1.0
 		}
@@ -104,12 +107,12 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 			nbThingToBuild += 1
 		}
 		if player.ModifierPolicy.BuildLgtTankFac {
-			player.Civilian.NbLightTankFactory += civilianProduction / nbThingToBuild
+			player.Civilian.NbLightTankFactory += (civilianProduction / nbThingToBuild) * 0.5
 		}
 		if player.ModifierPolicy.BuildHvyTankFac {
-			player.Civilian.NbHeavyTankFactory += civilianProduction / nbThingToBuild
+			player.Civilian.NbHeavyTankFactory += (civilianProduction / nbThingToBuild) * 0.4
 		}
-		player.Civilian.NbCivilianFactory += civilianProduction / nbThingToBuild
+		player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.2
 
 	} else {
 		if player.Army.Morale > 10 {

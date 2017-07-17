@@ -24,7 +24,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 
 	economy := utils.PlayerEconomy{
 		Money:   100000000,
-		TaxRate: 5}
+		TaxRate: 2}
 
 	civilian := utils.PlayerCivilian{
 		NbTotalCivil:       60000000,
@@ -34,7 +34,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		NbCivilianFactory:  20}
 
 	policy := utils.PlayerModifierPolicy{
-		RecruitmentPolicy:  5,
+		RecruitmentPolicy:  1,
 		ManpowerSizePolicy: 1,
 		ArtOnFactory:       false,
 		BuildHvyTankFac:    true,
@@ -56,7 +56,7 @@ type PlayerAction func(player *utils.PlayerInGame, value float32)
 
 //PASetRecruitementPolicy change recruitement policy to the value
 func PASetRecruitementPolicy(player *utils.PlayerInGame, value float32) {
-	qualityChange := player.Army.Quality - (100 - (1 / value))
+	qualityChange := player.ModifierPolicy.RecruitmentPolicy - value
 	fmt.Println("QUALITY CHANGE ", qualityChange)
 	player.Army.Quality -= value
 	player.ModifierPolicy.RecruitmentPolicy = value
@@ -65,11 +65,11 @@ func setTaxRatePolicy(player *utils.PlayerInGame, value float32) {
 	player.Economy.TaxRate = value
 }
 func setConscPolicy(player *utils.PlayerInGame, value float32) {
-	player.Civilian.NbManpower -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.001
-	player.Civilian.NbTotalCivil += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.001
+	player.Civilian.NbManpower -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
+	player.Civilian.NbTotalCivil += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
 	player.ModifierPolicy.ManpowerSizePolicy = value
-	player.Civilian.NbManpower += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.001
-	player.Civilian.NbTotalCivil -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.001
+	player.Civilian.NbManpower += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
+	player.Civilian.NbTotalCivil -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
 }
 func setBuildLgtTank(player *utils.PlayerInGame, value float32) {
 	if value == 1.0 {
@@ -156,14 +156,15 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	queueGameOut <- game
 	time.Sleep(5 * time.Second)
 	for game.CurrentTurn < 9999 {
-		timer1 := time.NewTimer(time.Second)
+		timer1 := time.NewTimer(time.Second / 2)
 		game.CurrentTurn++
 		//Resolve combat
 		var preFightP1 = player1
 		var preFightP2 = player2
-
-		player2 = utils.AlgoDamageRepartition(player2, utils.AlgoDamageDealt(preFightP1))
-		player1 = utils.AlgoDamageRepartition(player1, utils.AlgoDamageDealt(preFightP2))
+		if game.CurrentTurn > 30 {
+			player2 = utils.AlgoDamageRepartition(player2, utils.AlgoDamageDealt(preFightP1))
+			player1 = utils.AlgoDamageRepartition(player1, utils.AlgoDamageDealt(preFightP2))
+		}
 
 		if player1.Army.NbSoldier <= 0 {
 			fmt.Println("P2 WIN")
@@ -278,44 +279,6 @@ func main() {
 	go ZMQReader(queueGameIn)
 	go FromChanToZMQ(queueGameOut)
 
-	// pushSockMsg := ZMQPusherMockMSG()
-	// gConf := utils.GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{1, 2}}
-	// jsonMsg, err := json.Marshal(gConf)
-	// fmt.Println(string(jsonMsg))
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println("SEND CREATE GAME!")
-	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
-
-	// gConf = GameConf{GameType: "test", NbPlayers: 2, PlayerIDS: []int{8, 9}}
-	// jsonMsg, err = json.Marshal(gConf)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println("SEND CREATE GAME!")
-	// pushSockMsg.SendChan <- [][]byte{[]byte("CREATE"), []byte(jsonMsg)}
-
-	//MOCK TO SEND EVENT
-	// time.Sleep(2 * time.Second)
-	// lGmsg := GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 999, Text: "Change rec value to 5", Value: 15.0}
-	// jsonMsg, err = json.Marshal(lGmsg)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// var gsa GameMsg
-	// json.Unmarshal(jsonMsg, &gsa)
-	// pushSockMsg.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
-	// time.Sleep(1 * time.Second)
-	// lGmsg = GameMsg{Action: "PASetRecruitementPolicy", PlayerID: 1, Text: "Change rec value to 15", Value: 15}
-	// jsonMsg, err = json.Marshal(lGmsg)
-	// if err != nil {
-	// 	fmt.Println("fail :(")
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println("SEND EVENT MOCK !")
-	// fmt.Println(jsonMsg)
-	// pushSockMsg.SendChan <- [][]byte{[]byte(GID.String()), []byte(jsonMsg)}
 	var input string
 	fmt.Scanln(&input)
 	fmt.Println("done")
