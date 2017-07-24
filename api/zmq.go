@@ -19,7 +19,6 @@ func ZMQReader(queueCreation chan [][]byte) {
 	defer pull.Destroy()
 
 	for msg := range pull.RecvChan {
-		fmt.Println("Recieving new game state in ZMQ !! TYPE : ", string(msg[1]))
 		queueCreation <- msg
 	}
 

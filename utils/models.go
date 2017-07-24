@@ -39,6 +39,12 @@ type PlayerInGame struct {
 	ModifierPolicy PlayerModifierPolicy
 	Civilian       PlayerCivilian
 	Economy        PlayerEconomy
+	LastOrders     []PlayerLastOrders
+}
+
+type PlayerLastOrders struct {
+	Order    PlayerActionOrder
+	Cooldown int
 }
 
 //PlayerArmy current army of the player

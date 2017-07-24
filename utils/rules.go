@@ -37,6 +37,7 @@ type PlayerActionOrder struct {
 	ActionName     string
 	ConstraintName string
 	Description    string
+	Cooldown       int
 }
 
 type Technology struct {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
@@ -15,6 +16,8 @@ import (
 )
 
 var addr = flag.String("addr", ":5001", "http service address")
+
+var onGoingGames = make(map[uuid.UUID]*utils.Game)
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -34,7 +37,6 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 	for msg := range queueGameState {
 		var gs utils.Game
 		json.Unmarshal(msg[2], &gs)
-		fmt.Println("GAME STATE RECIEVE: ", gs)
 
 		if gs.State == "End" {
 			db, _ := gorm.Open("sqlite3", "test.db")
@@ -46,14 +48,13 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 			winner.ELO += 15
 			loser.ELO -= 15
-
 			db.Save(winner)
 			db.Save(loser)
 		}
 
 		for client := range hub.clients {
 			if client.GameID == gs.GameID {
-				fmt.Println("GAMEID FOUND ")
+				onGoingGames[gs.GameID].CurrentTurn = gs.CurrentTurn
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
 					fmt.Println("ERROR ", err)
@@ -61,8 +62,8 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 					w.Write(msg[2])
 				}
 			} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
-				fmt.Println("PLAYERID FOUND ")
 				client.GameID = gs.GameID
+				onGoingGames[gs.GameID] = &gs
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
 					fmt.Println("ERROR ", err)

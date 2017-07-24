@@ -63,6 +63,7 @@ func SetBaseValueDB() {
 		ActionName:     "actionCivConvertFactoryToLightTankFact",
 		ConstraintName: "actionCivConvertFactoryToLightTankFact",
 		Description:    "Convert Civilian Factory to light Tank factory (Cost 1M) ",
+		Cooldown:       10,
 	}
 	db.Create(&civToLight)
 
@@ -71,6 +72,7 @@ func SetBaseValueDB() {
 		ActionName:     "actionCivConvertFactoryToHvyTankFact",
 		ConstraintName: "actionCivConvertFactoryToHvyTankFact",
 		Description:    "Convert Civilian Factory to Heavy Tank factory (Cost 1M) ",
+		Cooldown:       10,
 	}
 	db.Create(&civToHvy)
 	var warProp PlayerActionOrder = PlayerActionOrder{
@@ -78,6 +80,7 @@ func SetBaseValueDB() {
 		ActionName:     "actionWarPropaganda",
 		ConstraintName: "actionWarPropaganda",
 		Description:    "Boost morale by 15% (cost 10M) ",
+		Cooldown:       10,
 	}
 	db.Create(&warProp)
 

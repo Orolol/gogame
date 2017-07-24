@@ -68,22 +68,54 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal(body, &actionApi); err != nil {
 		panic(err)
 	}
+	fmt.Println(onGoingGames)
+	var isOkAction bool = true
+	if game, ok := onGoingGames[actionApi.GameID]; ok {
+		fmt.Println("GOT THE GAME")
+		db.Where("ID = ?", actionApi.ID).First(&action)
+		for players := range game.ListPlayers {
+			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
+				fmt.Println("GOT THE PLayer")
+				if len(game.ListPlayers[players].LastOrders) > 0 {
+					for actions := range game.ListPlayers[players].LastOrders {
+						if game.ListPlayers[players].LastOrders[actions].Order.ID == action.ID {
+							if game.ListPlayers[players].LastOrders[actions].Cooldown >= game.CurrentTurn {
+								isOkAction = false
+							} else {
+								game.ListPlayers[players].LastOrders[actions].Cooldown = game.CurrentTurn + action.Cooldown
+							}
+						} else {
+							game.ListPlayers[players].LastOrders = append(game.ListPlayers[players].LastOrders,
+								utils.PlayerLastOrders{Order: action,
+									Cooldown: (action.Cooldown + game.CurrentTurn)})
+						}
+					}
+				} else {
+					game.ListPlayers[players].LastOrders = append(game.ListPlayers[players].LastOrders,
+						utils.PlayerLastOrders{Order: action,
+							Cooldown: (action.Cooldown + game.CurrentTurn)})
+				}
+			}
+		}
 
-	db.Where("ID = ?", actionApi.ID).First(&action)
-	gMsg.Action = action.ActionName
-	gMsg.GameID = actionApi.GameID
-	gMsg.PlayerID = actionApi.PlayerID
-	gMsg.Text = "Change pol"
-
-	gMsg.Value = actionApi.Value
-
-	jsonMsg, err := json.Marshal(gMsg)
-	fmt.Println(string(jsonMsg))
-	if err != nil {
-		fmt.Println(err)
 	}
-	fmt.Println("SEND Game MSG! ", gMsg)
-	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	if isOkAction {
+		fmt.Println("OK ACTION")
+		gMsg.Action = action.ActionName
+		gMsg.GameID = actionApi.GameID
+		gMsg.PlayerID = actionApi.PlayerID
+		gMsg.Text = "Order"
+		gMsg.Value = actionApi.Value
+		jsonMsg, err := json.Marshal(gMsg)
+		fmt.Println(string(jsonMsg))
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(onGoingGames)
+		ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	} else {
+		fmt.Println("ACTION ON CD")
+	}
 
 }
 
