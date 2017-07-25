@@ -40,7 +40,7 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 		if gs.State == "End" {
 			db, _ := gorm.Open("sqlite3", "test.db")
-
+			delete(onGoingGames, gs.GameID)
 			var winner utils.Account
 			var loser utils.Account
 			db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
@@ -54,7 +54,7 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 		for client := range hub.clients {
 			if client.GameID == gs.GameID {
-				onGoingGames[gs.GameID].CurrentTurn = gs.CurrentTurn
+				onGoingGames[gs.GameID] = &gs
 				w, err := client.conn.NextWriter(websocket.TextMessage)
 				if err != nil {
 					fmt.Println("ERROR ", err)
@@ -106,6 +106,7 @@ func main() {
 	db.AutoMigrate(&utils.Token{})
 	db.AutoMigrate(&utils.Policy{})
 	db.AutoMigrate(&utils.PlayerActionOrder{})
+	db.AutoMigrate(&utils.Technology{})
 
 	utils.SetBaseValueDB()
 

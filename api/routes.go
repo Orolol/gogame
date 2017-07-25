@@ -48,4 +48,10 @@ var routes = Routes{
 		"/Actions",
 		Actions,
 	},
+	Route{
+		"GetTechnology",
+		"POST",
+		"/GetTechnology",
+		GetTechnology,
+	},
 }

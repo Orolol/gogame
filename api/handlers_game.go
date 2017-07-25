@@ -39,8 +39,8 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	gMsg.GameID = polChange.GameID
 	gMsg.PlayerID = polChange.PlayerID
 	gMsg.Text = "Change pol"
-
-	gMsg.Value = polChange.Value
+	gMsg.Value = make(map[string]float32)
+	gMsg.Value["value"] = polChange.Value
 
 	jsonMsg, err := json.Marshal(gMsg)
 	fmt.Println(string(jsonMsg))
@@ -49,6 +49,67 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("SEND Game MSG!")
 	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+
+}
+
+func GetTechnology(w http.ResponseWriter, r *http.Request) {
+	var actionApi utils.PolicyChange
+	var techno utils.Technology
+	var gMsg utils.GameMsg
+	db, _ := gorm.Open("sqlite3", "test.db")
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(body, &actionApi); err != nil {
+		panic(err)
+	}
+	fmt.Println(onGoingGames)
+	var isOkAction bool = true
+	var game *utils.Game
+	var ok bool
+	var players int
+	var tech int
+	if game, ok = onGoingGames[actionApi.GameID]; ok {
+		db.Where("ID = ?", actionApi.ID).First(&techno)
+		for players = range game.ListPlayers {
+			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
+				if techno.Cost > game.ListPlayers[players].Civilian.NbResearchPoint {
+					fmt.Println("COST TO MUCH ", techno.Cost, game.ListPlayers[players].Civilian.NbResearchPoint)
+					isOkAction = false
+				}
+				for tech = range game.ListPlayers[players].PlayerTechnology {
+					if game.ListPlayers[players].PlayerTechnology[tech] == techno.ActionName {
+						fmt.Println("ALREADY GOT THE TECH")
+						isOkAction = false
+					}
+				}
+			}
+		}
+
+	}
+	if isOkAction {
+		game.ListPlayers[players].PlayerTechnology = append(game.ListPlayers[players].PlayerTechnology, techno.ActionName)
+		gMsg.Action = techno.ActionName
+		gMsg.GameID = actionApi.GameID
+		gMsg.PlayerID = actionApi.PlayerID
+		gMsg.Text = "Order"
+		gMsg.Value = make(map[string]float32)
+		gMsg.Value["cost"] = techno.Cost
+		jsonMsg, err := json.Marshal(gMsg)
+		fmt.Println(string(jsonMsg))
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(onGoingGames)
+		ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	} else {
+		fmt.Println("CANT TECH UP")
+	}
 
 }
 
@@ -70,6 +131,7 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(onGoingGames)
 	var isOkAction bool = true
+	var cd int = 0
 	if game, ok := onGoingGames[actionApi.GameID]; ok {
 		fmt.Println("GOT THE GAME")
 		db.Where("ID = ?", actionApi.ID).First(&action)
@@ -78,22 +140,15 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("GOT THE PLayer")
 				if len(game.ListPlayers[players].LastOrders) > 0 {
 					for actions := range game.ListPlayers[players].LastOrders {
-						if game.ListPlayers[players].LastOrders[actions].Order.ID == action.ID {
-							if game.ListPlayers[players].LastOrders[actions].Cooldown >= game.CurrentTurn {
+						if game.ListPlayers[players].LastOrders[actions].OrderID == int(action.ID) {
+							if game.ListPlayers[players].LastOrders[actions].Cooldown > game.CurrentTurn {
+								fmt.Println("CD END ", game.ListPlayers[players].LastOrders[actions].Cooldown)
 								isOkAction = false
 							} else {
-								game.ListPlayers[players].LastOrders[actions].Cooldown = game.CurrentTurn + action.Cooldown
+								cd = game.CurrentTurn + action.Cooldown
 							}
-						} else {
-							game.ListPlayers[players].LastOrders = append(game.ListPlayers[players].LastOrders,
-								utils.PlayerLastOrders{Order: action,
-									Cooldown: (action.Cooldown + game.CurrentTurn)})
 						}
 					}
-				} else {
-					game.ListPlayers[players].LastOrders = append(game.ListPlayers[players].LastOrders,
-						utils.PlayerLastOrders{Order: action,
-							Cooldown: (action.Cooldown + game.CurrentTurn)})
 				}
 			}
 		}
@@ -105,7 +160,11 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
-		gMsg.Value = actionApi.Value
+		gMsg.Value = make(map[string]float32)
+		gMsg.Value["cost"] = action.Cost
+		gMsg.Value["value"] = 1
+		gMsg.Value["CD"] = float32(cd)
+		gMsg.Value["ID"] = float32(action.ID)
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))
 		if err != nil {
@@ -144,6 +203,7 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	var m = make(map[string]interface{})
 	m["policies"] = getDefaultPolicies()
 	m["actions"] = getDefaultActions()
+	m["technology"] = getDefaultTech()
 
 	jsonMsg, err := json.Marshal(m)
 	if err != nil {

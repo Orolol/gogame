@@ -37,6 +37,7 @@ type PlayerActionOrder struct {
 	ActionName     string
 	ConstraintName string
 	Description    string
+	Cost           float32
 	Cooldown       int
 }
 
@@ -46,6 +47,7 @@ type Technology struct {
 	Description    string
 	TypeTechnology string
 	Tier           int
+	Cost           float32
 	ActionName     string
 	ConstraintName string
 }

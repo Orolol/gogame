@@ -89,6 +89,10 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 	fmt.Println("tax : ", tax)
 	player.Economy.Money = player.Economy.Money - armyUpkeep + tax
 
+	//Technology
+
+	player.Civilian.NbResearchPoint += player.Civilian.NbScientist * 0.05
+
 	if player.Economy.Money > 0 {
 
 		player.Army.NbLigtTank = player.Army.NbLigtTank + player.Civilian.NbLightTankFactory*3

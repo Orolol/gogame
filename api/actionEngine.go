@@ -32,3 +32,10 @@ func getDefaultActions() []utils.PlayerActionOrder {
 	db.Find(&actions)
 	return actions
 }
+
+func getDefaultTech() []utils.Technology {
+	db, _ := gorm.Open("sqlite3", "test.db")
+	var actions []utils.Technology
+	db.Find(&actions)
+	return actions
+}

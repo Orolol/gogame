@@ -9,6 +9,7 @@ func SetBaseValueDB() {
 	db.DropTable(&PlayerActionOrder{})
 	db.CreateTable(&PlayerActionOrder{})
 
+	//POLICIES
 	var popRecPol Policy = Policy{
 		Name:           "Training Time",
 		ActionName:     "setPopRecPolicy",
@@ -58,30 +59,66 @@ func SetBaseValueDB() {
 		DefaultValue:   "1"}
 	db.Create(&hvyTankBuild)
 
-	var civToLight PlayerActionOrder = PlayerActionOrder{
+	//ACTIONS
+	var CivToLight PlayerActionOrder = PlayerActionOrder{
 		Name:           "Civ Fact -> Lght Fact",
 		ActionName:     "actionCivConvertFactoryToLightTankFact",
 		ConstraintName: "actionCivConvertFactoryToLightTankFact",
 		Description:    "Convert Civilian Factory to light Tank factory (Cost 1M) ",
 		Cooldown:       10,
+		Cost:           5000000,
 	}
-	db.Create(&civToLight)
+	db.Create(&CivToLight)
 
-	var civToHvy PlayerActionOrder = PlayerActionOrder{
+	var CivToHvy PlayerActionOrder = PlayerActionOrder{
 		Name:           "Civ Fact -> Hvy Fact",
 		ActionName:     "actionCivConvertFactoryToHvyTankFact",
 		ConstraintName: "actionCivConvertFactoryToHvyTankFact",
 		Description:    "Convert Civilian Factory to Heavy Tank factory (Cost 1M) ",
 		Cooldown:       10,
+		Cost:           5000000,
 	}
-	db.Create(&civToHvy)
-	var warProp PlayerActionOrder = PlayerActionOrder{
+	db.Create(&CivToHvy)
+	var WarProp PlayerActionOrder = PlayerActionOrder{
 		Name:           "War Propaganda",
 		ActionName:     "actionWarPropaganda",
 		ConstraintName: "actionWarPropaganda",
 		Description:    "Boost morale by 15% (cost 10M) ",
 		Cooldown:       10,
+		Cost:           10000000,
 	}
-	db.Create(&warProp)
+	db.Create(&WarProp)
+
+	//TECHNOLOGY
+	var technoIndusT1N1 Technology = Technology{
+		Name:           "Boost Civilian production",
+		Description:    "Boost civilian factory production by 15%",
+		Cost:           150.0,
+		ActionName:     "technoIndusT1N1",
+		ConstraintName: "technoIndusT1N1",
+		Tier:           1,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT1N1)
+	var technoIndusT1N2 Technology = Technology{
+		Name:           "Boost Tank production",
+		Description:    "Boost Tank factory production by 15%",
+		Cost:           100.0,
+		ActionName:     "technoIndusT1N2",
+		ConstraintName: "technoIndusT1N2",
+		Tier:           1,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT1N2)
+	var technoIndusT1N3 Technology = Technology{
+		Name:           "Boost Aircraft production",
+		Description:    "Boost Aircraft factory production by 15%",
+		Cost:           100.0,
+		ActionName:     "technoIndusT1N3",
+		ConstraintName: "technoIndusT1N3",
+		Tier:           1,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT1N3)
 
 }

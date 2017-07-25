@@ -33,17 +33,18 @@ type ListPlayer struct {
 
 //PlayerInGame player ig
 type PlayerInGame struct {
-	PlayerID       int
-	Nick           string
-	Army           PlayerArmy
-	ModifierPolicy PlayerModifierPolicy
-	Civilian       PlayerCivilian
-	Economy        PlayerEconomy
-	LastOrders     []PlayerLastOrders
+	PlayerID         int
+	Nick             string
+	Army             PlayerArmy
+	ModifierPolicy   PlayerModifierPolicy
+	Civilian         PlayerCivilian
+	Economy          PlayerEconomy
+	LastOrders       []PlayerLastOrders
+	PlayerTechnology []string
 }
 
 type PlayerLastOrders struct {
-	Order    PlayerActionOrder
+	OrderID  int
 	Cooldown int
 }
 
@@ -62,6 +63,8 @@ type PlayerArmy struct {
 type PlayerCivilian struct {
 	NbTotalCivil       float32
 	NbManpower         float32
+	NbResearchPoint    float32
+	NbScientist        float32
 	NbCivilianFactory  float32
 	NbLightTankFactory float32
 	NbHeavyTankFactory float32
@@ -79,6 +82,9 @@ type PlayerModifierPolicy struct {
 	ArtOnFactory       bool
 	BuildLgtTankFac    bool
 	BuildHvyTankFac    bool
+	CivilianProduction float32
+	TankProduction     float32
+	AirCraftProduction float32
 }
 
 //GameMsg msg send to the routine
@@ -87,5 +93,5 @@ type GameMsg struct {
 	Text     string
 	PlayerID int
 	Action   string
-	Value    float32
+	Value    map[string]float32
 }

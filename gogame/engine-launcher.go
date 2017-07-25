@@ -10,103 +10,6 @@ import (
 	"github.com/zeromq/goczmq"
 )
 
-//InitializePlayerDefaultValue init player
-func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
-	army := utils.PlayerArmy{
-		NbSoldier:  100000,
-		NbLigtTank: 100,
-		NbHvyTank:  50,
-		NbArt:      50,
-		NbAirSup:   0,
-		NbAirBomb:  0,
-		Morale:     100,
-		Quality:    100}
-
-	economy := utils.PlayerEconomy{
-		Money:   100000000,
-		TaxRate: 2}
-
-	civilian := utils.PlayerCivilian{
-		NbTotalCivil:       60000000,
-		NbManpower:         600000,
-		NbHeavyTankFactory: 20,
-		NbLightTankFactory: 20,
-		NbCivilianFactory:  20}
-
-	policy := utils.PlayerModifierPolicy{
-		RecruitmentPolicy:  1,
-		ManpowerSizePolicy: 1,
-		ArtOnFactory:       false,
-		BuildHvyTankFac:    true,
-		BuildLgtTankFac:    true}
-
-	var player = utils.PlayerInGame{
-		PlayerID:       int(acc.ID),
-		ModifierPolicy: policy,
-		Army:           army,
-		Nick:           acc.Name,
-		Economy:        economy,
-		Civilian:       civilian}
-
-	return player
-}
-
-//PlayerAction player action
-type PlayerAction func(player *utils.PlayerInGame, value float32)
-
-//PASetRecruitementPolicy change recruitement policy to the value
-func PASetRecruitementPolicy(player *utils.PlayerInGame, value float32) {
-	qualityChange := player.ModifierPolicy.RecruitmentPolicy - value
-	fmt.Println("QUALITY CHANGE ", qualityChange)
-	player.Army.Quality -= value
-	player.ModifierPolicy.RecruitmentPolicy = value
-}
-func setTaxRatePolicy(player *utils.PlayerInGame, value float32) {
-	player.Economy.TaxRate = value
-}
-func setConscPolicy(player *utils.PlayerInGame, value float32) {
-	player.Civilian.NbManpower -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
-	player.Civilian.NbTotalCivil += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
-	player.ModifierPolicy.ManpowerSizePolicy = value
-	player.Civilian.NbManpower += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
-	player.Civilian.NbTotalCivil -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
-}
-func setBuildLgtTank(player *utils.PlayerInGame, value float32) {
-	if value == 1.0 {
-		player.ModifierPolicy.BuildLgtTankFac = true
-	} else {
-		player.ModifierPolicy.BuildLgtTankFac = false
-	}
-}
-func setBuildHvyTank(player *utils.PlayerInGame, value float32) {
-	if value == 1.0 {
-		player.ModifierPolicy.BuildHvyTankFac = true
-	} else {
-		player.ModifierPolicy.BuildHvyTankFac = false
-	}
-}
-
-func actionCivConvertFactoryToLightTankFact(player *utils.PlayerInGame, value float32) {
-	if player.Civilian.NbCivilianFactory > value {
-		player.Civilian.NbCivilianFactory -= value
-		player.Civilian.NbLightTankFactory += value
-		player.Economy.Money -= 1000000 * value
-	}
-}
-func actionCivConvertFactoryToHvyTankFact(player *utils.PlayerInGame, value float32) {
-	if player.Civilian.NbCivilianFactory > value {
-		player.Civilian.NbCivilianFactory -= value
-		player.Civilian.NbHeavyTankFactory += value
-		player.Economy.Money -= 1000000 * value
-	}
-}
-
-func actionWarPropaganda(player *utils.PlayerInGame, value float32) {
-	player.Economy.Money -= 10000000 * value
-	player.Army.Morale += 15
-
-}
-
 func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 	var gameID = uuid.New()
 	var mockP1 = InitializePlayerDefaultValue(conf.Players[0])
@@ -131,12 +34,15 @@ func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *util
 		"actionWarPropaganda":                    actionWarPropaganda,
 		"actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
 		"actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
+		"technoIndusT1N3":                        technoIndusT1N3,
+		"technoIndusT1N2":                        technoIndusT1N2,
+		"technoIndusT1N1":                        technoIndusT1N1,
 	}
 	for msg := range queue {
 		if player1.PlayerID == msg.PlayerID {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, float32))(player1, msg.Value)
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(player1, msg.Value)
 		} else {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, float32))(player2, msg.Value)
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(player2, msg.Value)
 		}
 		fmt.Println(game.ListPlayers)
 
@@ -156,7 +62,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	queueGameOut <- game
 	time.Sleep(5 * time.Second)
 	for game.CurrentTurn < 9999 {
-		timer1 := time.NewTimer(time.Second / 2)
+		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
 		//Resolve combat
 		var preFightP1 = player1
