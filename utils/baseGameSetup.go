@@ -8,6 +8,8 @@ func SetBaseValueDB() {
 	db.CreateTable(&Policy{})
 	db.DropTable(&PlayerActionOrder{})
 	db.CreateTable(&PlayerActionOrder{})
+	db.DropTable(&Technology{})
+	db.CreateTable(&Technology{})
 
 	//POLICIES
 	var popRecPol Policy = Policy{
@@ -66,7 +68,7 @@ func SetBaseValueDB() {
 		ConstraintName: "actionCivConvertFactoryToLightTankFact",
 		Description:    "Convert Civilian Factory to light Tank factory (Cost 1M) ",
 		Cooldown:       10,
-		Cost:           5000000,
+		Cost:           1000000,
 	}
 	db.Create(&CivToLight)
 
@@ -76,7 +78,7 @@ func SetBaseValueDB() {
 		ConstraintName: "actionCivConvertFactoryToHvyTankFact",
 		Description:    "Convert Civilian Factory to Heavy Tank factory (Cost 1M) ",
 		Cooldown:       10,
-		Cost:           5000000,
+		Cost:           1000000,
 	}
 	db.Create(&CivToHvy)
 	var WarProp PlayerActionOrder = PlayerActionOrder{
@@ -120,5 +122,35 @@ func SetBaseValueDB() {
 		TypeTechnology: "INDUS",
 	}
 	db.Create(&technoIndusT1N3)
+	var technoIndusT2N1 Technology = Technology{
+		Name:           "Boost Civilian production",
+		Description:    "Boost civilian factory production by 15%",
+		Cost:           450.0,
+		ActionName:     "technoIndusT2N1",
+		ConstraintName: "technoIndusT2N1",
+		Tier:           2,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT2N1)
+	var technoIndusT2N2 Technology = Technology{
+		Name:           "Boost Tank production",
+		Description:    "Boost Tank factory production by 15%",
+		Cost:           300.0,
+		ActionName:     "technoIndusT2N2",
+		ConstraintName: "technoIndusT2N2",
+		Tier:           2,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT2N2)
+	var technoIndusT2N3 Technology = Technology{
+		Name:           "Boost Aircraft production",
+		Description:    "Boost Aircraft factory production by 15%",
+		Cost:           600.0,
+		ActionName:     "technoIndusT2N3",
+		ConstraintName: "technoIndusT2N3",
+		Tier:           2,
+		TypeTechnology: "INDUS",
+	}
+	db.Create(&technoIndusT2N3)
 
 }
