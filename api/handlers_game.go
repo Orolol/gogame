@@ -78,6 +78,7 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 		db.Where("ID = ?", actionApi.ID).First(&techno)
 		for players = range game.ListPlayers {
 			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
+				fmt.Println("TECH CHECK", techno)
 				if techno.Cost > game.ListPlayers[players].Civilian.NbResearchPoint {
 					fmt.Println("COST TO MUCH ", techno.Cost, game.ListPlayers[players].Civilian.NbResearchPoint)
 					isOkAction = false
@@ -87,6 +88,12 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 						fmt.Println("ALREADY GOT THE TECH")
 						isOkAction = false
 					}
+				}
+				if !utils.CheckConstraint(&game.ListPlayers[players], techno.ConstraintName) {
+					fmt.Println("CONSTRAINT FAIL")
+					isOkAction = false
+				} else {
+					fmt.Println("CONSTRAINT OK")
 				}
 			}
 		}
@@ -149,6 +156,14 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 							}
 						}
 					}
+				}
+				var actionDB utils.PlayerActionOrder
+				db.Where("ID = ?", actionApi.ID).First(&actionDB)
+				if !utils.CheckConstraint(&game.ListPlayers[players], actionDB.ConstraintName) {
+					fmt.Println("CONSTRAINT FAIL")
+					isOkAction = false
+				} else {
+					fmt.Println("CONSTRAINT OK")
 				}
 			}
 		}

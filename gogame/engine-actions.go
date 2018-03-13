@@ -41,6 +41,8 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		CivilianProduction: 1,
 		TankProduction:     1}
 
+	var modifiers []utils.PlayerModifier
+
 	var player = utils.PlayerInGame{
 		PlayerID:       int(acc.ID),
 		ModifierPolicy: policy,
@@ -122,6 +124,17 @@ func actionWarPropaganda(player *utils.PlayerInGame, values map[string]float32) 
 	player.LastOrders = append(player.LastOrders, order)
 
 }
+func buyForeignTanks(player *utils.PlayerInGame, values map[string]float32) {
+	player.Economy.Money -= values["value"]
+	player.Army.NbHvyTank += 50
+	player.Army.NbLigtTank += 150
+	var order = utils.PlayerLastOrders{
+		OrderID:  int(values["ID"]),
+		Cooldown: int(values["CD"]),
+	}
+	player.LastOrders = append(player.LastOrders, order)
+
+}
 
 func technoIndusT1N1(player *utils.PlayerInGame, values map[string]float32) {
 	player.PlayerTechnology = append(player.PlayerTechnology, "technoIndusT1N1")
@@ -135,5 +148,48 @@ func technoIndusT1N2(player *utils.PlayerInGame, values map[string]float32) {
 }
 func technoIndusT1N3(player *utils.PlayerInGame, values map[string]float32) {
 	player.PlayerTechnology = append(player.PlayerTechnology, "technoIndusT1N3")
+	fmt.Println("No airplane yet :()")
+}
+func technoIndusT2N1(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoIndusT2N1")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.CivilianProduction += 0.15
+}
+func technoIndusT2N2(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoIndusT2N2")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.TankProduction += 0.15
+}
+func technoIndusT2N3(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoIndusT2N3")
+	fmt.Println("No airplane yet :()")
+}
+
+func technoMilT1N1(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT1N1")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.CivilianProduction += 0.15
+}
+func technoMilT1N2(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT1N2")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.TankProduction += 0.15
+}
+func technoMilT1N3(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT1N3")
+	fmt.Println("No airplane yet :()")
+}
+func technoMilT2N1(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT2N1")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.CivilianProduction += 0.15
+}
+func technoMilT2N2(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT2N2")
+	player.Civilian.NbResearchPoint -= values["value"]
+	player.ModifierPolicy.TankProduction += 0.15
+}
+func technoMilT2N3(player *utils.PlayerInGame, values map[string]float32) {
+	player.PlayerTechnology = append(player.PlayerTechnology, "technoMilT2N3")
 	fmt.Println("No airplane yet :()")
 }
