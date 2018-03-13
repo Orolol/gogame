@@ -41,6 +41,12 @@ type PlayerInGame struct {
 	Economy          PlayerEconomy
 	LastOrders       []PlayerLastOrders
 	PlayerTechnology []string
+	Modifiers        []PlayerModifier
+}
+
+type PlayerModifier struct {
+	Name  string
+	Value float32
 }
 
 type PlayerLastOrders struct {
@@ -94,4 +100,5 @@ type GameMsg struct {
 	PlayerID int
 	Action   string
 	Value    map[string]float32
+	Effects  []Effect
 }

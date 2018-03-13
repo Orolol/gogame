@@ -6,6 +6,25 @@ import (
 	"time"
 )
 
+//ApplyEffect apply effect on player modifiers
+func ApplyEffect(player *PlayerInGame, effect Effect) {
+	for _, mod := range player.Modifiers {
+		if mod.Name == effect.ModifierName {
+			switch op := effect.Operator; op {
+			case "+":
+				mod.Value += effect.Value
+			case "-":
+				mod.Value -= effect.Value
+			case "*":
+				mod.Value *= effect.Value
+			case "/":
+				mod.Value *= 1 / effect.Value
+
+			}
+		}
+	}
+}
+
 //AlgoDamageDealt Calculate dmg dealt
 func AlgoDamageDealt(player *PlayerInGame) float32 {
 	s1 := rand.NewSource(time.Now().UnixNano())
