@@ -32,6 +32,24 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+	
+//ApplyEffect apply effect on player modifiers
+func ApplyEffect(player *PlayerInGame, effect Effect) {
+	for _, mod := range player.Modifiers {
+		if mod.Name == effect.ModifierName {
+			switch op := effect.Operator; op {
+			case "+":
+				mod.Value += effect.Value
+			case "-":
+				mod.Value -= effect.Value
+			case "*":
+				mod.Value *= effect.Value
+			case "/":
+				mod.Value *= 1 / effect.Value
+
+			}
+		}
+	}
 }
 
 //AlgoDamageDealt Calculate dmg dealt

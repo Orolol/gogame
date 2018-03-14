@@ -44,10 +44,9 @@ type PlayerInGame struct {
 	Modifiers        []PlayerModifier
 }
 
-//PlayerModifier base struct for in game modifier.
 type PlayerModifier struct {
 	Name  string
-	value float32
+	Value float32
 }
 
 type PlayerLastOrders struct {
@@ -101,4 +100,5 @@ type GameMsg struct {
 	PlayerID int
 	Action   string
 	Value    map[string]float32
+	Effects  []Effect
 }

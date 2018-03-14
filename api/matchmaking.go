@@ -14,12 +14,14 @@ func matchmaking() {
 
 	for account := range matchmakingQueue {
 		fmt.Println("Recieving new match making msg ", account)
+		fmt.Println("1 CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
 		poolPendingPlayer = append(poolPendingPlayer, account)
 		if len(poolPendingPlayer) == 2 {
 			time.Sleep(2000 * time.Millisecond)
 			CreateGame(poolPendingPlayer[0], poolPendingPlayer[1])
 			poolPendingPlayer = []utils.Account{}
 		}
+		fmt.Println("2 CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
 	}
 }
 

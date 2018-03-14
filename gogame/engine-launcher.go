@@ -32,17 +32,33 @@ func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *util
 		"setBuildHvyTank":                        setBuildHvyTank,
 		"setConscPolicy":                         setConscPolicy,
 		"actionWarPropaganda":                    actionWarPropaganda,
+		"buyForeignTanks":                        buyForeignTanks,
 		"actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
 		"actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
 		"technoIndusT1N3":                        technoIndusT1N3,
 		"technoIndusT1N2":                        technoIndusT1N2,
 		"technoIndusT1N1":                        technoIndusT1N1,
+		"technoIndusT2N3":                        technoIndusT2N3,
+		"technoIndusT2N2":                        technoIndusT2N2,
+		"technoIndusT2N1":                        technoIndusT2N1,
+		"technoMilT1N3":                          technoMilT1N3,
+		"technoMilT1N2":                          technoMilT1N2,
+		"technoMilT1N1":                          technoMilT1N1,
+		"technoMilT2N3":                          technoMilT2N3,
+		"technoMilT2N2":                          technoMilT2N2,
+		"technoMilT2N1":                          technoMilT2N1,
 	}
 	for msg := range queue {
 		if player1.PlayerID == msg.PlayerID {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(player1, msg.Value)
+			if len(msg.Effects) > 0 {
+				genericApplyEffect(player1, msg.Effects)
+			}
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32, []utils.Effect))(player1, msg.Value, msg.Effects)
 		} else {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(player2, msg.Value)
+			if len(msg.Effects) > 0 {
+				genericApplyEffect(player2, msg.Effects)
+			}
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32, []utils.Effect))(player2, msg.Value, msg.Effects)
 		}
 		fmt.Println(game.ListPlayers)
 

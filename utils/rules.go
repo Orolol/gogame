@@ -54,6 +54,13 @@ type Technology struct {
 	Cost           float32
 	ActionName     string
 	ConstraintName string
+	Effects        []Effect
+}
+
+type Effect struct {
+	ModifierName string
+	Operator     string
+	Value        float32
 }
 
 //Constraint Json type for constraint
