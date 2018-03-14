@@ -17,6 +17,7 @@ type Policy struct {
 	DefaultValue   string
 }
 
+//API type for policy
 type PolicyChange struct {
 	ID       int
 	Value    float32
@@ -24,6 +25,7 @@ type PolicyChange struct {
 	GameID   uuid.UUID
 }
 
+//API type for action
 type PlayerActionOrderApi struct {
 	ID       int
 	Value    float32
@@ -31,6 +33,7 @@ type PlayerActionOrderApi struct {
 	GameID   uuid.UUID
 }
 
+//SQL type for Actions
 type PlayerActionOrder struct {
 	gorm.Model
 	Name           string `gorm:"not null;unique"`
@@ -41,6 +44,7 @@ type PlayerActionOrder struct {
 	Cooldown       int
 }
 
+//Technology SQL type for technology
 type Technology struct {
 	gorm.Model
 	Name           string `gorm:"not null;unique"`
@@ -50,4 +54,12 @@ type Technology struct {
 	Cost           float32
 	ActionName     string
 	ConstraintName string
+}
+
+//Constraint Json type for constraint
+type Constraint struct {
+	Tech   []string `json:tech`
+	Turn   int      `json:turn`
+	policy []string `json:policy`
+	action []string `json:action`
 }

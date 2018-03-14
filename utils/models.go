@@ -41,6 +41,13 @@ type PlayerInGame struct {
 	Economy          PlayerEconomy
 	LastOrders       []PlayerLastOrders
 	PlayerTechnology []string
+	Modifiers        []PlayerModifier
+}
+
+//PlayerModifier base struct for in game modifier.
+type PlayerModifier struct {
+	Name  string
+	value float32
 }
 
 type PlayerLastOrders struct {

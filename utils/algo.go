@@ -1,10 +1,38 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
 )
+
+//CheckConstraint Check if constraint is respected.
+func CheckConstraint(player *PlayerInGame, constraint string) bool {
+	fmt.Println("CONSTRAINT CHECK ", constraint, player.Nick)
+	var conObj Constraint
+	err := json.Unmarshal([]byte(constraint), &conObj)
+	if err == nil {
+		for _, t := range conObj.Tech {
+			if !stringInSlice(t, player.PlayerTechnology) {
+				return false
+			}
+		}
+	} else {
+		return false
+	}
+	return true
+
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
 
 //AlgoDamageDealt Calculate dmg dealt
 func AlgoDamageDealt(player *PlayerInGame) float32 {
