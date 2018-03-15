@@ -1,228 +1,298 @@
 package utils
 
-import "github.com/jinzhu/gorm"
+var technologies []Technology
+var actions []PlayerActionOrder
+var policies []Policy
+
+func GetTechnolgies() []Technology {
+
+	return technologies
+}
+func GetActions() []PlayerActionOrder {
+	return actions
+}
+func GetPolicies() []Policy {
+	return policies
+}
+
+func GetTechnolgy(name string) Technology {
+	var ret Technology
+	for _, x := range technologies {
+		if x.ActionName == name {
+			ret = x
+		}
+	}
+	return ret
+}
+
+func GetAction(name string) PlayerActionOrder {
+	var ret PlayerActionOrder
+	for _, x := range actions {
+		if x.ActionName == name {
+			ret = x
+		}
+	}
+	return ret
+}
+
+func GetPolicy(name string) Policy {
+	var ret Policy
+	for _, x := range policies {
+		if x.ActionName == name {
+			ret = x
+		}
+	}
+	return ret
+}
 
 func SetBaseValueDB() {
-	db, _ := gorm.Open("sqlite3", "test.db")
-	db.DropTable(&Policy{})
-	db.CreateTable(&Policy{})
-	db.DropTable(&PlayerActionOrder{})
-	db.CreateTable(&PlayerActionOrder{})
-	db.DropTable(&Technology{})
-	db.CreateTable(&Technology{})
 
 	//POLICIES
-	var popRecPol = Policy{
-		Name:           "Training Time",
-		ActionName:     "setPopRecPolicy",
-		ConstraintName: "{}",
-		Description:    "Set your recuitement policy",
-		TypePolicy:     "MIL",
-		PossibleValue:  "{\"Full\" : 1,\"Long\" : 2,\"Hurry\" : 5,\"No time !\" : 10,\"Send everyone !\" : 30}",
-		DefaultValue:   "1"}
-	db.Create(&popRecPol)
-	var conscPol = Policy{
-		Name:           "Conscription Policy",
-		ActionName:     "setConscPolicy",
-		ConstraintName: "{}",
-		Description:    "Set your recuitement policy",
-		TypePolicy:     "MIL",
-		PossibleValue:  "{\"Pro Army\" : 1,\"Volonteer\" : 2,\"War time\" : 5,\"All valids !\" : 10,\"Anyone who can hold a weapon\" : 30}",
-		DefaultValue:   "1"}
-	db.Create(&conscPol)
+	policies = append(policies, Policy{
+		Name:          "Training Time",
+		ActionName:    "setPopRecPolicy",
+		Description:   "Set your recuitement policy",
+		TypePolicy:    "MIL",
+		PossibleValue: "{\"Full\" : 1,\"Long\" : 2,\"Hurry\" : 5,\"No time !\" : 10,\"Send everyone !\" : 30}",
+		DefaultValue:  "1"})
+	policies = append(policies, Policy{
+		Name:          "Conscription Policy",
+		ActionName:    "setConscPolicy",
+		Description:   "Set your recuitement policy",
+		TypePolicy:    "MIL",
+		PossibleValue: "{\"Pro Army\" : 1,\"Volonteer\" : 2,\"War time\" : 5,\"All valids !\" : 10,\"Anyone who can hold a weapon\" : 30}",
+		DefaultValue:  "1"})
 
-	var taxRatePol = Policy{
-		Name:           "Tax rate",
-		ActionName:     "setTaxRatePolicy",
-		ConstraintName: "{}",
-		Description:    "Set your tax rate. ",
-		TypePolicy:     "ECO",
-		PossibleValue:  "{\"Low taxes\" : 1,\"Country effort\" : 1.5,\"War Economy\" : 2,\"Full Mobilization\" : 3,\"Total war\" : 5}",
-		DefaultValue:   "1.5"}
-	db.Create(&taxRatePol)
+	policies = append(policies, Policy{
+		Name:          "Tax rate",
+		ActionName:    "setTaxRatePolicy",
+		Description:   "Set your tax rate. ",
+		TypePolicy:    "ECO",
+		PossibleValue: "{\"Low taxes\" : 1,\"Country effort\" : 1.5,\"War Economy\" : 2,\"Full Mobilization\" : 3,\"Total war\" : 5}",
+		DefaultValue:  "1.5"})
+	policies = append(policies, Policy{
+		Name:          "Build Light Tank ?",
+		ActionName:    "setBuildLgtTank",
+		Description:   "Set your tax rate. ",
+		TypePolicy:    "ECO",
+		PossibleValue: "{\"Yes\" : 1,\"No\" : 0}",
+		DefaultValue:  "1"})
 
-	var lgtTankBuild = Policy{
-		Name:           "Build Light Tank ?",
-		ActionName:     "setBuildLgtTank",
-		ConstraintName: "{}",
-		Description:    "Set your tax rate. ",
-		TypePolicy:     "ECO",
-		PossibleValue:  "{\"Yes\" : 1,\"No\" : 0}",
-		DefaultValue:   "1"}
-	db.Create(&lgtTankBuild)
-
-	var hvyTankBuild = Policy{
-		Name:           "Build Heavy Tank ?",
-		ActionName:     "setBuildHvyTank",
-		ConstraintName: "{}",
-		Description:    "Set your tax rate. ",
-		TypePolicy:     "ECO",
-		PossibleValue:  "{\"Yes\" : 1,\"No\" : 0}",
-		DefaultValue:   "1"}
-	db.Create(&hvyTankBuild)
+	policies = append(policies, Policy{
+		Name:          "Build Heavy Tank ?",
+		ActionName:    "setBuildHvyTank",
+		Description:   "Set your tax rate. ",
+		TypePolicy:    "ECO",
+		PossibleValue: "{\"Yes\" : 1,\"No\" : 0}",
+		DefaultValue:  "1"})
 
 	//ACTIONS
-	var CivToLight = PlayerActionOrder{
-		Name:           "Civ Fact -> Lght Fact",
-		ActionName:     "actionCivConvertFactoryToLightTankFact",
-		ConstraintName: "{}",
-		Description:    "Convert Civilian Factory to light Tank factory (Cost 1M) ",
-		Cooldown:       10,
-		Cost:           1000000,
-	}
-	db.Create(&CivToLight)
+	actions = append(actions, PlayerActionOrder{
+		Name:        "Civ Fact -> Lght Fact",
+		ActionName:  "actionCivConvertFactoryToLightTankFact",
+		Description: "Convert Civilian Factory to light Tank factory (Cost 1M) ",
+		Cooldown:    10,
+		Costs:       []Cost{Cost{Type: "money", Value: 1000000}},
+	})
 
-	var CivToHvy = PlayerActionOrder{
-		Name:           "Civ Fact -> Hvy Fact",
-		ActionName:     "actionCivConvertFactoryToHvyTankFact",
-		ConstraintName: "{}",
-		Description:    "Convert Civilian Factory to Heavy Tank factory (Cost 1M) ",
-		Cooldown:       10,
-		Cost:           1000000,
-	}
-	db.Create(&CivToHvy)
-	var WarProp = PlayerActionOrder{
-		Name:           "War Propaganda",
-		ActionName:     "actionWarPropaganda",
-		ConstraintName: "{}",
-		Description:    "Boost morale by 15% (cost 10M) ",
-		Cooldown:       10,
-		Cost:           10000000,
-	}
-	db.Create(&WarProp)
-	var buyFT = PlayerActionOrder{
-		Name:           "Buy foreign tanks",
-		ActionName:     "buyForeignTanks",
-		ConstraintName: "{\"tech\":[\"technoIndusT1N1\", \"technoIndusT1N2\"]}",
-		Description:    "Get 150 light tank and 50 heavy one (cost 100M) ",
-		Cooldown:       60,
-		Cost:           100000000,
-	}
-	db.Create(&buyFT)
+	actions = append(actions, PlayerActionOrder{
+		Name:        "Civ Fact -> Hvy Fact",
+		ActionName:  "actionCivConvertFactoryToHvyTankFact",
+		Description: "Convert Civilian Factory to Heavy Tank factory (Cost 1M) ",
+		Cooldown:    10,
+		Costs:       []Cost{Cost{Type: "money", Value: 1000000}},
+	})
+	actions = append(actions, PlayerActionOrder{
+		Name:        "War Propaganda",
+		ActionName:  "actionWarPropaganda",
+		Description: "Boost morale by 15% (cost 10M) ",
+		Cooldown:    10,
+		Costs:       []Cost{Cost{Type: "money", Value: 10000000}},
+	})
+	actions = append(actions, PlayerActionOrder{
+		Name:        "Emergency recruitment",
+		ActionName:  "emergencyRecruitment",
+		Description: "Recruit immediatly 10% of your manpower. (cost 50M and 10% morale)",
+		Cooldown:    30,
+		Costs:       []Cost{Cost{Type: "money", Value: 50000000}, Cost{Type: "morale", Value: 10}},
+	})
+	actions = append(actions, PlayerActionOrder{
+		Name:        "Purge of weak elements",
+		ActionName:  "purgeSoldier",
+		Description: "Executes possible traitors and weak soldier to improve morale and discipline by 15%. (cost 15% soldier and 10M)",
+		Cooldown:    30,
+		Costs:       []Cost{Cost{Type: "money", Value: 10000000}},
+	})
+	actions = append(actions, PlayerActionOrder{
+		Name:       "Buy foreign tanks",
+		ActionName: "buyForeignTanks",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoIndusT1N1"},
+			Constraint{Type: "tech", Value: "technoIndusT1N2"},
+		},
+		Description: "Get 150 light tank and 50 heavy one (cost 100M) ",
+		Cooldown:    60,
+		Costs:       []Cost{Cost{Type: "money", Value: 10000000}},
+	})
 
 	//TECHNOLOGY
-	var technoIndusT1N1 = Technology{
+	technologies = append(technologies, Technology{
 		Name:           "Boost Civilian production",
 		Description:    "Boost civilian factory production by 15%",
-		Cost:           150.0,
+		Costs:          []Cost{Cost{Type: "science", Value: 100}},
+		Effects:        []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
 		ActionName:     "technoIndusT1N1",
-		ConstraintName: "{}",
 		Tier:           1,
 		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT1N1)
-	var technoIndusT1N2 = Technology{
-		Name:           "Boost Tank production",
-		Description:    "Boost Tank factory production by 15%",
-		Cost:           100.0,
+	})
+
+	technologies = append(technologies, Technology{
+		Name:        "Boost Civilian production T2",
+		Description: "Boost civilian factory production by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 450}},
+		Effects:     []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
+		ActionName:  "technoIndusT2N1",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoIndusT1N1"},
+		},
+		Tier:           2,
+		TypeTechnology: "INDUS",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:        "Boost Civilian production T3",
+		Description: "Boost civilian factory production by 25%",
+		Costs:       []Cost{Cost{Type: "science", Value: 1200}},
+		Effects:     []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.25}},
+		ActionName:  "technoIndusT3N1",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoIndusT2N1"},
+		},
+		Tier:           3,
+		TypeTechnology: "INDUS",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:        "Boost Tank production",
+		Description: "Boost Tank factory production by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 100}},
+		Effects: []Effect{
+			Effect{ModifierName: "lightTankFactoryProduction", Operator: "*", Value: 1.15},
+			Effect{ModifierName: "heavyTankFactoryProduction", Operator: "*", Value: 1.15},
+		},
 		ActionName:     "technoIndusT1N2",
-		ConstraintName: "{}",
 		Tier:           1,
 		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT1N2)
-	var technoIndusT1N3 = Technology{
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Boost Tank production T2",
+		Description: "Boost Tank factory production by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 300}},
+		Effects: []Effect{
+			Effect{ModifierName: "lightTankFactoryProduction", Operator: "*", Value: 1.15},
+			Effect{ModifierName: "heavyTankFactoryProduction", Operator: "*", Value: 1.15},
+		},
+		ActionName: "technoIndusT2N2",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoIndusT1N2"},
+		},
+		Tier:           2,
+		TypeTechnology: "INDUS",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:        "Boost Tank production T3",
+		Description: "Boost Tank factory production by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 1000}},
+		Effects: []Effect{
+			Effect{ModifierName: "lightTankFactoryProduction", Operator: "*", Value: 1.15},
+			Effect{ModifierName: "heavyTankFactoryProduction", Operator: "*", Value: 1.15},
+		},
+		ActionName: "technoIndusT3N2",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoIndusT2N2"},
+		},
+		Tier:           3,
+		TypeTechnology: "INDUS",
+	})
+	technologies = append(technologies, Technology{
 		Name:           "Boost Aircraft production",
 		Description:    "Boost Aircraft factory production by 15%",
-		Cost:           100.0,
+		Costs:          []Cost{Cost{Type: "science", Value: 100}},
+		Effects:        []Effect{Effect{ModifierName: "aircraftFactoryProduction", Operator: "*", Value: 1.15}},
 		ActionName:     "technoIndusT1N3",
-		ConstraintName: "{}",
 		Tier:           1,
 		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT1N3)
-	var technoIndusT2N1 = Technology{
-		Name:           "Boost Civilian production T2",
-		Description:    "Boost civilian factory production by 15%",
-		Cost:           450.0,
-		ActionName:     "technoIndusT2N1",
-		ConstraintName: "{\"tech\":[\"technoIndusT1N1\"]}",
-		Tier:           2,
-		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT2N1)
-	var technoIndusT2N2 = Technology{
-		Name:           "Boost Tank production T2",
-		Description:    "Boost Tank factory production by 15%",
-		Cost:           300.0,
-		ActionName:     "technoIndusT2N2",
-		ConstraintName: "{\"tech\":[\"technoIndusT1N2\"]}",
-		Tier:           2,
-		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT2N2)
-	var technoIndusT2N3 = Technology{
-		Name:           "Boost Aircraft production T2",
-		Description:    "Boost Aircraft factory production by 15%",
-		Cost:           600.0,
-		ActionName:     "technoIndusT2N3",
-		ConstraintName: "{\"tech\":[\"technoIndusT1N3\"]}",
-		Tier:           2,
-		TypeTechnology: "INDUS",
-	}
-	db.Create(&technoIndusT2N3)
+	})
 
 	//MIL TECHNOLOGY
-	var technoMilT1N1 = Technology{
-		Name:           "Boost soldier damage",
-		Description:    "Boost soldier damage by 15%",
-		Cost:           200.0,
-		ActionName:     "technoMilT1N1",
-		ConstraintName: "{}",
-		Tier:           1,
-		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT1N1)
 
-	var technoMilT1N2 = Technology{
-		Name:           "Boost Tank damage",
-		Description:    "Boost Tank damage by 15%",
-		Cost:           100.0,
+	technologies = append(technologies, Technology{
+		Name:           "Boost soldier damage",
+		Description:    "Boost soldier damage by 10%",
+		Costs:          []Cost{Cost{Type: "science", Value: 200}},
+		Effects:        []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.10}},
+		ActionName:     "technoMilT1N1",
+		Tier:           1,
+		TypeTechnology: "MIL",
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Boost soldier damage",
+		Description: "Boost soldier damage by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 800}},
+		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.15}},
+		ActionName:  "technoMilT2N1",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoMilT1N1"},
+		},
+		Tier:           2,
+		TypeTechnology: "MIL",
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Boost soldier damage",
+		Description: "Boost soldier damage by 20%",
+		Costs:       []Cost{Cost{Type: "science", Value: 1600}},
+		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.20}},
+		ActionName:  "technoMilT3N1",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoMilT2N1"},
+		},
+		Tier:           3,
+		TypeTechnology: "MIL",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:           "Boost light tank damage",
+		Description:    "Boost light tank damage by 10%",
+		Costs:          []Cost{Cost{Type: "science", Value: 200}},
+		Effects:        []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.10}},
 		ActionName:     "technoMilT1N2",
-		ConstraintName: "{}",
 		Tier:           1,
 		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT1N2)
-	var technoMilT1N3 = Technology{
-		Name:           "Boost Aircraft damage",
-		Description:    "Boost Aircraft damage by 15%",
-		Cost:           100.0,
-		ActionName:     "technoMilT1N3",
-		ConstraintName: "{}",
-		Tier:           1,
-		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT1N3)
-	var technoMilT2N1 = Technology{
-		Name:           "Boost soldier damage T2",
-		Description:    "Boost soldier damage by 15%",
-		Cost:           800.0,
-		ActionName:     "technoMilT2N1",
-		ConstraintName: "{\"tech\":[\"technoMilT1N1\"]}",
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Boost light tank damage",
+		Description: "Boost light tank damage by 15%",
+		Costs:       []Cost{Cost{Type: "science", Value: 800}},
+		Effects:     []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.15}},
+		ActionName:  "technoMilT2N2",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoMilT1N2"},
+		},
 		Tier:           2,
 		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT2N1)
-	var technoMilT2N2 = Technology{
-		Name:           "Boost Tank damage T2",
-		Description:    "Boost Tank damage by 15%",
-		Cost:           300.0,
-		ActionName:     "technoMilT2N2",
-		ConstraintName: "{\"tech\":[\"technoMilT1N2\"]}",
-		Tier:           2,
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Boost light tank damage",
+		Description: "Boost light tank damage by 20%",
+		Costs:       []Cost{Cost{Type: "science", Value: 1600}},
+		Effects:     []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.20}},
+		ActionName:  "technoMilT3N2",
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoMilT2N2"},
+		},
+		Tier:           3,
 		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT2N2)
-	var technoMilT2N3 = Technology{
-		Name:           "Boost Aircraft damage T2",
-		Description:    "Boost Aircraft damage by 15%",
-		Cost:           600.0,
-		ActionName:     "technoMilT2N3",
-		ConstraintName: "{\"tech\":[\"technoMilT1N3\"]}",
-		Tier:           2,
-		TypeTechnology: "MIL",
-	}
-	db.Create(&technoMilT2N3)
+	})
 
 }

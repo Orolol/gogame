@@ -1,54 +1,92 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
 )
 
 //CheckConstraint Check if constraint is respected.
-func CheckConstraint(player *PlayerInGame, constraint string) bool {
-	fmt.Println("CONSTRAINT CHECK ", constraint, player.Nick)
-	var conObj Constraint
-	err := json.Unmarshal([]byte(constraint), &conObj)
-	if err == nil {
-		for _, t := range conObj.Tech {
-			if !stringInSlice(t, player.PlayerTechnology) {
+func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost) bool {
+	fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
+	for _, c := range costs {
+		switch op := c.Type; op {
+		case "money":
+			if player.Economy.Money < c.Value {
+				fmt.Println("FAIL CONSTRAINT COST", c, player.Economy.Money)
 				return false
 			}
+		case "science":
+			if player.Civilian.NbResearchPoint < c.Value {
+				fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbResearchPoint)
+				return false
+			}
+		case "manpower":
+			if player.Civilian.NbManpower < c.Value {
+				fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbManpower)
+				return false
+			}
+		case "morale":
+			if player.Army.Morale < c.Value {
+				fmt.Println("FAIL CONSTRAINT COST", c, player.Army.Morale)
+				return false
+			}
+
 		}
-	} else {
-		return false
 	}
+	for _, t := range constraints {
+		if t.Type == "tech" && !StringInSlice(t.Value, player.PlayerTechnology) {
+			fmt.Println("FAIL TECH CONSTRAINT PREREQUISITES", t, player.PlayerTechnology)
+			return false
+		}
+	}
+
 	return true
 
 }
 
-func stringInSlice(a string, list []string) bool {
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
 		}
 	}
 	return false
-	
+
+}
+
 //ApplyEffect apply effect on player modifiers
 func ApplyEffect(player *PlayerInGame, effect Effect) {
-	for _, mod := range player.Modifiers {
-		if mod.Name == effect.ModifierName {
+	for key, _ := range player.Modifiers {
+		if key == effect.ModifierName {
 			switch op := effect.Operator; op {
 			case "+":
-				mod.Value += effect.Value
+				player.Modifiers[key] += effect.Value
 			case "-":
-				mod.Value -= effect.Value
+				player.Modifiers[key] -= effect.Value
 			case "*":
-				mod.Value *= effect.Value
+				player.Modifiers[key] *= effect.Value
 			case "/":
-				mod.Value *= 1 / effect.Value
+				player.Modifiers[key] *= 1 / effect.Value
 
 			}
 		}
+	}
+}
+
+//ApplyCost apply cost on player board
+func ApplyCost(player *PlayerInGame, cost Cost) {
+	fmt.Println("APPLY COST !")
+	switch op := cost.Type; op {
+	case "money":
+		player.Economy.Money -= cost.Value
+	case "science":
+		player.Civilian.NbResearchPoint -= cost.Value
+	case "manpower":
+		player.Civilian.NbManpower -= cost.Value
+	case "morale":
+		player.Army.Morale -= cost.Value
+
 	}
 }
 
@@ -60,7 +98,10 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 	var rollp2 = r1.Float32() + 4.0
 	var rollp3 = r1.Float32() + 4.0
 	dmgModifier := (player.Army.Morale / 100.0) * (player.Army.Quality / 100.0)
-	var dmg = ((player.Army.NbSoldier * 0.05 * rollp1) + (player.Army.NbLigtTank * 5 * rollp2) + (player.Army.NbHvyTank * 15 * rollp3)) * 0.2 * dmgModifier
+	var dmgSoldier = player.Army.NbSoldier * 0.05 * rollp1 * player.Modifiers["soldierQuality"]
+	var dmgLightTank = player.Army.NbLigtTank * 5 * rollp2 * player.Modifiers["lightTankQuality"]
+	var dmgHvyTank = player.Army.NbHvyTank * 15 * rollp3 * player.Modifiers["heavyTankQuality"]
+	var dmg = (dmgSoldier + dmgLightTank + dmgHvyTank) * 0.2 * dmgModifier
 	fmt.Println("DAMAGE ", dmg)
 	return dmg
 }
@@ -92,8 +133,8 @@ func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 //AlgoDamageRepartition Calculate loses
 func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInGame {
 	totalHp := player.Army.NbSoldier + (player.Army.NbLigtTank * 5) + (player.Army.NbHvyTank * 20)
-	var multiHvyTank float32 = 0.0
-	var multiLgtTank float32 = 0.0
+	var multiHvyTank float32
+	var multiLgtTank float32
 	if player.Army.NbHvyTank > 0 {
 
 		multiHvyTank = (player.Army.NbHvyTank * 20) / totalHp
@@ -128,11 +169,8 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 }
 
 func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
-	armyUpkeep := (player.Army.NbSoldier * 100) + (player.Army.NbLigtTank * 150) + (player.Army.NbHvyTank * 200)
+	armyUpkeep := (player.Army.NbSoldier * 100) + (player.Army.NbLigtTank * 1000) + (player.Army.NbHvyTank * 5000)
 	tax := (player.Economy.TaxRate * 0.2 * player.Civilian.NbTotalCivil)
-	fmt.Println("MONEY : ", player.Economy.Money)
-	fmt.Println("armyUpkeep : ", armyUpkeep)
-	fmt.Println("tax : ", tax)
 	player.Economy.Money = player.Economy.Money - armyUpkeep + tax
 
 	//Technology
@@ -141,20 +179,21 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 	if player.Economy.Money > 0 {
 
-		player.Army.NbLigtTank = player.Army.NbLigtTank + player.Civilian.NbLightTankFactory*3
-		player.Army.NbHvyTank = player.Army.NbHvyTank + player.Civilian.NbHeavyTankFactory*1
+		player.Army.NbLigtTank += player.Civilian.NbLightTankFactory * 3 * player.Modifiers["lightTankFactoryProduction"]
+		player.Army.NbHvyTank += player.Civilian.NbHeavyTankFactory * 1 * player.Modifiers["heavyTankFactoryProduction"]
 
 		player.Economy.Money -= (player.Civilian.NbLightTankFactory * 10000) + (player.Civilian.NbHeavyTankFactory * 100000)
 
 		var nbThingToBuild float32 = 1.0
 
 		var civilianProduction = player.Civilian.NbCivilianFactory * 0.01 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
-		fmt.Println("CIVILIAN PROD :", civilianProduction)
+		civilianProduction *= player.Modifiers["civilianFactoryProduction"]
+
 		if player.ModifierPolicy.BuildLgtTankFac {
 			nbThingToBuild += 1.0
 		}
 		if player.ModifierPolicy.BuildHvyTankFac {
-			nbThingToBuild += 1
+			nbThingToBuild--
 		}
 		if player.ModifierPolicy.BuildLgtTankFac {
 			player.Civilian.NbLightTankFactory += (civilianProduction / nbThingToBuild) * 0.5
@@ -166,11 +205,8 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 	} else {
 		if player.Army.Morale > 10 {
-			player.Army.Morale -= 1
+			player.Army.Morale--
 		}
-
-		fmt.Println("ENOUGHT MONEY TO BUILD !")
-		fmt.Println("MORALE !", player.Army.Morale)
 	}
 
 	return player

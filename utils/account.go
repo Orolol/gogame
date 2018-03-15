@@ -23,6 +23,7 @@ type Token struct {
 }
 
 //GameHistory list of past game
+
 type GameHistory struct {
 	gorm.Model
 	GameEndState Game

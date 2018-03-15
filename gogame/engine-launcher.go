@@ -35,33 +35,39 @@ func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *util
 		"buyForeignTanks":                        buyForeignTanks,
 		"actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
 		"actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
-		"technoIndusT1N3":                        technoIndusT1N3,
-		"technoIndusT1N2":                        technoIndusT1N2,
-		"technoIndusT1N1":                        technoIndusT1N1,
-		"technoIndusT2N3":                        technoIndusT2N3,
-		"technoIndusT2N2":                        technoIndusT2N2,
-		"technoIndusT2N1":                        technoIndusT2N1,
-		"technoMilT1N3":                          technoMilT1N3,
-		"technoMilT1N2":                          technoMilT1N2,
-		"technoMilT1N1":                          technoMilT1N1,
-		"technoMilT2N3":                          technoMilT2N3,
-		"technoMilT2N2":                          technoMilT2N2,
-		"technoMilT2N1":                          technoMilT2N1,
+		"emergencyRecruitment":                   emergencyRecruitment,
+		"purgeSoldier":                           purgeSoldier,
 	}
-	for msg := range queue {
-		if player1.PlayerID == msg.PlayerID {
-			if len(msg.Effects) > 0 {
-				genericApplyEffect(player1, msg.Effects)
-			}
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32, []utils.Effect))(player1, msg.Value, msg.Effects)
-		} else {
-			if len(msg.Effects) > 0 {
-				genericApplyEffect(player2, msg.Effects)
-			}
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32, []utils.Effect))(player2, msg.Value, msg.Effects)
-		}
-		fmt.Println(game.ListPlayers)
 
+	keys := make([]string, 0, len(ActionMapping))
+	for k := range ActionMapping {
+		keys = append(keys, k)
+	}
+
+	for msg := range queue {
+		var p *utils.PlayerInGame
+
+		//Determine the player
+		if player1.PlayerID == msg.PlayerID {
+			p = player1
+		} else {
+			p = player2
+		}
+
+		//Apply Effects, cost and special action
+		if len(msg.Effects) > 0 {
+			genericApplyEffect(p, msg.Effects)
+		}
+		if len(msg.Costs) > 0 {
+			genericApplyCosts(p, msg.Costs)
+		}
+		if utils.StringInSlice(msg.Action, keys) {
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(p, msg.Value)
+		}
+
+		if msg.Type == "TECH" {
+			p.PlayerTechnology = append(p.PlayerTechnology, msg.Action)
+		}
 	}
 }
 
@@ -89,20 +95,16 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		}
 
 		if player1.Army.NbSoldier <= 0 {
-			fmt.Println("P2 WIN")
 			game.State = "End"
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
-			fmt.Println("SEND ", game)
 			queueGameOut <- game
 			queueGameOut <- game
 			break
 		} else if player2.Army.NbSoldier <= 0 {
-			fmt.Println("P1 WIN")
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]
-			fmt.Println("SEND ", game)
 			queueGameOut <- game
 			queueGameOut <- game
 			break
@@ -120,9 +122,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			player1 = utils.AlgoEconomicEndTurn(player1)
 			player2 = utils.AlgoEconomicEndTurn(player2)
 
-			fmt.Println("NO WIN")
 			<-timer1.C
-			fmt.Println("SEND ", game)
 			queueGameOut <- game
 			queueGameOut <- game
 		}
@@ -141,7 +141,6 @@ func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
 			var gc utils.GameConf
 			json.Unmarshal(msg[2], &gc)
 			fmt.Println("GAME CREATE : ", gc)
-			fmt.Println("Launch Game from this msg ", gc)
 			queueGameInc := make(chan utils.GameMsg, 100)
 			game := createGame(gc, queueGameInc)
 			go runGame(game, queueGameInc, queueGameOut)

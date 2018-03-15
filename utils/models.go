@@ -41,16 +41,13 @@ type PlayerInGame struct {
 	Economy          PlayerEconomy
 	LastOrders       []PlayerLastOrders
 	PlayerTechnology []string
-	Modifiers        []PlayerModifier
+	Modifiers        map[string]float32
 }
 
-type PlayerModifier struct {
-	Name  string
-	Value float32
-}
+//PlayerModifier modifeirs
 
 type PlayerLastOrders struct {
-	OrderID  int
+	OrderID  string
 	Cooldown int
 }
 
@@ -99,6 +96,8 @@ type GameMsg struct {
 	Text     string
 	PlayerID int
 	Action   string
+	Type     string
 	Value    map[string]float32
 	Effects  []Effect
+	Costs    []Cost
 }

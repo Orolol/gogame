@@ -107,6 +107,8 @@ func main() {
 	db.AutoMigrate(&utils.Policy{})
 	db.AutoMigrate(&utils.PlayerActionOrder{})
 	db.AutoMigrate(&utils.Technology{})
+	db.AutoMigrate(&utils.Effect{})
+	db.AutoMigrate(&utils.Cost{})
 
 	utils.SetBaseValueDB()
 

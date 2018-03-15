@@ -20,8 +20,6 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	var polChange utils.PolicyChange
 	var pol utils.Policy
 	var gMsg utils.GameMsg
-	db, _ := gorm.Open("sqlite3", "test.db")
-
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		panic(err)
@@ -34,7 +32,7 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("CHANGE POLICY, ", polChange)
 
-	db.Where("ID = ?", polChange.ID).First(&pol)
+	pol = utils.GetPolicy(polChange.ID)
 	gMsg.Action = pol.ActionName
 	gMsg.GameID = polChange.GameID
 	gMsg.PlayerID = polChange.PlayerID
@@ -56,7 +54,6 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 	var actionApi utils.PolicyChange
 	var techno utils.Technology
 	var gMsg utils.GameMsg
-	db, _ := gorm.Open("sqlite3", "test.db")
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -75,21 +72,17 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 	var players int
 	var tech int
 	if game, ok = onGoingGames[actionApi.GameID]; ok {
-		db.Where("ID = ?", actionApi.ID).First(&techno)
+		techno = utils.GetTechnolgy(actionApi.ID)
 		for players = range game.ListPlayers {
 			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
 				fmt.Println("TECH CHECK", techno)
-				if techno.Cost > game.ListPlayers[players].Civilian.NbResearchPoint {
-					fmt.Println("COST TO MUCH ", techno.Cost, game.ListPlayers[players].Civilian.NbResearchPoint)
-					isOkAction = false
-				}
 				for tech = range game.ListPlayers[players].PlayerTechnology {
 					if game.ListPlayers[players].PlayerTechnology[tech] == techno.ActionName {
 						fmt.Println("ALREADY GOT THE TECH")
 						isOkAction = false
 					}
 				}
-				if !utils.CheckConstraint(&game.ListPlayers[players], techno.ConstraintName) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], techno.Constraints, techno.Costs) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -105,8 +98,10 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
-		gMsg.Value = make(map[string]float32)
-		gMsg.Value["cost"] = techno.Cost
+		gMsg.Costs = techno.Costs
+		gMsg.Effects = techno.Effects
+		gMsg.Type = "TECH"
+		fmt.Println("TECH UP !!!", gMsg, techno)
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))
 		if err != nil {
@@ -141,13 +136,13 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 	var cd int = 0
 	if game, ok := onGoingGames[actionApi.GameID]; ok {
 		fmt.Println("GOT THE GAME")
-		db.Where("ID = ?", actionApi.ID).First(&action)
+		action = utils.GetAction(actionApi.ID)
 		for players := range game.ListPlayers {
 			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
 				fmt.Println("GOT THE PLayer")
 				if len(game.ListPlayers[players].LastOrders) > 0 {
 					for actions := range game.ListPlayers[players].LastOrders {
-						if game.ListPlayers[players].LastOrders[actions].OrderID == int(action.ID) {
+						if game.ListPlayers[players].LastOrders[actions].OrderID == action.ActionName {
 							if game.ListPlayers[players].LastOrders[actions].Cooldown > game.CurrentTurn {
 								fmt.Println("CD END ", game.ListPlayers[players].LastOrders[actions].Cooldown)
 								isOkAction = false
@@ -159,7 +154,7 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 				}
 				var actionDB utils.PlayerActionOrder
 				db.Where("ID = ?", actionApi.ID).First(&actionDB)
-				if !utils.CheckConstraint(&game.ListPlayers[players], actionDB.ConstraintName) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], actionDB.Constraints, actionDB.Costs) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -176,10 +171,9 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
 		gMsg.Value = make(map[string]float32)
-		gMsg.Value["cost"] = action.Cost
+		gMsg.Costs = action.Costs
 		gMsg.Value["value"] = 1
 		gMsg.Value["CD"] = float32(cd)
-		gMsg.Value["ID"] = float32(action.ID)
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))
 		if err != nil {

@@ -2,24 +2,22 @@ package utils
 
 import (
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 )
 
 //Account Account Model
 type Policy struct {
-	gorm.Model
-	Name           string `gorm:"not null;unique"`
-	ActionName     string
-	ConstraintName string
-	Description    string
-	PossibleValue  string
-	TypePolicy     string
-	DefaultValue   string
+	Name          string `gorm:"not null;unique"`
+	ActionName    string
+	Constraints   []Constraint
+	Description   string
+	PossibleValue string
+	TypePolicy    string
+	DefaultValue  string
 }
 
 //API type for policy
 type PolicyChange struct {
-	ID       int
+	ID       string
 	Value    float32
 	PlayerID int
 	GameID   uuid.UUID
@@ -27,7 +25,7 @@ type PolicyChange struct {
 
 //API type for action
 type PlayerActionOrderApi struct {
-	ID       int
+	ID       string
 	Value    float32
 	PlayerID int
 	GameID   uuid.UUID
@@ -35,25 +33,23 @@ type PlayerActionOrderApi struct {
 
 //SQL type for Actions
 type PlayerActionOrder struct {
-	gorm.Model
-	Name           string `gorm:"not null;unique"`
-	ActionName     string
-	ConstraintName string
-	Description    string
-	Cost           float32
-	Cooldown       int
+	Name        string `gorm:"not null;unique"`
+	ActionName  string
+	Constraints []Constraint
+	Description string
+	Costs       []Cost
+	Cooldown    int
 }
 
 //Technology SQL type for technology
 type Technology struct {
-	gorm.Model
 	Name           string `gorm:"not null;unique"`
 	Description    string
 	TypeTechnology string
 	Tier           int
-	Cost           float32
+	Costs          []Cost
 	ActionName     string
-	ConstraintName string
+	Constraints    []Constraint
 	Effects        []Effect
 }
 
@@ -63,10 +59,20 @@ type Effect struct {
 	Value        float32
 }
 
-//Constraint Json type for constraint
-type Constraint struct {
-	Tech   []string `json:tech`
-	Turn   int      `json:turn`
-	policy []string `json:policy`
-	action []string `json:action`
+type Cost struct {
+	Type  string
+	Value float32
 }
+
+type Constraint struct {
+	Type  string
+	Value string
+}
+
+// //Constraint Json type for constraint
+// type Constraint struct {
+// 	Tech   []string `json:tech`
+// 	Turn   int      `json:turn`
+// 	Policy []string `json:policy`
+// 	Action []string `json:action`
+// }
