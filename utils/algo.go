@@ -90,6 +90,61 @@ func ApplyCost(player *PlayerInGame, cost Cost) {
 	}
 }
 
+func AlgoTerritorryChange(p1 *PlayerInGame, p2 *PlayerInGame, p1dmg float32, p2dmg float32) (*PlayerInGame, *PlayerInGame) {
+	var winner, loser *PlayerInGame
+	if p1dmg > (p2dmg * 1.05) {
+		winner = p1
+		loser = p2
+	} else if p2dmg > (p1dmg * 1.05) {
+		winner = p2
+		loser = p1
+	} else {
+		return p1, p2
+	}
+	loser.Territory.Surface -= 0.01
+	winner.Territory.Surface += 0.01
+
+	return p1, p2
+}
+
+func AlgoRollTurnEvent(p1 *PlayerInGame, p2 *PlayerInGame, turn int) (*PlayerInGame, *PlayerInGame) {
+	var allSingleEvents = GetEventsByType("Single")
+	var currentEventp1 = GetEvent("event0")
+	var currentEventp2 = GetEvent("event0")
+	var totalWeight int
+	for _, g := range allSingleEvents {
+		totalWeight += g.Weight
+	}
+	totalWeight *= 10
+
+	rand.Seed(time.Now().UnixNano())
+	r := rand.Intn(totalWeight)
+	for _, g := range allSingleEvents {
+		r -= g.Weight
+		if r <= 0 {
+			currentEventp1 = g
+			break
+		}
+	}
+	for _, e := range currentEventp1.Effects {
+		ApplyEffect(p1, e)
+		p1.Logs = append(p1.Logs, PlayerLog{Turn: turn, ActionName: currentEventp1.ActionName})
+	}
+	r = rand.Intn(totalWeight)
+	for _, g := range allSingleEvents {
+		r -= g.Weight
+		if r <= 0 {
+			currentEventp2 = g
+			break
+		}
+	}
+	for _, e := range currentEventp2.Effects {
+		ApplyEffect(p2, e)
+		p2.Logs = append(p2.Logs, PlayerLog{Turn: turn, ActionName: currentEventp2.ActionName})
+	}
+	return p1, p2
+}
+
 //AlgoDamageDealt Calculate dmg dealt
 func AlgoDamageDealt(player *PlayerInGame) float32 {
 	s1 := rand.NewSource(time.Now().UnixNano())

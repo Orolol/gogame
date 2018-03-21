@@ -69,6 +69,16 @@ type Constraint struct {
 	Value string
 }
 
+type PlayerEvent struct {
+	Type        string
+	Description string
+	Constraints []Constraint
+	Effects     []Effect
+	ActionName  string
+	Name        string
+	Weight      int
+}
+
 // //Constraint Json type for constraint
 // type Constraint struct {
 // 	Tech   []string `json:tech`

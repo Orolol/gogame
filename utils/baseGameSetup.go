@@ -1,8 +1,13 @@
 package utils
 
+import (
+	"fmt"
+)
+
 var technologies []Technology
 var actions []PlayerActionOrder
 var policies []Policy
+var events []PlayerEvent
 
 func GetTechnolgies() []Technology {
 
@@ -13,6 +18,29 @@ func GetActions() []PlayerActionOrder {
 }
 func GetPolicies() []Policy {
 	return policies
+}
+func GetEvents() *[]PlayerEvent {
+	return &events
+}
+
+func GetEvent(name string) PlayerEvent {
+	var ret PlayerEvent
+	for _, x := range events {
+		if x.ActionName == name {
+			ret = x
+		}
+	}
+	return ret
+}
+func GetEventsByType(typeEvent string) []PlayerEvent {
+
+	var ret []PlayerEvent
+	for _, x := range events {
+		if x.Type == typeEvent {
+			ret = append(ret, x)
+		}
+	}
+	return ret
 }
 
 func GetTechnolgy(name string) Technology {
@@ -294,5 +322,34 @@ func SetBaseValueDB() {
 		Tier:           3,
 		TypeTechnology: "MIL",
 	})
+
+	//EVENTS
+
+	events = append(events, PlayerEvent{
+		Name:        "",
+		Description: "",
+		ActionName:  "event0",
+		Weight:      0,
+		Type:        "NullEvent",
+	})
+	events = append(events, PlayerEvent{
+		Name:        "Famous Colonel die",
+		Description: "One your most famous Colonel just died while defending position",
+		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 0.95}},
+		ActionName:  "event1",
+		Weight:      5,
+		Type:        "Single",
+	})
+	events = append(events, PlayerEvent{
+		Name:        "A new hero",
+		Description: "A soldier just accomplish an incredible feat of heroism.",
+		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.05}},
+		ActionName:  "event2",
+		Weight:      5,
+		Type:        "Single",
+	})
+
+	fmt.Println("events", events)
+	fmt.Println("technologies", technologies)
 
 }

@@ -23,6 +23,7 @@ type Game struct {
 	CurrentTurn int
 	ListPlayers []PlayerInGame
 	Conf        GameConf
+	IsWar       bool
 }
 
 //ListPlayer list of players
@@ -39,9 +40,16 @@ type PlayerInGame struct {
 	ModifierPolicy   PlayerModifierPolicy
 	Civilian         PlayerCivilian
 	Economy          PlayerEconomy
+	Territory        PlayerTerritory
 	LastOrders       []PlayerLastOrders
 	PlayerTechnology []string
 	Modifiers        map[string]float32
+	Logs             []PlayerLog
+}
+
+type PlayerLog struct {
+	Turn       int
+	ActionName string
 }
 
 //PlayerModifier modifeirs
@@ -88,6 +96,14 @@ type PlayerModifierPolicy struct {
 	CivilianProduction float32
 	TankProduction     float32
 	AirCraftProduction float32
+}
+
+type PlayerTerritory struct {
+	Surface      float32
+	SmallCities  float32
+	MediumCities float32
+	BigCities    float32
+	Barracks     float32
 }
 
 //GameMsg msg send to the routine

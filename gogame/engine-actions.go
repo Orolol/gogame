@@ -41,6 +41,14 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		CivilianProduction: 1,
 		TankProduction:     1}
 
+	territory := utils.PlayerTerritory{
+		Barracks:     50,
+		SmallCities:  100,
+		MediumCities: 25,
+		BigCities:    5,
+		Surface:      100,
+	}
+
 	var modifiers = make(map[string]float32)
 
 	//MIL modifiers
@@ -54,7 +62,6 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 
 	//PROD modifiers
 	modifiers["civilianFactoryProduction"] = 1.0
-
 	modifiers["lightTankFactoryProduction"] = 1.0
 	modifiers["heavyTankFactoryProduction"] = 1.0
 
@@ -65,7 +72,8 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		Nick:           acc.Name,
 		Economy:        economy,
 		Civilian:       civilian,
-		Modifiers:      modifiers}
+		Modifiers:      modifiers,
+		Territory:      territory}
 
 	return player
 }

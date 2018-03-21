@@ -104,11 +104,6 @@ func main() {
 	defer db.Close()
 	db.AutoMigrate(&utils.Account{})
 	db.AutoMigrate(&utils.Token{})
-	db.AutoMigrate(&utils.Policy{})
-	db.AutoMigrate(&utils.PlayerActionOrder{})
-	db.AutoMigrate(&utils.Technology{})
-	db.AutoMigrate(&utils.Effect{})
-	db.AutoMigrate(&utils.Cost{})
 
 	utils.SetBaseValueDB()
 

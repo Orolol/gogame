@@ -19,6 +19,7 @@ func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 		GameID:      gameID,
 		CurrentTurn: 0,
 		ListPlayers: listPlayer,
+		IsWar:       false,
 		Conf:        conf}
 
 	return game
@@ -75,7 +76,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	var player1, player2 *utils.PlayerInGame
 	player1 = &game.ListPlayers[0]
 	player2 = &game.ListPlayers[1]
-
+	utils.SetBaseValueDB()
 	go GameEvent(queue, game, player1, player2)
 
 	fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
@@ -86,12 +87,23 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	for game.CurrentTurn < 9999 {
 		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
+
+		//Event start turn
+		player1, player2 = utils.AlgoRollTurnEvent(player1, player2, game.CurrentTurn)
+
 		//Resolve combat
 		var preFightP1 = player1
 		var preFightP2 = player2
+
 		if game.CurrentTurn > 30 {
-			player2 = utils.AlgoDamageRepartition(player2, utils.AlgoDamageDealt(preFightP1))
-			player1 = utils.AlgoDamageRepartition(player1, utils.AlgoDamageDealt(preFightP2))
+			game.IsWar = true
+		}
+		if game.IsWar {
+			p1dmg := utils.AlgoDamageDealt(preFightP1)
+			p2dmg := utils.AlgoDamageDealt(preFightP2)
+			player2 = utils.AlgoDamageRepartition(player2, p1dmg)
+			player1 = utils.AlgoDamageRepartition(player1, p2dmg)
+			player1, player2 = utils.AlgoTerritorryChange(player1, player2, p1dmg, p2dmg)
 		}
 
 		if player1.Army.NbSoldier <= 0 {

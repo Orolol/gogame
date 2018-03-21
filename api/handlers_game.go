@@ -213,6 +213,7 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	m["policies"] = getDefaultPolicies()
 	m["actions"] = getDefaultActions()
 	m["technology"] = getDefaultTech()
+	m["events"] = getDefaultEvents()
 
 	jsonMsg, err := json.Marshal(m)
 	if err != nil {

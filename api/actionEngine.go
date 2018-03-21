@@ -16,3 +16,7 @@ func getDefaultActions() []utils.PlayerActionOrder {
 func getDefaultTech() []utils.Technology {
 	return utils.GetTechnolgies()
 }
+
+func getDefaultEvents() *[]utils.PlayerEvent {
+	return utils.GetEvents()
+}
