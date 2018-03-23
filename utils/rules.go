@@ -39,6 +39,7 @@ type PlayerActionOrder struct {
 	Description string
 	Costs       []Cost
 	Cooldown    int
+	Effects     []Effect
 }
 
 //Technology SQL type for technology
@@ -54,9 +55,17 @@ type Technology struct {
 }
 
 type Effect struct {
+	ModifierType string
 	ModifierName string
 	Operator     string
 	Value        float32
+	Target       string
+	Callbacks    []CallbackEffect
+}
+
+type CallbackEffect struct {
+	Constraints []Constraint
+	Effects     []Effect
 }
 
 type Cost struct {
@@ -65,8 +74,10 @@ type Cost struct {
 }
 
 type Constraint struct {
-	Type  string
-	Value string
+	Type     string
+	Key      string
+	Value    string
+	Operator string
 }
 
 type PlayerEvent struct {

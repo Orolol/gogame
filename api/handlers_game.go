@@ -76,13 +76,13 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 		for players = range game.ListPlayers {
 			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
 				fmt.Println("TECH CHECK", techno)
-				for tech = range game.ListPlayers[players].PlayerTechnology {
-					if game.ListPlayers[players].PlayerTechnology[tech] == techno.ActionName {
+				for tech = range game.ListPlayers[players].Technologies {
+					if game.ListPlayers[players].Technologies[tech] == techno.ActionName {
 						fmt.Println("ALREADY GOT THE TECH")
 						isOkAction = false
 					}
 				}
-				if !utils.CheckConstraint(&game.ListPlayers[players], techno.Constraints, techno.Costs) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], techno.Constraints, techno.Costs, game) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -93,7 +93,7 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if isOkAction {
-		game.ListPlayers[players].PlayerTechnology = append(game.ListPlayers[players].PlayerTechnology, techno.ActionName)
+		game.ListPlayers[players].Technologies = append(game.ListPlayers[players].Technologies, techno.ActionName)
 		gMsg.Action = techno.ActionName
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID
@@ -119,8 +119,6 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 	var actionApi utils.PolicyChange
 	var action utils.PlayerActionOrder
 	var gMsg utils.GameMsg
-	db, _ := gorm.Open("sqlite3", "test.db")
-
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		panic(err)
@@ -133,7 +131,6 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(onGoingGames)
 	var isOkAction bool = true
-	var cd int = 0
 	if game, ok := onGoingGames[actionApi.GameID]; ok {
 		fmt.Println("GOT THE GAME")
 		action = utils.GetAction(actionApi.ID)
@@ -146,15 +143,11 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 							if game.ListPlayers[players].LastOrders[actions].Cooldown > game.CurrentTurn {
 								fmt.Println("CD END ", game.ListPlayers[players].LastOrders[actions].Cooldown)
 								isOkAction = false
-							} else {
-								cd = game.CurrentTurn + action.Cooldown
 							}
 						}
 					}
 				}
-				var actionDB utils.PlayerActionOrder
-				db.Where("ID = ?", actionApi.ID).First(&actionDB)
-				if !utils.CheckConstraint(&game.ListPlayers[players], actionDB.Constraints, actionDB.Costs) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], action.Constraints, action.Costs, game) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -170,10 +163,9 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
-		gMsg.Value = make(map[string]float32)
 		gMsg.Costs = action.Costs
-		gMsg.Value["value"] = 1
-		gMsg.Value["CD"] = float32(cd)
+		gMsg.Effects = action.Effects
+		gMsg.Cooldown = action.Cooldown
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))
 		if err != nil {

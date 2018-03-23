@@ -25,7 +25,7 @@ func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 	return game
 }
 
-func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *utils.PlayerInGame) {
+func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *utils.PlayerInGame) {
 	ActionMapping := map[string]interface{}{
 		"setPopRecPolicy":                        PASetRecruitementPolicy,
 		"setTaxRatePolicy":                       setTaxRatePolicy,
@@ -39,7 +39,7 @@ func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *util
 		"emergencyRecruitment":                   emergencyRecruitment,
 		"purgeSoldier":                           purgeSoldier,
 	}
-
+	fmt.Println("GAME EVENT ", game)
 	keys := make([]string, 0, len(ActionMapping))
 	for k := range ActionMapping {
 		keys = append(keys, k)
@@ -47,29 +47,41 @@ func GameEvent(queue chan utils.GameMsg, game utils.Game, player1, player2 *util
 
 	for msg := range queue {
 		var p *utils.PlayerInGame
+		var opponent *utils.PlayerInGame
 
 		//Determine the player
 		if player1.PlayerID == msg.PlayerID {
 			p = player1
+			opponent = player2
 		} else {
 			p = player2
+			opponent = player1
 		}
 
 		//Apply Effects, cost and special action
 		if len(msg.Effects) > 0 {
-			genericApplyEffect(p, msg.Effects)
+			genericApplyEffect(p, opponent, msg.Effects, game)
 		}
 		if len(msg.Costs) > 0 {
 			genericApplyCosts(p, msg.Costs)
+		}
+		if msg.Cooldown != 0 {
+			var order = utils.PlayerLastOrders{
+				OrderID:  msg.Action,
+				Cooldown: msg.Cooldown + game.CurrentTurn,
+			}
+			p.LastOrders = append(p.LastOrders, order)
+			fmt.Println("MISE SOUS CD", msg.Cooldown, game.CurrentTurn)
 		}
 		if utils.StringInSlice(msg.Action, keys) {
 			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(p, msg.Value)
 		}
 
 		if msg.Type == "TECH" {
-			p.PlayerTechnology = append(p.PlayerTechnology, msg.Action)
+			p.Technologies = append(p.Technologies, msg.Action)
 		}
 	}
+
 }
 
 func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.Game) {
@@ -77,7 +89,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	player1 = &game.ListPlayers[0]
 	player2 = &game.ListPlayers[1]
 	utils.SetBaseValueDB()
-	go GameEvent(queue, game, player1, player2)
+	go GameEvent(queue, &game, player1, player2)
 
 	fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
 	game.State = "Running"
@@ -88,8 +100,46 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
 
+		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
+			j := i - (rlen - len(player1.CallbackEffects))
+			var cb = player1.CallbackEffects[j]
+			if utils.CheckConstraint(player1, cb.Constraints, nil, &game) {
+				for _, e := range cb.Effects {
+					utils.ApplyEffect(player1, e, &game)
+					player1.CallbackEffects = append(player1.CallbackEffects[:j], player1.CallbackEffects[j+1:]...)
+				}
+			}
+		}
+		for i, rlen := 0, len(player2.CallbackEffects); i < rlen; i++ {
+			j := i - (rlen - len(player2.CallbackEffects))
+			var cb = player2.CallbackEffects[j]
+			if utils.CheckConstraint(player2, cb.Constraints, nil, &game) {
+				for _, e := range cb.Effects {
+					utils.ApplyEffect(player2, e, &game)
+					player2.CallbackEffects = append(player2.CallbackEffects[:j], player2.CallbackEffects[j+1:]...)
+				}
+			}
+		}
+
+		// for i, cb := range player1.CallbackEffects {
+		// 	if utils.CheckConstraint(player1, cb.Constraints, nil, &game) {
+		// 		for _, e := range cb.Effects {
+		// 			utils.ApplyEffect(player1, e, &game)
+		// 			player1.CallbackEffects = append(player1.CallbackEffects[:i], player1.CallbackEffects[i+1:]...)
+		// 		}
+		// 	}
+		// }
+		// for i, cb := range player2.CallbackEffects {
+		// 	if utils.CheckConstraint(player2, cb.Constraints, nil, &game) {
+		// 		for _, e := range cb.Effects {
+		// 			utils.ApplyEffect(player2, e, &game)
+		// 			player2.CallbackEffects = append(player2.CallbackEffects[:i], player2.CallbackEffects[i+1:]...)
+		// 		}
+		// 	}
+		// }
 		//Event start turn
-		player1, player2 = utils.AlgoRollTurnEvent(player1, player2, game.CurrentTurn)
+		player1 = utils.AlgoRollTurnEvent(player1, &game)
+		player2 = utils.AlgoRollTurnEvent(player2, &game)
 
 		//Resolve combat
 		var preFightP1 = player1
@@ -111,14 +161,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
 			queueGameOut <- game
-			queueGameOut <- game
+			// queueGameOut <- game
 			break
 		} else if player2.Army.NbSoldier <= 0 {
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]
 			queueGameOut <- game
-			queueGameOut <- game
+			// queueGameOut <- game
 			break
 		} else {
 			player2 = utils.AlgoReinforcement(player2)
@@ -136,7 +186,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 
 			<-timer1.C
 			queueGameOut <- game
-			queueGameOut <- game
+			// queueGameOut <- game
 		}
 
 	}

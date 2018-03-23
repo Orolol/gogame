@@ -3,11 +3,12 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
 //CheckConstraint Check if constraint is respected.
-func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost) bool {
+func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost, game *Game) bool {
 	fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
 	for _, c := range costs {
 		switch op := c.Type; op {
@@ -35,8 +36,35 @@ func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cos
 		}
 	}
 	for _, t := range constraints {
-		if t.Type == "tech" && !StringInSlice(t.Value, player.PlayerTechnology) {
-			fmt.Println("FAIL TECH CONSTRAINT PREREQUISITES", t, player.PlayerTechnology)
+		if t.Type == "tech" && !StringInSlice(t.Value, player.Technologies) {
+			fmt.Println("FAIL TECH CONSTRAINT PREREQUISITES", t, player.Technologies)
+			return false
+		} else if t.Type == "turn" {
+			turn, _ := strconv.Atoi(t.Value)
+			return CheckOperator(float32(turn), t.Operator, float32(game.CurrentTurn))
+		} else if t.Type == "isWar" && !game.IsWar {
+			fmt.Println("FAIL ISWAR CONSTRAINT PREREQUISITES", t)
+			return false
+		} else if t.Type == "isNotWar" && game.IsWar {
+			fmt.Println("FAIL ISWAR CONSTRAINT PREREQUISITES", t)
+			return false
+		} else if t.Type == "Modifier" {
+			value, _ := strconv.Atoi(t.Value)
+			for key := range player.Modifiers {
+				if key == t.Key {
+					return CheckOperator(float32(value), t.Operator, float32(player.Modifiers[key]))
+				}
+			}
+			fmt.Println("FAIL MODIFIER CONSTRAINT PREREQUISITES", t, player.Technologies)
+			return false
+		} else if t.Type == "ModifierTurn" {
+			for key := range player.Modifiers {
+				if key == t.Key {
+					fmt.Println("FAIL MODIFIER TURN CONSTRAINT PREREQUISITES", t, key, player.Modifiers[key], game.CurrentTurn)
+					return CheckOperator(float32(player.Modifiers[key]), t.Operator, float32(game.CurrentTurn))
+				}
+			}
+			fmt.Println("FAIL MODIFIER TURN CONSTRAINT PREREQUISITES", t)
 			return false
 		}
 	}
@@ -56,22 +84,86 @@ func StringInSlice(a string, list []string) bool {
 }
 
 //ApplyEffect apply effect on player modifiers
-func ApplyEffect(player *PlayerInGame, effect Effect) {
-	for key, _ := range player.Modifiers {
-		if key == effect.ModifierName {
-			switch op := effect.Operator; op {
-			case "+":
-				player.Modifiers[key] += effect.Value
-			case "-":
-				player.Modifiers[key] -= effect.Value
-			case "*":
-				player.Modifiers[key] *= effect.Value
-			case "/":
-				player.Modifiers[key] *= 1 / effect.Value
+func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 
-			}
+	if effect.ModifierType == "Army" {
+		switch field := effect.ModifierName; field {
+		case "Morale":
+			player.Army.Morale = ApplyOperator(effect.Value, effect.Operator, player.Army.Morale, game)
+		case "Quality":
+			player.Army.Quality = ApplyOperator(effect.Value, effect.Operator, player.Army.Quality, game)
+		case "NbHvyTank":
+			player.Army.NbHvyTank = ApplyOperator(effect.Value, effect.Operator, player.Army.NbHvyTank, game)
+		case "NbLigtTank":
+			player.Army.NbLigtTank = ApplyOperator(effect.Value, effect.Operator, player.Army.NbLigtTank, game)
+		case "NbArt":
+			player.Army.NbArt = ApplyOperator(effect.Value, effect.Operator, player.Army.NbArt, game)
+		case "NbSoldier":
+			player.Army.NbSoldier = ApplyOperator(effect.Value, effect.Operator, player.Army.NbSoldier, game)
 		}
+
+	} else if effect.ModifierType == "Economy" {
+		switch field := effect.ModifierName; field {
+		case "Money":
+			player.Economy.Money = ApplyOperator(effect.Value, effect.Operator, player.Economy.Money, game)
+		}
+	} else if effect.ModifierType == "Civilian" {
+		switch field := effect.ModifierName; field {
+		case "NbManpower":
+			player.Civilian.NbManpower = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbManpower, game)
+		case "NbScientist":
+			player.Civilian.NbScientist = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbScientist, game)
+		case "NbTotalCivil":
+			player.Civilian.NbTotalCivil = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbTotalCivil, game)
+		case "NbResearchPoint":
+			player.Civilian.NbResearchPoint = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbResearchPoint, game)
+		case "NbLightTankFactory":
+			player.Civilian.NbLightTankFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbLightTankFactory, game)
+		case "NbHeavyTankFactory":
+			player.Civilian.NbHeavyTankFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbHeavyTankFactory, game)
+		case "NbCivilianFactory":
+			player.Civilian.NbCivilianFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbCivilianFactory, game)
+		}
+	} else {
+		player.Modifiers[effect.ModifierName] = ApplyOperator(effect.Value, effect.Operator, player.Modifiers[effect.ModifierName], game)
+
 	}
+
+	for _, cb := range effect.Callbacks {
+		player.CallbackEffects = append(player.CallbackEffects, cb)
+	}
+
+}
+
+func ApplyOperator(value float32, operator string, baseValue float32, game *Game) float32 {
+	switch op := operator; op {
+	case "+":
+		return baseValue + value
+	case "-":
+		return baseValue - value
+	case "*":
+		return baseValue * value
+	case "/":
+		return baseValue / value
+	case "turn+":
+		return float32(game.CurrentTurn) + value
+	case "=":
+		return value
+	default:
+		return baseValue
+
+	}
+}
+func CheckOperator(value float32, operator string, baseValue float32) bool {
+	switch op := operator; op {
+	case ">":
+		return baseValue > value
+	case "<":
+		return baseValue < value
+	case "=":
+		return baseValue == value
+	}
+	return false
 }
 
 //ApplyCost apply cost on player board
@@ -107,19 +199,23 @@ func AlgoTerritorryChange(p1 *PlayerInGame, p2 *PlayerInGame, p1dmg float32, p2d
 	return p1, p2
 }
 
-func AlgoRollTurnEvent(p1 *PlayerInGame, p2 *PlayerInGame, turn int) (*PlayerInGame, *PlayerInGame) {
+func AlgoRollTurnEvent(p1 *PlayerInGame, game *Game) *PlayerInGame {
 	var allSingleEvents = GetEventsByType("Single")
 	var currentEventp1 = GetEvent("event0")
-	var currentEventp2 = GetEvent("event0")
 	var totalWeight int
+	var allPossibleEents []PlayerEvent
 	for _, g := range allSingleEvents {
-		totalWeight += g.Weight
+		if CheckConstraint(p1, g.Constraints, nil, game) {
+			totalWeight += g.Weight
+			allPossibleEents = append(allPossibleEents, g)
+		}
+
 	}
 	totalWeight *= 10
 
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(totalWeight)
-	for _, g := range allSingleEvents {
+	for _, g := range allPossibleEents {
 		r -= g.Weight
 		if r <= 0 {
 			currentEventp1 = g
@@ -127,22 +223,11 @@ func AlgoRollTurnEvent(p1 *PlayerInGame, p2 *PlayerInGame, turn int) (*PlayerInG
 		}
 	}
 	for _, e := range currentEventp1.Effects {
-		ApplyEffect(p1, e)
-		p1.Logs = append(p1.Logs, PlayerLog{Turn: turn, ActionName: currentEventp1.ActionName})
+		ApplyEffect(p1, e, game)
+		p1.Logs = append(p1.Logs, PlayerLog{Turn: game.CurrentTurn, ActionName: currentEventp1.ActionName})
 	}
-	r = rand.Intn(totalWeight)
-	for _, g := range allSingleEvents {
-		r -= g.Weight
-		if r <= 0 {
-			currentEventp2 = g
-			break
-		}
-	}
-	for _, e := range currentEventp2.Effects {
-		ApplyEffect(p2, e)
-		p2.Logs = append(p2.Logs, PlayerLog{Turn: turn, ActionName: currentEventp2.ActionName})
-	}
-	return p1, p2
+
+	return p1
 }
 
 //AlgoDamageDealt Calculate dmg dealt

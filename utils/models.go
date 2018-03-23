@@ -34,17 +34,18 @@ type ListPlayer struct {
 
 //PlayerInGame player ig
 type PlayerInGame struct {
-	PlayerID         int
-	Nick             string
-	Army             PlayerArmy
-	ModifierPolicy   PlayerModifierPolicy
-	Civilian         PlayerCivilian
-	Economy          PlayerEconomy
-	Territory        PlayerTerritory
-	LastOrders       []PlayerLastOrders
-	PlayerTechnology []string
-	Modifiers        map[string]float32
-	Logs             []PlayerLog
+	PlayerID        int
+	Nick            string
+	Army            PlayerArmy
+	ModifierPolicy  PlayerModifierPolicy
+	Civilian        PlayerCivilian
+	Economy         PlayerEconomy
+	Territory       PlayerTerritory
+	LastOrders      []PlayerLastOrders
+	Technologies    []string
+	Modifiers       map[string]float32
+	Logs            []PlayerLog
+	CallbackEffects []CallbackEffect
 }
 
 type PlayerLog struct {
@@ -113,6 +114,7 @@ type GameMsg struct {
 	PlayerID int
 	Action   string
 	Type     string
+	Cooldown int
 	Value    map[string]float32
 	Effects  []Effect
 	Costs    []Cost
