@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/orolol/gogame/utils"
 )
 
@@ -34,9 +32,9 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	policy := utils.PlayerModifierPolicy{
 		RecruitmentPolicy:  1,
 		ManpowerSizePolicy: 1,
-		ArtOnFactory:       false,
-		BuildHvyTankFac:    true,
-		BuildLgtTankFac:    true,
+		ArtOnFactory:       1,
+		BuildHvyTankFac:    1,
+		BuildLgtTankFac:    1,
 		AirCraftProduction: 1,
 		CivilianProduction: 1,
 		TankProduction:     1}
@@ -52,6 +50,9 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	var modifiers = make(map[string]float32)
 
 	//MIL modifiers
+	modifiers["soldierRecruitmentExperience"] = 1.0
+	modifiers["workersConcrptionEfficiency"] = 1.0
+
 	modifiers["soldierQuality"] = 1.0
 	modifiers["lightTankQuality"] = 1.0
 	modifiers["heavyTankQuality"] = 1.0
@@ -64,6 +65,16 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["civilianFactoryProduction"] = 1.0
 	modifiers["lightTankFactoryProduction"] = 1.0
 	modifiers["heavyTankFactoryProduction"] = 1.0
+
+	var policies []utils.PolicyValue
+
+	for _, p := range utils.GetPolicies() {
+		for _, pv := range p.PossibleValue2 {
+			if pv.IsDefault {
+				policies = append(policies, pv)
+			}
+		}
+	}
 
 	var player = utils.PlayerInGame{
 		PlayerID:       int(acc.ID),
@@ -81,11 +92,10 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 //PlayerAction player action
 type PlayerAction func(player *utils.PlayerInGame, values map[string]float32)
 
-//PASetRecruitementPolicy change recruitement policy to the value
-func PASetRecruitementPolicy(player *utils.PlayerInGame, values map[string]float32) {
-	qualityChange := player.ModifierPolicy.RecruitmentPolicy - values["value"]
-	fmt.Println("QUALITY CHANGE ", qualityChange)
-	player.Army.Quality -= values["value"]
+//setPopRecPolicy change recruitement policy to the value
+func setPopRecPolicy(player *utils.PlayerInGame, values map[string]float32) {
+	// qualityChange := player.ModifierPolicy.RecruitmentPolicy - values["value"]
+	// player.Army.Quality -= values["value"]
 	player.ModifierPolicy.RecruitmentPolicy = values["value"]
 }
 func setTaxRatePolicy(player *utils.PlayerInGame, values map[string]float32) {
@@ -100,16 +110,16 @@ func setConscPolicy(player *utils.PlayerInGame, values map[string]float32) {
 }
 func setBuildLgtTank(player *utils.PlayerInGame, values map[string]float32) {
 	if values["value"] == 1.0 {
-		player.ModifierPolicy.BuildLgtTankFac = true
+		player.ModifierPolicy.BuildLgtTankFac = 1
 	} else {
-		player.ModifierPolicy.BuildLgtTankFac = false
+		player.ModifierPolicy.BuildLgtTankFac = 0
 	}
 }
 func setBuildHvyTank(player *utils.PlayerInGame, values map[string]float32) {
 	if values["value"] == 1.0 {
-		player.ModifierPolicy.BuildHvyTankFac = true
+		player.ModifierPolicy.BuildHvyTankFac = 1
 	} else {
-		player.ModifierPolicy.BuildHvyTankFac = false
+		player.ModifierPolicy.BuildHvyTankFac = 0
 	}
 }
 

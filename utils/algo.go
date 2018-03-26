@@ -37,16 +37,13 @@ func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cos
 	}
 	for _, t := range constraints {
 		if t.Type == "tech" && !StringInSlice(t.Value, player.Technologies) {
-			fmt.Println("FAIL TECH CONSTRAINT PREREQUISITES", t, player.Technologies)
 			return false
 		} else if t.Type == "turn" {
 			turn, _ := strconv.Atoi(t.Value)
 			return CheckOperator(float32(turn), t.Operator, float32(game.CurrentTurn))
 		} else if t.Type == "isWar" && !game.IsWar {
-			fmt.Println("FAIL ISWAR CONSTRAINT PREREQUISITES", t)
 			return false
 		} else if t.Type == "isNotWar" && game.IsWar {
-			fmt.Println("FAIL ISWAR CONSTRAINT PREREQUISITES", t)
 			return false
 		} else if t.Type == "Modifier" {
 			value, _ := strconv.Atoi(t.Value)
@@ -55,16 +52,13 @@ func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cos
 					return CheckOperator(float32(value), t.Operator, float32(player.Modifiers[key]))
 				}
 			}
-			fmt.Println("FAIL MODIFIER CONSTRAINT PREREQUISITES", t, player.Technologies)
 			return false
 		} else if t.Type == "ModifierTurn" {
 			for key := range player.Modifiers {
 				if key == t.Key {
-					fmt.Println("FAIL MODIFIER TURN CONSTRAINT PREREQUISITES", t, key, player.Modifiers[key], game.CurrentTurn)
 					return CheckOperator(float32(player.Modifiers[key]), t.Operator, float32(game.CurrentTurn))
 				}
 			}
-			fmt.Println("FAIL MODIFIER TURN CONSTRAINT PREREQUISITES", t)
 			return false
 		}
 	}
@@ -106,6 +100,8 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 		switch field := effect.ModifierName; field {
 		case "Money":
 			player.Economy.Money = ApplyOperator(effect.Value, effect.Operator, player.Economy.Money, game)
+		case "TaxRate":
+			player.Economy.TaxRate = ApplyOperator(effect.Value, effect.Operator, player.Economy.Money, game)
 		}
 	} else if effect.ModifierType == "Civilian" {
 		switch field := effect.ModifierName; field {
@@ -123,6 +119,25 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 			player.Civilian.NbHeavyTankFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbHeavyTankFactory, game)
 		case "NbCivilianFactory":
 			player.Civilian.NbCivilianFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbCivilianFactory, game)
+		}
+	} else if effect.ModifierType == "Policy" {
+		switch field := effect.ModifierName; field {
+		case "AirCraftProduction":
+			player.ModifierPolicy.AirCraftProduction = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.AirCraftProduction, game)
+		case "ArtOnFactory":
+			player.ModifierPolicy.ArtOnFactory = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.ArtOnFactory, game)
+		case "BuildHvyTankFac":
+			player.ModifierPolicy.BuildHvyTankFac = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.BuildHvyTankFac, game)
+		case "BuildLgtTankFac":
+			player.ModifierPolicy.BuildLgtTankFac = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.BuildLgtTankFac, game)
+		case "CivilianProduction":
+			player.ModifierPolicy.CivilianProduction = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.CivilianProduction, game)
+		case "ManpowerSizePolicy":
+			player.ModifierPolicy.ManpowerSizePolicy = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.ManpowerSizePolicy, game)
+		case "RecruitmentPolicy":
+			player.ModifierPolicy.RecruitmentPolicy = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.RecruitmentPolicy, game)
+		case "TankProduction":
+			player.ModifierPolicy.TankProduction = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.TankProduction, game)
 		}
 	} else {
 		player.Modifiers[effect.ModifierName] = ApplyOperator(effect.Value, effect.Operator, player.Modifiers[effect.ModifierName], game)
@@ -261,7 +276,7 @@ func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 		player.Army.NbSoldier += reinforcement
 		player.Civilian.NbManpower -= reinforcement
 	}
-	natGrowth := player.ModifierPolicy.ManpowerSizePolicy * 0.00001 * player.Civilian.NbTotalCivil
+	natGrowth := player.ModifierPolicy.ManpowerSizePolicy * 0.001 * player.Civilian.NbTotalCivil
 	player.Civilian.NbManpower += natGrowth
 	player.Civilian.NbTotalCivil -= natGrowth
 
@@ -329,16 +344,16 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 		var civilianProduction = player.Civilian.NbCivilianFactory * 0.01 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
 		civilianProduction *= player.Modifiers["civilianFactoryProduction"]
 
-		if player.ModifierPolicy.BuildLgtTankFac {
+		if player.ModifierPolicy.BuildLgtTankFac == 1. {
 			nbThingToBuild += 1.0
 		}
-		if player.ModifierPolicy.BuildHvyTankFac {
+		if player.ModifierPolicy.BuildHvyTankFac == 1. {
 			nbThingToBuild--
 		}
-		if player.ModifierPolicy.BuildLgtTankFac {
+		if player.ModifierPolicy.BuildLgtTankFac == 1. {
 			player.Civilian.NbLightTankFactory += (civilianProduction / nbThingToBuild) * 0.5
 		}
-		if player.ModifierPolicy.BuildHvyTankFac {
+		if player.ModifierPolicy.BuildHvyTankFac == 1. {
 			player.Civilian.NbHeavyTankFactory += (civilianProduction / nbThingToBuild) * 0.4
 		}
 		player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.2

@@ -27,11 +27,10 @@ func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 
 func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *utils.PlayerInGame) {
 	ActionMapping := map[string]interface{}{
-		"setPopRecPolicy":                        PASetRecruitementPolicy,
+		"setPopRecPolicy":                        setPopRecPolicy,
 		"setTaxRatePolicy":                       setTaxRatePolicy,
 		"setBuildLgtTank":                        setBuildLgtTank,
 		"setBuildHvyTank":                        setBuildHvyTank,
-		"setConscPolicy":                         setConscPolicy,
 		"actionWarPropaganda":                    actionWarPropaganda,
 		"buyForeignTanks":                        buyForeignTanks,
 		"actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
@@ -97,7 +96,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	queueGameOut <- game
 	time.Sleep(5 * time.Second)
 	for game.CurrentTurn < 9999 {
-		timer1 := time.NewTimer(time.Second)
+		timer1 := time.NewTimer(time.Second * 20)
 		game.CurrentTurn++
 
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {

@@ -56,9 +56,9 @@ func SetBaseValueActions() {
 		Costs:       []Cost{Cost{Type: "money", Value: 10000000}},
 	})
 	actions = append(actions, PlayerActionOrder{
-		Name:        "Send spys to assassinate key scientits",
+		Name:        "Send spys to assassinate key scientists",
 		ActionName:  "assassinateScientist",
-		Description: "Send spys to assassinate key scientits (cost 45M)",
+		Description: "Send spys to assassinate key scientists (cost 45M)",
 		Cooldown:    30,
 		Effects:     []Effect{Effect{ModifierType: "Civilian", ModifierName: "NbScientist", Operator: "-", Value: 30, Target: "Opponent"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 45000000}},

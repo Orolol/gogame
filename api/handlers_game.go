@@ -17,7 +17,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangePolicy(w http.ResponseWriter, r *http.Request) {
-	var polChange utils.PolicyChange
+	var actionApi utils.PolicyChange
 	var pol utils.Policy
 	var gMsg utils.GameMsg
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -27,26 +27,60 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 	if err := r.Body.Close(); err != nil {
 		panic(err)
 	}
-	if err := json.Unmarshal(body, &polChange); err != nil {
+	if err := json.Unmarshal(body, &actionApi); err != nil {
 		panic(err)
 	}
-	fmt.Println("CHANGE POLICY, ", polChange)
-
-	pol = utils.GetPolicy(polChange.ID)
-	gMsg.Action = pol.ActionName
-	gMsg.GameID = polChange.GameID
-	gMsg.PlayerID = polChange.PlayerID
-	gMsg.Text = "Change pol"
-	gMsg.Value = make(map[string]float32)
-	gMsg.Value["value"] = polChange.Value
-
-	jsonMsg, err := json.Marshal(gMsg)
-	fmt.Println(string(jsonMsg))
-	if err != nil {
-		fmt.Println(err)
+	fmt.Println("CHANGE POLICY, ", actionApi)
+	var isOkAction bool = true
+	var game *utils.Game
+	var ok bool
+	var players int
+	pol = utils.GetPolicy(actionApi.ID)
+	var choosePol utils.PolicyValue
+	for _, opt := range pol.PossibleValue2 {
+		if opt.Value == actionApi.Value {
+			choosePol = opt
+		}
 	}
-	fmt.Println("SEND Game MSG!")
-	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+
+	if game, ok = onGoingGames[actionApi.GameID]; ok {
+		for players = range game.ListPlayers {
+			if game.ListPlayers[players].PlayerID == actionApi.PlayerID {
+				for _, playerPol := range game.ListPlayers[players].Policies {
+					if playerPol.ActionName == actionApi.ID {
+						if (playerPol.Value-actionApi.Value) > pol.MaxChange || (playerPol.Value-actionApi.Value) < -pol.MaxChange {
+							fmt.Println("TOO MUICH CHANGE")
+							isOkAction = false
+						}
+					}
+				}
+				if !utils.CheckConstraint(&game.ListPlayers[players], choosePol.Constraints, nil, game) {
+					fmt.Println("CONSTRAINT FAIL")
+					isOkAction = false
+				} else {
+					fmt.Println("CONSTRAINT OK")
+				}
+			}
+		}
+
+	}
+	if isOkAction {
+		gMsg.Action = pol.ActionName
+		gMsg.GameID = actionApi.GameID
+		gMsg.PlayerID = actionApi.PlayerID
+		gMsg.Text = "Order"
+		gMsg.Effects = choosePol.Effects
+		gMsg.Type = "POLICY"
+		jsonMsg, err := json.Marshal(gMsg)
+		fmt.Println(string(jsonMsg))
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(onGoingGames)
+		ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
+	} else {
+		fmt.Println("CANT TECH UP")
+	}
 
 }
 

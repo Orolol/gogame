@@ -46,6 +46,7 @@ type PlayerInGame struct {
 	Modifiers       map[string]float32
 	Logs            []PlayerLog
 	CallbackEffects []CallbackEffect
+	Policies        []PolicyValue
 }
 
 type PlayerLog struct {
@@ -91,9 +92,9 @@ type PlayerEconomy struct {
 type PlayerModifierPolicy struct {
 	RecruitmentPolicy  float32
 	ManpowerSizePolicy float32
-	ArtOnFactory       bool
-	BuildLgtTankFac    bool
-	BuildHvyTankFac    bool
+	ArtOnFactory       float32
+	BuildLgtTankFac    float32
+	BuildHvyTankFac    float32
 	CivilianProduction float32
 	TankProduction     float32
 	AirCraftProduction float32

@@ -6,13 +6,25 @@ import (
 
 //Account Account Model
 type Policy struct {
-	Name          string `gorm:"not null;unique"`
-	ActionName    string
-	Constraints   []Constraint
-	Description   string
-	PossibleValue string
-	TypePolicy    string
-	DefaultValue  string
+	Name           string `gorm:"not null;unique"`
+	ActionName     string
+	Constraints    []Constraint
+	Description    string
+	PossibleValue  string
+	PossibleValue2 []PolicyValue
+	TypePolicy     string
+	DefaultValue   string
+	MaxChange      float32
+}
+
+type PolicyValue struct {
+	ActionName  string
+	Value       float32
+	Name        string
+	Description string
+	Constraints []Constraint
+	Effects     []Effect
+	IsDefault   bool
 }
 
 //API type for policy
