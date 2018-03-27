@@ -21,7 +21,7 @@ func matchmaking() {
 			CreateGame(poolPendingPlayer[0], poolPendingPlayer[1])
 			poolPendingPlayer = []utils.Account{}
 		}
-		fmt.Println("2 CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
+		fmt.Println("AFTER CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
 	}
 }
 

@@ -116,7 +116,7 @@ type GameMsg struct {
 	Action   string
 	Type     string
 	Cooldown int
-	Value    map[string]float32
+	Value    float32
 	Effects  []Effect
 	Costs    []Cost
 }

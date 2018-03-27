@@ -11,6 +11,7 @@ import (
 )
 
 func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
+	utils.SetBaseValueDB()
 	var gameID = uuid.New()
 	var mockP1 = InitializePlayerDefaultValue(conf.Players[0])
 	var mockP2 = InitializePlayerDefaultValue(conf.Players[1])
@@ -27,16 +28,12 @@ func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 
 func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *utils.PlayerInGame) {
 	ActionMapping := map[string]interface{}{
-		"setPopRecPolicy":                        setPopRecPolicy,
-		"setTaxRatePolicy":                       setTaxRatePolicy,
-		"setBuildLgtTank":                        setBuildLgtTank,
-		"setBuildHvyTank":                        setBuildHvyTank,
-		"actionWarPropaganda":                    actionWarPropaganda,
-		"buyForeignTanks":                        buyForeignTanks,
-		"actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
-		"actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
-		"emergencyRecruitment":                   emergencyRecruitment,
-		"purgeSoldier":                           purgeSoldier,
+		// "actionWarPropaganda":                    actionWarPropaganda,
+		"buyForeignTanks": buyForeignTanks,
+		// "actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
+		// "actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
+		"emergencyRecruitment": emergencyRecruitment,
+		"purgeSoldier":         purgeSoldier,
 	}
 	fmt.Println("GAME EVENT ", game)
 	keys := make([]string, 0, len(ActionMapping))
@@ -73,11 +70,26 @@ func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *uti
 			fmt.Println("MISE SOUS CD", msg.Cooldown, game.CurrentTurn)
 		}
 		if utils.StringInSlice(msg.Action, keys) {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, map[string]float32))(p, msg.Value)
+			ActionMapping[msg.Action].(func(*utils.PlayerInGame, float32))(p, msg.Value)
 		}
 
 		if msg.Type == "TECH" {
 			p.Technologies = append(p.Technologies, msg.Action)
+		} else if msg.Type == "POLICY" {
+			var pol = utils.GetPolicy(msg.Action)
+			var choosePol utils.PolicyValue
+			for _, x := range pol.PossibleValue2 {
+				fmt.Println("FOUND POLICY ", x)
+				if x.Value == msg.Value {
+					choosePol = x
+				}
+			}
+			for k, pl := range p.Policies {
+				if pl.ActionName == msg.Action {
+					p.Policies[k] = choosePol
+				}
+
+			}
 		}
 	}
 
@@ -87,16 +99,16 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	var player1, player2 *utils.PlayerInGame
 	player1 = &game.ListPlayers[0]
 	player2 = &game.ListPlayers[1]
-	utils.SetBaseValueDB()
+
 	go GameEvent(queue, &game, player1, player2)
 
 	fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
 	game.State = "Running"
 	queueGameOut <- game
 	queueGameOut <- game
-	time.Sleep(5 * time.Second)
+	time.Sleep(2 * time.Second)
 	for game.CurrentTurn < 9999 {
-		timer1 := time.NewTimer(time.Second * 20)
+		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
 
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
@@ -160,14 +172,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
 			queueGameOut <- game
-			// queueGameOut <- game
+			queueGameOut <- game
 			break
 		} else if player2.Army.NbSoldier <= 0 {
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]
 			queueGameOut <- game
-			// queueGameOut <- game
+			queueGameOut <- game
 			break
 		} else {
 			player2 = utils.AlgoReinforcement(player2)

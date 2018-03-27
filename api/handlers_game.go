@@ -65,11 +65,13 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if isOkAction {
+
 		gMsg.Action = pol.ActionName
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
 		gMsg.Effects = choosePol.Effects
+		gMsg.Value = choosePol.Value
 		gMsg.Type = "POLICY"
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))
@@ -79,7 +81,7 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(onGoingGames)
 		ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
 	} else {
-		fmt.Println("CANT TECH UP")
+		fmt.Println("CANT CHANGE POLICY")
 	}
 
 }
@@ -127,7 +129,6 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if isOkAction {
-		game.ListPlayers[players].Technologies = append(game.ListPlayers[players].Technologies, techno.ActionName)
 		gMsg.Action = techno.ActionName
 		gMsg.GameID = actionApi.GameID
 		gMsg.PlayerID = actionApi.PlayerID

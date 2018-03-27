@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/orolol/gogame/utils"
 )
 
@@ -18,10 +20,10 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 
 	economy := utils.PlayerEconomy{
 		Money:   100000000,
-		TaxRate: 2}
+		TaxRate: 1}
 
 	civilian := utils.PlayerCivilian{
-		NbTotalCivil:       60000000,
+		NbTotalCivil:       61000000,
 		NbManpower:         600000,
 		NbHeavyTankFactory: 20,
 		NbLightTankFactory: 20,
@@ -67,10 +69,13 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["heavyTankFactoryProduction"] = 1.0
 
 	var policies []utils.PolicyValue
-
+	fmt.Println("GET POLICIES")
 	for _, p := range utils.GetPolicies() {
+		fmt.Println("P", p)
 		for _, pv := range p.PossibleValue2 {
+			fmt.Println("PV", pv)
 			if pv.IsDefault {
+				fmt.Println("DEFAULT", pv)
 				policies = append(policies, pv)
 			}
 		}
@@ -84,76 +89,77 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		Economy:        economy,
 		Civilian:       civilian,
 		Modifiers:      modifiers,
-		Territory:      territory}
+		Territory:      territory,
+		Policies:       policies}
 
 	return player
 }
 
 //PlayerAction player action
-type PlayerAction func(player *utils.PlayerInGame, values map[string]float32)
+type PlayerAction func(player *utils.PlayerInGame, values float32)
 
 //setPopRecPolicy change recruitement policy to the value
-func setPopRecPolicy(player *utils.PlayerInGame, values map[string]float32) {
-	// qualityChange := player.ModifierPolicy.RecruitmentPolicy - values["value"]
-	// player.Army.Quality -= values["value"]
-	player.ModifierPolicy.RecruitmentPolicy = values["value"]
+func setPopRecPolicy(player *utils.PlayerInGame, values float32) {
+	// qualityChange := player.ModifierPolicy.RecruitmentPolicy - values
+	// player.Army.Quality -= values
+	player.ModifierPolicy.RecruitmentPolicy = values
 }
-func setTaxRatePolicy(player *utils.PlayerInGame, values map[string]float32) {
-	player.Economy.TaxRate = values["value"]
+func setTaxRatePolicy(player *utils.PlayerInGame, values float32) {
+	player.Economy.TaxRate = values
 }
-func setConscPolicy(player *utils.PlayerInGame, values map[string]float32) {
+func setConscPolicy(player *utils.PlayerInGame, values float32) {
 	player.Civilian.NbManpower -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
 	player.Civilian.NbTotalCivil += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
-	player.ModifierPolicy.ManpowerSizePolicy = values["value"]
+	player.ModifierPolicy.ManpowerSizePolicy = values
 	player.Civilian.NbManpower += player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
 	player.Civilian.NbTotalCivil -= player.Civilian.NbTotalCivil * player.ModifierPolicy.ManpowerSizePolicy * 0.01
 }
-func setBuildLgtTank(player *utils.PlayerInGame, values map[string]float32) {
-	if values["value"] == 1.0 {
+func setBuildLgtTank(player *utils.PlayerInGame, values float32) {
+	if values == 1.0 {
 		player.ModifierPolicy.BuildLgtTankFac = 1
 	} else {
 		player.ModifierPolicy.BuildLgtTankFac = 0
 	}
 }
-func setBuildHvyTank(player *utils.PlayerInGame, values map[string]float32) {
-	if values["value"] == 1.0 {
+func setBuildHvyTank(player *utils.PlayerInGame, values float32) {
+	if values == 1.0 {
 		player.ModifierPolicy.BuildHvyTankFac = 1
 	} else {
 		player.ModifierPolicy.BuildHvyTankFac = 0
 	}
 }
 
-func actionCivConvertFactoryToLightTankFact(player *utils.PlayerInGame, values map[string]float32) {
-	if player.Civilian.NbCivilianFactory > values["value"] {
-		player.Civilian.NbCivilianFactory -= values["value"]
-		player.Civilian.NbLightTankFactory += values["value"]
+func actionCivConvertFactoryToLightTankFact(player *utils.PlayerInGame, values float32) {
+	if player.Civilian.NbCivilianFactory > values {
+		player.Civilian.NbCivilianFactory -= values
+		player.Civilian.NbLightTankFactory += values
 
 	}
 }
-func actionCivConvertFactoryToHvyTankFact(player *utils.PlayerInGame, values map[string]float32) {
-	if player.Civilian.NbCivilianFactory > values["value"] {
-		player.Civilian.NbCivilianFactory -= values["value"]
-		player.Civilian.NbHeavyTankFactory += values["value"]
+func actionCivConvertFactoryToHvyTankFact(player *utils.PlayerInGame, values float32) {
+	if player.Civilian.NbCivilianFactory > values {
+		player.Civilian.NbCivilianFactory -= values
+		player.Civilian.NbHeavyTankFactory += values
 
 	}
 }
 
-func actionWarPropaganda(player *utils.PlayerInGame, values map[string]float32) {
+func actionWarPropaganda(player *utils.PlayerInGame, values float32) {
 	player.Army.Morale += 15
 
 }
-func emergencyRecruitment(player *utils.PlayerInGame, values map[string]float32) {
+func emergencyRecruitment(player *utils.PlayerInGame, values float32) {
 	player.Army.Morale -= 10
 	player.Army.NbSoldier += player.Civilian.NbManpower * 0.1
 
 }
-func purgeSoldier(player *utils.PlayerInGame, values map[string]float32) {
+func purgeSoldier(player *utils.PlayerInGame, values float32) {
 	player.Army.Morale += 15
 	player.Modifiers["soldierQuality"] *= 1.15
 	player.Army.NbSoldier *= 0.85
 
 }
-func buyForeignTanks(player *utils.PlayerInGame, values map[string]float32) {
+func buyForeignTanks(player *utils.PlayerInGame, values float32) {
 	player.Army.NbHvyTank += 50
 	player.Army.NbLigtTank += 150
 
