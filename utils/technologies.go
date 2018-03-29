@@ -27,7 +27,7 @@ func SetBaseValueTechnologies() {
 		Effects:        []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
 		ActionName:     "technoIndusT1N1",
 		Tier:           1,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 
 	technologies = append(technologies, Technology{
@@ -40,7 +40,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoIndusT1N1"},
 		},
 		Tier:           2,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 
 	technologies = append(technologies, Technology{
@@ -53,7 +53,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoIndusT2N1"},
 		},
 		Tier:           3,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 
 	technologies = append(technologies, Technology{
@@ -66,7 +66,7 @@ func SetBaseValueTechnologies() {
 		},
 		ActionName:     "technoIndusT1N2",
 		Tier:           1,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 	technologies = append(technologies, Technology{
 		Name:        "Boost Tank production T2",
@@ -81,7 +81,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoIndusT1N2"},
 		},
 		Tier:           2,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 
 	technologies = append(technologies, Technology{
@@ -97,7 +97,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoIndusT2N2"},
 		},
 		Tier:           3,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 	technologies = append(technologies, Technology{
 		Name:           "Boost Aircraft production",
@@ -106,7 +106,7 @@ func SetBaseValueTechnologies() {
 		Effects:        []Effect{Effect{ModifierName: "aircraftFactoryProduction", Operator: "*", Value: 1.15}},
 		ActionName:     "technoIndusT1N3",
 		Tier:           1,
-		TypeTechnology: "INDUS",
+		TypeTechnology: "INDUSTRIAL",
 	})
 
 	//MIL TECHNOLOGY
@@ -118,7 +118,7 @@ func SetBaseValueTechnologies() {
 		Effects:        []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.10}},
 		ActionName:     "technoMilT1N1",
 		Tier:           1,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
 	})
 	technologies = append(technologies, Technology{
 		Name:        "Boost soldier damage",
@@ -130,7 +130,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT1N1"},
 		},
 		Tier:           2,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
 	})
 	technologies = append(technologies, Technology{
 		Name:        "Boost soldier damage",
@@ -142,7 +142,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT2N1"},
 		},
 		Tier:           3,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
 	})
 
 	technologies = append(technologies, Technology{
@@ -152,7 +152,7 @@ func SetBaseValueTechnologies() {
 		Effects:        []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.10}},
 		ActionName:     "technoMilT1N2",
 		Tier:           1,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
 	})
 	technologies = append(technologies, Technology{
 		Name:        "Boost light tank damage",
@@ -164,7 +164,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT1N2"},
 		},
 		Tier:           2,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
 	})
 	technologies = append(technologies, Technology{
 		Name:        "Boost light tank damage",
@@ -176,7 +176,54 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT2N2"},
 		},
 		Tier:           3,
-		TypeTechnology: "MIL",
+		TypeTechnology: "MILITARY",
+	})
+
+	//ECO
+	technologies = append(technologies, Technology{
+		Name:        "Administration Reform - Tax",
+		Description: "Reform tax administration to ensure you gather tax more efficiently",
+		Costs:       []Cost{Cost{Type: "science", Value: 150}},
+		Effects: []Effect{
+			Effect{ModifierName: "taxEfficiency", Operator: "=", Value: 1.15},
+		},
+		ActionName:     "technoEcoT1N1",
+		Tier:           1,
+		TypeTechnology: "ECONOMIC",
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Administration Reform - Reasearch",
+		Description: "Reform Reasearch administration to ensure your scientist work in better conditions",
+		Costs:       []Cost{Cost{Type: "science", Value: 600}},
+		Effects: []Effect{
+			Effect{ModifierName: "researchEfficiency", Operator: "=", Value: 1.15},
+		},
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoEcoT1N1"},
+		},
+		ActionName:     "technoEcoT2N1",
+		Tier:           2,
+		TypeTechnology: "ECONOMIC",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:           "Intelligence deployment",
+		Description:    "Unlock some intelligence action, like more effective sabotage",
+		Costs:          []Cost{Cost{Type: "science", Value: 350}},
+		ActionName:     "technoEcoT1N2",
+		Tier:           1,
+		TypeTechnology: "ECONOMIC",
+	})
+	technologies = append(technologies, Technology{
+		Name:        "Advanced intelligence deployment",
+		Description: "Unlock some intelligence action, like more effective sabotage and assasination",
+		Costs:       []Cost{Cost{Type: "science", Value: 1000}},
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoEcoT1N2"},
+		},
+		ActionName:     "technoEcoT2N2",
+		Tier:           2,
+		TypeTechnology: "ECONOMIC",
 	})
 
 }

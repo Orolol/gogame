@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/orolol/gogame/utils"
 )
 
@@ -69,13 +67,13 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["heavyTankFactoryProduction"] = 1.0
 
 	var policies []utils.PolicyValue
-	fmt.Println("GET POLICIES")
+	//fmt.Println("GET POLICIES")
 	for _, p := range utils.GetPolicies() {
-		fmt.Println("P", p)
+		//fmt.Println("P", p)
 		for _, pv := range p.PossibleValue2 {
-			fmt.Println("PV", pv)
+			//fmt.Println("PV", pv)
 			if pv.IsDefault {
-				fmt.Println("DEFAULT", pv)
+				//fmt.Println("DEFAULT", pv)
 				policies = append(policies, pv)
 			}
 		}

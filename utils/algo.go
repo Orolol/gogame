@@ -9,27 +9,27 @@ import (
 
 //CheckConstraint Check if constraint is respected.
 func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost, game *Game) bool {
-	fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
+	//fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
 	for _, c := range costs {
 		switch op := c.Type; op {
 		case "money":
 			if player.Economy.Money < c.Value {
-				fmt.Println("FAIL CONSTRAINT COST", c, player.Economy.Money)
+				//fmt.Println("FAIL CONSTRAINT COST", c, player.Economy.Money)
 				return false
 			}
 		case "science":
 			if player.Civilian.NbResearchPoint < c.Value {
-				fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbResearchPoint)
+				//fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbResearchPoint)
 				return false
 			}
 		case "manpower":
 			if player.Civilian.NbManpower < c.Value {
-				fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbManpower)
+				//fmt.Println("FAIL CONSTRAINT COST", c, player.Civilian.NbManpower)
 				return false
 			}
 		case "morale":
 			if player.Army.Morale < c.Value {
-				fmt.Println("FAIL CONSTRAINT COST", c, player.Army.Morale)
+				//fmt.Println("FAIL CONSTRAINT COST", c, player.Army.Morale)
 				return false
 			}
 
@@ -79,7 +79,7 @@ func StringInSlice(a string, list []string) bool {
 
 //ApplyEffect apply effect on player modifiers
 func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
-
+	fmt.Println(player.Nick, "APPLY EFFECT", effect, player)
 	if effect.ModifierType == "Army" {
 		switch field := effect.ModifierName; field {
 		case "Morale":
@@ -148,6 +148,9 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 		player.CallbackEffects = append(player.CallbackEffects, cb)
 	}
 
+	fmt.Println(player.Nick, "APPLIED EFFECT", effect, player)
+	//fmt.Println("#############################################")
+
 }
 
 func ApplyOperator(value float32, operator string, baseValue float32, game *Game) float32 {
@@ -183,7 +186,7 @@ func CheckOperator(value float32, operator string, baseValue float32) bool {
 
 //ApplyCost apply cost on player board
 func ApplyCost(player *PlayerInGame, cost Cost) {
-	fmt.Println("APPLY COST !")
+	////fmt.Println("APPLY COST !")
 	switch op := cost.Type; op {
 	case "money":
 		player.Economy.Money -= cost.Value
@@ -208,8 +211,8 @@ func AlgoTerritorryChange(p1 *PlayerInGame, p2 *PlayerInGame, p1dmg float32, p2d
 	} else {
 		return p1, p2
 	}
-	loser.Territory.Surface -= 0.01
-	winner.Territory.Surface += 0.01
+	loser.Territory.Surface--
+	winner.Territory.Surface++
 
 	return p1, p2
 }
@@ -257,7 +260,7 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 	var dmgLightTank = player.Army.NbLigtTank * 5 * rollp2 * player.Modifiers["lightTankQuality"]
 	var dmgHvyTank = player.Army.NbHvyTank * 15 * rollp3 * player.Modifiers["heavyTankQuality"]
 	var dmg = (dmgSoldier + dmgLightTank + dmgHvyTank) * 0.2 * dmgModifier
-	fmt.Println("DAMAGE ", dmg)
+	////fmt.Println("DAMAGE ", dmg)
 	return dmg
 }
 
@@ -266,7 +269,7 @@ func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 	if player.Economy.Money > 0 {
 		var minRf float32 = 100.0
 		reinforcement := 1000 * player.ModifierPolicy.RecruitmentPolicy
-		fmt.Println("REINFORCEMENT : ", reinforcement)
+		////fmt.Println("REINFORCEMENT : ", reinforcement)
 		if reinforcement > player.Civilian.NbManpower {
 			reinforcement = 0.0
 		} else if reinforcement < minRf {
@@ -280,7 +283,7 @@ func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 	player.Civilian.NbManpower += natGrowth
 	player.Civilian.NbTotalCivil -= natGrowth
 
-	fmt.Println("NAT GROTH ", natGrowth)
+	//fmt.Println("NAT GROTH ", natGrowth)
 
 	return player
 }
@@ -300,9 +303,9 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 	multiSoldier := 1 - multiHvyTank - multiLgtTank
 
 	if dmgIncoming > totalHp {
-		fmt.Println("Civilian damage ", dmgIncoming-totalHp)
+		//fmt.Println("Civilian damage ", dmgIncoming-totalHp)
 	}
-	fmt.Println("DMG MODIFER", (player.Army.Morale/100.0)*(player.Army.Quality/100.0))
+	//fmt.Println("DMG MODIFER", (player.Army.Morale/100.0)*(player.Army.Quality/100.0))
 	dmgModifier := 2 / (1 + (player.Army.Morale/100.0)*(player.Army.Quality/100.0))
 	player.Army.NbSoldier -= dmgIncoming * multiSoldier * 0.1 * dmgModifier
 	player.Army.NbLigtTank -= dmgIncoming * multiLgtTank * 0.02 * dmgModifier
@@ -312,11 +315,11 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 		player.Army.NbSoldier = 0.0
 	}
 	if player.Army.NbLigtTank < 0 {
-		fmt.Println("All lght tank lost ")
+		//fmt.Println("All lght tank lost ")
 		player.Army.NbLigtTank = 0.0
 	}
 	if player.Army.NbHvyTank < 0 {
-		fmt.Println("All hvy tank lost ")
+		//fmt.Println("All hvy tank lost ")
 		player.Army.NbHvyTank = 0.0
 	}
 
@@ -324,8 +327,8 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 }
 
 func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
-	armyUpkeep := (player.Army.NbSoldier * 100) + (player.Army.NbLigtTank * 1000) + (player.Army.NbHvyTank * 5000)
-	tax := (player.Economy.TaxRate * 0.2 * player.Civilian.NbTotalCivil)
+	armyUpkeep := (player.Army.NbSoldier * 25) + (player.Army.NbLigtTank * 500) + (player.Army.NbHvyTank * 2000)
+	tax := (player.Economy.TaxRate * 0.35 * player.Civilian.NbTotalCivil)
 	player.Economy.Money = player.Economy.Money - armyUpkeep + tax
 
 	//Technology
@@ -357,6 +360,12 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 			player.Civilian.NbHeavyTankFactory += (civilianProduction / nbThingToBuild) * 0.4
 		}
 		player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.2
+
+		if player.Army.Morale > 100 && player.Economy.Money > 0 {
+			player.Army.Morale--
+		} else {
+			player.Army.Morale++
+		}
 
 	} else {
 		if player.Army.Morale > 10 {

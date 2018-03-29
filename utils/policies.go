@@ -113,30 +113,30 @@ func SetBaseValuePolicies() {
 					Effect{ModifierType: "Economy", Value: 1, Operator: "=", ModifierName: "TaxRate"},
 				}, IsDefault: true,
 			},
-			PolicyValue{Name: "Country effort", Value: 2, Description: "Raise taxes to prepare for war", Constraints: nil, ActionName: "setTaxRatePolicy",
+			PolicyValue{Name: "Country effort", Value: 1.1, Description: "Raise taxes to prepare for war", Constraints: nil, ActionName: "setTaxRatePolicy",
 				Effects: []Effect{
-					Effect{ModifierType: "Economy", Value: 1.2, Operator: "=", ModifierName: "TaxRate"},
+					Effect{ModifierType: "Economy", Value: 1.1, Operator: "=", ModifierName: "TaxRate"},
 					Effect{ModifierType: "Modifiers", Value: 0.98, Operator: "=", ModifierName: "TaxEffectOnIndustry"},
 				},
 			},
-			PolicyValue{Name: "War Economy", Value: 3, Description: "War is upon us, country must be ready", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
+			PolicyValue{Name: "War Economy", Value: 1.2, Description: "War is upon us, country must be ready", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Economy", Value: 2, Operator: "=", ModifierName: "TaxRate"},
+				Effect{ModifierType: "Economy", Value: 1.2, Operator: "=", ModifierName: "TaxRate"},
 				Effect{ModifierType: "Modifiers", Value: 0.95, Operator: "=", ModifierName: "TaxEffectOnIndustry"},
 			},
 			},
-			PolicyValue{Name: "Full Mobilization", Value: 4, Description: "Everyone should make effort", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
+			PolicyValue{Name: "Full Mobilization", Value: 1.3, Description: "Everyone should make effort", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Economy", Value: 3, Operator: "=", ModifierName: "TaxRate"},
+				Effect{ModifierType: "Economy", Value: 1.3, Operator: "=", ModifierName: "TaxRate"},
 				Effect{ModifierType: "Modifiers", Value: 0.90, Operator: "=", ModifierName: "TaxEffectOnIndustry"},
 			},
 			},
-			PolicyValue{Name: "Total war", Value: 5, Description: "Who need schools or food anyway ?", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
+			PolicyValue{Name: "Total war", Value: 1.5, Description: "Who need schools or food anyway ?", ActionName: "setTaxRatePolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Economy", Value: 5, Operator: "=", ModifierName: "TaxRate"},
+				Effect{ModifierType: "Economy", Value: 1.5, Operator: "=", ModifierName: "TaxRate"},
 				Effect{ModifierType: "Modifiers", Value: 0.80, Operator: "=", ModifierName: "TaxEffectOnIndustry"},
 			},
 			},

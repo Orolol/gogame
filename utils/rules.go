@@ -52,6 +52,7 @@ type PlayerActionOrder struct {
 	Costs       []Cost
 	Cooldown    int
 	Effects     []Effect
+	Type        string
 }
 
 //Technology SQL type for technology

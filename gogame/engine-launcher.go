@@ -27,19 +27,19 @@ func createGame(conf utils.GameConf, queue chan utils.GameMsg) utils.Game {
 }
 
 func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *utils.PlayerInGame) {
-	ActionMapping := map[string]interface{}{
-		// "actionWarPropaganda":                    actionWarPropaganda,
-		"buyForeignTanks": buyForeignTanks,
-		// "actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
-		// "actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
-		"emergencyRecruitment": emergencyRecruitment,
-		"purgeSoldier":         purgeSoldier,
-	}
-	fmt.Println("GAME EVENT ", game)
-	keys := make([]string, 0, len(ActionMapping))
-	for k := range ActionMapping {
-		keys = append(keys, k)
-	}
+	// ActionMapping := map[string]interface{}{
+	// 	// "actionWarPropaganda":                    actionWarPropaganda,
+	// 	"buyForeignTanks": buyForeignTanks,
+	// 	// "actionCivConvertFactoryToHvyTankFact":   actionCivConvertFactoryToHvyTankFact,
+	// 	// "actionCivConvertFactoryToLightTankFact": actionCivConvertFactoryToLightTankFact,
+	// 	"emergencyRecruitment": emergencyRecruitment,
+	// 	"purgeSoldier":         purgeSoldier,
+	// }
+	// //fmt.Println("GAME EVENT ", game)
+	// keys := make([]string, 0, len(ActionMapping))
+	// for k := range ActionMapping {
+	// 	keys = append(keys, k)
+	// }
 
 	for msg := range queue {
 		var p *utils.PlayerInGame
@@ -67,11 +67,11 @@ func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *uti
 				Cooldown: msg.Cooldown + game.CurrentTurn,
 			}
 			p.LastOrders = append(p.LastOrders, order)
-			fmt.Println("MISE SOUS CD", msg.Cooldown, game.CurrentTurn)
+			//fmt.Println("MISE SOUS CD", msg.Cooldown, game.CurrentTurn)
 		}
-		if utils.StringInSlice(msg.Action, keys) {
-			ActionMapping[msg.Action].(func(*utils.PlayerInGame, float32))(p, msg.Value)
-		}
+		// if utils.StringInSlice(msg.Action, keys) {
+		// 	ActionMapping[msg.Action].(func(*utils.PlayerInGame, float32))(p, msg.Value)
+		// }
 
 		if msg.Type == "TECH" {
 			p.Technologies = append(p.Technologies, msg.Action)
@@ -79,7 +79,7 @@ func GameEvent(queue chan utils.GameMsg, game *utils.Game, player1, player2 *uti
 			var pol = utils.GetPolicy(msg.Action)
 			var choosePol utils.PolicyValue
 			for _, x := range pol.PossibleValue2 {
-				fmt.Println("FOUND POLICY ", x)
+				//fmt.Println("FOUND POLICY ", x)
 				if x.Value == msg.Value {
 					choosePol = x
 				}
@@ -102,7 +102,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 
 	go GameEvent(queue, &game, player1, player2)
 
-	fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
+	//fmt.Println("Start game ", player1.Nick, " vs ", player2.Nick)
 	game.State = "Running"
 	queueGameOut <- game
 	queueGameOut <- game
@@ -167,14 +167,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			player1, player2 = utils.AlgoTerritorryChange(player1, player2, p1dmg, p2dmg)
 		}
 
-		if player1.Army.NbSoldier <= 0 {
+		if player1.Territory.Surface <= 0 {
 			game.State = "End"
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
 			queueGameOut <- game
 			queueGameOut <- game
 			break
-		} else if player2.Army.NbSoldier <= 0 {
+		} else if player2.Territory.Surface <= 0 {
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]
@@ -201,7 +201,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		}
 
 	}
-	fmt.Println("End game")
+	//fmt.Println("End game")
 }
 
 func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
@@ -213,20 +213,20 @@ func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
 		case "CREATE":
 			var gc utils.GameConf
 			json.Unmarshal(msg[2], &gc)
-			fmt.Println("GAME CREATE : ", gc)
+			//fmt.Println("GAME CREATE : ", gc)
 			queueGameInc := make(chan utils.GameMsg, 100)
 			game := createGame(gc, queueGameInc)
 			go runGame(game, queueGameInc, queueGameOut)
 			GameList[game.GameID] = queueGameInc
-			fmt.Println("CURRENT LIST OF GAME ", GameList)
+			//fmt.Println("CURRENT LIST OF GAME ", GameList)
 		case "MSG":
 			var gs utils.GameMsg
 			json.Unmarshal(msg[2], &gs)
-			fmt.Println("GameMSG : ", gs)
+			//fmt.Println("GameMSG : ", gs)
 			if val, ok := GameList[gs.GameID]; ok {
 				val <- gs
 			} else {
-				fmt.Println("Game not found ", gs.GameID)
+				//fmt.Println("Game not found ", gs.GameID)
 			}
 
 		}
@@ -235,15 +235,15 @@ func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
 }
 
 func ZMQReader(queueCreation chan [][]byte) {
-	fmt.Printf("Init Reader")
+	//fmt.Printf("Init Reader")
 	pull := goczmq.NewRouterChanneler("tcp://127.0.0.1:31337")
 	for msg := range pull.RecvChan {
-		fmt.Println("Recieving new game msg in ZMQ !! TYPE : ", string(msg[1]))
+		//fmt.Println("Recieving new game msg in ZMQ !! TYPE : ", string(msg[1]))
 		queueCreation <- msg
 	}
 }
 func ZMQPusher() *goczmq.Channeler {
-	fmt.Printf("Init Pusher")
+	//fmt.Printf("Init Pusher")
 	push := goczmq.NewDealerChanneler("tcp://127.0.0.1:31338")
 
 	return push
@@ -252,20 +252,20 @@ func ZMQPusher() *goczmq.Channeler {
 func FromChanToZMQ(queue chan utils.Game) {
 	pushSock := ZMQPusher()
 	for msg := range queue {
-		fmt.Println("Read Game from Queue and send to ZMQ")
+		//fmt.Println("Read Game from Queue and send to ZMQ")
 		jsonMsg, err := json.Marshal(msg)
 		if err != nil {
-			fmt.Println("fail :(")
-			fmt.Println(err)
+			//fmt.Println("fail :(")
+			//fmt.Println(err)
 		}
 
 		pushSock.SendChan <- [][]byte{[]byte(msg.GameID.String()), []byte(jsonMsg)}
-		fmt.Println("SENT : ", msg)
+		//fmt.Println("SENT : ", msg)
 	}
 }
 
 func main() {
-	fmt.Printf("Enter Main")
+	//fmt.Printf("Enter Main")
 	queueGameOut := make(chan utils.Game)
 	queueGameIn := make(chan [][]byte)
 
