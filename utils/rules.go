@@ -13,6 +13,7 @@ type Policy struct {
 	PossibleValue  string
 	PossibleValue2 []PolicyValue
 	TypePolicy     string
+	SubType        string
 	DefaultValue   string
 	MaxChange      float32
 }
@@ -53,6 +54,9 @@ type PlayerActionOrder struct {
 	Cooldown    int
 	Effects     []Effect
 	Type        string
+	SubType     string
+	Selector    string
+	BaseValue   float32
 }
 
 //Technology SQL type for technology

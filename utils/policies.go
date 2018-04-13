@@ -22,38 +22,39 @@ func SetBaseValuePolicies() {
 		Name:        "Training Time",
 		ActionName:  "setPopRecPolicy",
 		Description: "Set your recuitement policy",
-		TypePolicy:  "MIL",
+		TypePolicy:  "MILITARY",
+		SubType:     "RECRUITMENT",
 		MaxChange:   1,
 		PossibleValue2: []PolicyValue{
 			PolicyValue{Name: "Full", Value: 1, Description: "Take time to train well soldiers", ActionName: "setPopRecPolicy", Constraints: nil,
 				Effects: []Effect{
-					Effect{ModifierType: "Policy", Value: 1, Operator: "=", ModifierName: "RecruitmentPolicy"},
+					Effect{ModifierType: "Policy", Value: 1, Operator: "=", ModifierName: "TrainingPolicy"},
 				}, IsDefault: true,
 			},
 			PolicyValue{Name: "Long", Value: 2, Description: "Make sure everyone know how to fight", ActionName: "setPopRecPolicy", Constraints: nil,
 				Effects: []Effect{
-					Effect{ModifierType: "Policy", Value: 1.5, Operator: "=", ModifierName: "RecruitmentPolicy"},
+					Effect{ModifierType: "Policy", Value: 1.5, Operator: "=", ModifierName: "TrainingPolicy"},
 					Effect{ModifierType: "Modifiers", Value: 0.98, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 				},
 			},
 			PolicyValue{Name: "Hurry", Value: 3, Description: "Army need fresh recruit !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Policy", Value: 2.5, Operator: "=", ModifierName: "RecruitmentPolicy"},
+				Effect{ModifierType: "Policy", Value: 2.5, Operator: "=", ModifierName: "TrainingPolicy"},
 				Effect{ModifierType: "Modifiers", Value: 0.95, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 			},
 			},
 			PolicyValue{Name: "No time !", Value: 4, Description: "If they can handle a rifle, send them !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Policy", Value: 5, Operator: "=", ModifierName: "RecruitmentPolicy"},
+				Effect{ModifierType: "Policy", Value: 5, Operator: "=", ModifierName: "TrainingPolicy"},
 				Effect{ModifierType: "Modifiers", Value: 0.90, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 			},
 			},
 			PolicyValue{Name: "Send everyone !", Value: 5, Description: "Drag the full country", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
-				Effect{ModifierType: "Policy", Value: 10, Operator: "=", ModifierName: "RecruitmentPolicy"},
+				Effect{ModifierType: "Policy", Value: 10, Operator: "=", ModifierName: "TrainingPolicy"},
 				Effect{ModifierType: "Modifiers", Value: 0.80, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 			},
 			},
@@ -62,7 +63,8 @@ func SetBaseValuePolicies() {
 		Name:          "Conscription Policy",
 		ActionName:    "setConscPolicy",
 		Description:   "Set your conscription policy. The more your mobilize your population, the less the workers will be productive",
-		TypePolicy:    "MIL",
+		TypePolicy:    "MILITARY",
+		SubType:       "RECRUITMENT",
 		MaxChange:     1,
 		PossibleValue: "{\"Pro Army\" : 1,\"Volonteer\" : 2,\"War time\" : 5,\"All valids !\" : 10,\"Anyone who can hold a weapon\" : 30}",
 		PossibleValue2: []PolicyValue{
@@ -104,7 +106,8 @@ func SetBaseValuePolicies() {
 		Name:          "Tax rate",
 		ActionName:    "setTaxRatePolicy",
 		Description:   "Set your tax rate. ",
-		TypePolicy:    "ECO",
+		TypePolicy:    "ECONOMY",
+		SubType:       "TAX",
 		MaxChange:     1,
 		PossibleValue: "{\"Low taxes\" : 1,\"Country effort\" : 1.5,\"War Economy\" : 2,\"Full Mobilization\" : 3,\"Total war\" : 5}",
 		PossibleValue2: []PolicyValue{
@@ -141,20 +144,5 @@ func SetBaseValuePolicies() {
 			},
 			},
 		}})
-	policies = append(policies, Policy{
-		Name:          "Build Light Tank ?",
-		ActionName:    "setBuildLgtTank",
-		Description:   "Set your tax rate. ",
-		TypePolicy:    "ECO",
-		PossibleValue: "{\"Yes\" : 1,\"No\" : 0}",
-		DefaultValue:  "1"})
-
-	policies = append(policies, Policy{
-		Name:          "Build Heavy Tank ?",
-		ActionName:    "setBuildHvyTank",
-		Description:   "Set your tax rate. ",
-		TypePolicy:    "ECO",
-		PossibleValue: "{\"Yes\" : 1,\"No\" : 0}",
-		DefaultValue:  "1"})
 
 }

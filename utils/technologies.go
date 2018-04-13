@@ -226,4 +226,25 @@ func SetBaseValueTechnologies() {
 		TypeTechnology: "ECONOMIC",
 	})
 
+	technologies = append(technologies, Technology{
+		Name:           "Financial devlopment",
+		Description:    "Unlock some financial action, like larger loans",
+		Costs:          []Cost{Cost{Type: "science", Value: 400}},
+		ActionName:     "technoEcoT1N3",
+		Tier:           1,
+		TypeTechnology: "ECONOMIC",
+	})
+
+	technologies = append(technologies, Technology{
+		Name:        "Advanced Financial devlopment",
+		Description: "Unlock some financial action, like larger loans",
+		Costs:       []Cost{Cost{Type: "science", Value: 800}},
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoEcoT1N3"},
+		},
+		ActionName:     "technoEcoT2N3",
+		Tier:           2,
+		TypeTechnology: "ECONOMIC",
+	})
+
 }

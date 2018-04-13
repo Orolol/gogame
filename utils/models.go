@@ -34,19 +34,34 @@ type ListPlayer struct {
 
 //PlayerInGame player ig
 type PlayerInGame struct {
-	PlayerID        int
-	Nick            string
-	Army            PlayerArmy
-	ModifierPolicy  PlayerModifierPolicy
-	Civilian        PlayerCivilian
-	Economy         PlayerEconomy
-	Territory       PlayerTerritory
-	LastOrders      []PlayerLastOrders
-	Technologies    []string
-	Modifiers       map[string]float32
-	Logs            []PlayerLog
-	CallbackEffects []CallbackEffect
-	Policies        []PolicyValue
+	PlayerID           int
+	Nick               string
+	Army               PlayerArmy
+	ModifierPolicy     PlayerModifierPolicy
+	Civilian           PlayerCivilian
+	Economy            PlayerEconomy
+	Territory          PlayerTerritory
+	LastOrders         []PlayerLastOrders
+	Technologies       []string
+	Modifiers          map[string]float32
+	Logs               []PlayerLog
+	CallbackEffects    []CallbackEffect
+	Policies           []PolicyValue
+	PlayerInformations map[string]*PlayerInformation
+}
+
+// type PlayerInformations struct {
+// 	Type        string
+// 	Description string
+// 	Infos       []PlayerInformation
+// }
+
+type PlayerInformation struct {
+	Type        string
+	SubType     string
+	Name        string
+	Description string
+	Value       float32
 }
 
 type PlayerLog struct {
@@ -63,34 +78,42 @@ type PlayerLastOrders struct {
 
 //PlayerArmy current army of the player
 type PlayerArmy struct {
-	NbSoldier  float32
-	NbLigtTank float32
-	NbHvyTank  float32
-	NbArt      float32
-	NbAirSup   float32
-	NbAirBomb  float32
-	Morale     float32
-	Quality    float32
+	NbSoldier         float32
+	NbLigtTank        float32
+	NbHvyTank         float32
+	NbArt             float32
+	NbAirSup          float32
+	NbAirBomb         float32
+	Morale            float32
+	Quality           float32
+	InfantryEquipment float32
+	Ammunition        float32
 }
 
 type PlayerCivilian struct {
-	NbTotalCivil       float32
-	NbManpower         float32
-	NbResearchPoint    float32
-	NbScientist        float32
-	NbCivilianFactory  float32
-	NbLightTankFactory float32
-	NbHeavyTankFactory float32
+	NbManpower        float32
+	NbResearchPoint   float32
+	NbScientist       float32
+	NbCivilianFactory float32
 }
 
 type PlayerEconomy struct {
-	Money   float32
-	TaxRate float32
+	Money                       float32
+	Loans                       float32
+	TaxRate                     float32
+	LightTankProduction         float32
+	HeavyTankProduction         float32
+	ArtilleryProduction         float32
+	InfantryEquipmentProduction float32
+	AmmunitionProduction        float32
+	FighterProduction           float32
+	BomberProduction            float32
+	FactoryProduction           float32
 }
 
 //PlayerModifierPolicy list of modifier policy
 type PlayerModifierPolicy struct {
-	RecruitmentPolicy  float32
+	TrainingPolicy     float32
 	ManpowerSizePolicy float32
 	ArtOnFactory       float32
 	BuildLgtTankFac    float32

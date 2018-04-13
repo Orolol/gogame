@@ -114,7 +114,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
 			j := i - (rlen - len(player1.CallbackEffects))
 			var cb = player1.CallbackEffects[j]
-			if utils.CheckConstraint(player1, cb.Constraints, nil, &game) {
+			if utils.CheckConstraint(player1, cb.Constraints, nil, &game, 0) {
 				for _, e := range cb.Effects {
 					utils.ApplyEffect(player1, e, &game)
 					player1.CallbackEffects = append(player1.CallbackEffects[:j], player1.CallbackEffects[j+1:]...)
@@ -124,11 +124,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		for i, rlen := 0, len(player2.CallbackEffects); i < rlen; i++ {
 			j := i - (rlen - len(player2.CallbackEffects))
 			var cb = player2.CallbackEffects[j]
-			if utils.CheckConstraint(player2, cb.Constraints, nil, &game) {
+			if utils.CheckConstraint(player2, cb.Constraints, nil, &game, 0) {
 				for _, e := range cb.Effects {
 					utils.ApplyEffect(player2, e, &game)
-					player2.CallbackEffects = append(player2.CallbackEffects[:j], player2.CallbackEffects[j+1:]...)
+					fmt.Println(1, j, player2.CallbackEffects)
+
 				}
+				player2.CallbackEffects = append(player2.CallbackEffects[:j], player2.CallbackEffects[j+1:]...)
+				fmt.Println(2)
 			}
 		}
 

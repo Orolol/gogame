@@ -54,8 +54,9 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				if !utils.CheckConstraint(&game.ListPlayers[players], choosePol.Constraints, nil, game) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], choosePol.Constraints, nil, game, 0) {
 					fmt.Println("CONSTRAINT FAIL")
+
 					isOkAction = false
 				} else {
 					fmt.Println("CONSTRAINT OK")
@@ -118,7 +119,7 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 						isOkAction = false
 					}
 				}
-				if !utils.CheckConstraint(&game.ListPlayers[players], techno.Constraints, techno.Costs, game) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], techno.Constraints, techno.Costs, game, 0) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -182,7 +183,7 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				if !utils.CheckConstraint(&game.ListPlayers[players], action.Constraints, action.Costs, game) {
+				if !utils.CheckConstraint(&game.ListPlayers[players], action.Constraints, action.Costs, game, actionApi.Value) {
 					fmt.Println("CONSTRAINT FAIL")
 					isOkAction = false
 				} else {
@@ -199,7 +200,18 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 		gMsg.PlayerID = actionApi.PlayerID
 		gMsg.Text = "Order"
 		gMsg.Costs = action.Costs
+
 		gMsg.Effects = action.Effects
+		if action.Selector == "range" {
+			fmt.Println("RANGE ACTION", actionApi.Value)
+			for i, e := range gMsg.Effects {
+				fmt.Println("APPLY VALUE ON EFFECT")
+				e.Value = actionApi.Value
+				gMsg.Effects[i] = e
+
+			}
+		}
+
 		gMsg.Cooldown = action.Cooldown
 		jsonMsg, err := json.Marshal(gMsg)
 		fmt.Println(string(jsonMsg))

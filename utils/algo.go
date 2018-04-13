@@ -8,7 +8,7 @@ import (
 )
 
 //CheckConstraint Check if constraint is respected.
-func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost, game *Game) bool {
+func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost, game *Game, valueToCheck float32) bool {
 	//fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
 	for _, c := range costs {
 		switch op := c.Type; op {
@@ -60,6 +60,16 @@ func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cos
 				}
 			}
 			return false
+		} else if t.Type == "Custom" {
+			value, _ := strconv.Atoi(t.Value)
+			return CheckOperator(float32(value), t.Operator, valueToCheck)
+		} else if t.Type == "linked" {
+			if t.Value == "production" {
+				if player.Economy.HeavyTankProduction+player.Economy.AmmunitionProduction+player.Economy.LightTankProduction+player.Economy.FactoryProduction+player.Economy.ArtilleryProduction+player.Economy.InfantryEquipmentProduction+player.Economy.BomberProduction+player.Economy.FighterProduction > 800 {
+					return false
+				}
+			}
+			return true
 		}
 	}
 
@@ -79,7 +89,7 @@ func StringInSlice(a string, list []string) bool {
 
 //ApplyEffect apply effect on player modifiers
 func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
-	fmt.Println(player.Nick, "APPLY EFFECT", effect, player)
+	fmt.Println(player.Nick, "APPLY EFFECT", effect)
 	if effect.ModifierType == "Army" {
 		switch field := effect.ModifierName; field {
 		case "Morale":
@@ -100,8 +110,24 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 		switch field := effect.ModifierName; field {
 		case "Money":
 			player.Economy.Money = ApplyOperator(effect.Value, effect.Operator, player.Economy.Money, game)
+		case "Loans":
+			player.Economy.Loans = ApplyOperator(effect.Value, effect.Operator, player.Economy.Loans, game)
 		case "TaxRate":
 			player.Economy.TaxRate = ApplyOperator(effect.Value, effect.Operator, player.Economy.Money, game)
+		case "ArtilleryProduction":
+			player.Economy.ArtilleryProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.ArtilleryProduction, game)
+		case "BomberProduction":
+			player.Economy.BomberProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.BomberProduction, game)
+		case "FighterProduction":
+			player.Economy.FighterProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.FighterProduction, game)
+		case "HeavyTankProduction":
+			player.Economy.HeavyTankProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.HeavyTankProduction, game)
+		case "InfantryEquipmentProduction":
+			player.Economy.InfantryEquipmentProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.InfantryEquipmentProduction, game)
+		case "LightTankProduction":
+			player.Economy.LightTankProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.LightTankProduction, game)
+		case "AmmunitionProduction":
+			player.Economy.AmmunitionProduction = ApplyOperator(effect.Value, effect.Operator, player.Economy.AmmunitionProduction, game)
 		}
 	} else if effect.ModifierType == "Civilian" {
 		switch field := effect.ModifierName; field {
@@ -109,14 +135,8 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 			player.Civilian.NbManpower = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbManpower, game)
 		case "NbScientist":
 			player.Civilian.NbScientist = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbScientist, game)
-		case "NbTotalCivil":
-			player.Civilian.NbTotalCivil = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbTotalCivil, game)
 		case "NbResearchPoint":
 			player.Civilian.NbResearchPoint = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbResearchPoint, game)
-		case "NbLightTankFactory":
-			player.Civilian.NbLightTankFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbLightTankFactory, game)
-		case "NbHeavyTankFactory":
-			player.Civilian.NbHeavyTankFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbHeavyTankFactory, game)
 		case "NbCivilianFactory":
 			player.Civilian.NbCivilianFactory = ApplyOperator(effect.Value, effect.Operator, player.Civilian.NbCivilianFactory, game)
 		}
@@ -134,10 +154,15 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 			player.ModifierPolicy.CivilianProduction = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.CivilianProduction, game)
 		case "ManpowerSizePolicy":
 			player.ModifierPolicy.ManpowerSizePolicy = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.ManpowerSizePolicy, game)
-		case "RecruitmentPolicy":
-			player.ModifierPolicy.RecruitmentPolicy = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.RecruitmentPolicy, game)
+		case "TrainingPolicy":
+			player.ModifierPolicy.TrainingPolicy = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.TrainingPolicy, game)
 		case "TankProduction":
 			player.ModifierPolicy.TankProduction = ApplyOperator(effect.Value, effect.Operator, player.ModifierPolicy.TankProduction, game)
+		}
+	} else if effect.ModifierType == "Territory" {
+		switch field := effect.ModifierName; field {
+		case "Barracks":
+			player.Territory.Barracks = ApplyOperator(effect.Value, effect.Operator, player.Territory.Barracks, game)
 		}
 	} else {
 		player.Modifiers[effect.ModifierName] = ApplyOperator(effect.Value, effect.Operator, player.Modifiers[effect.ModifierName], game)
@@ -148,7 +173,7 @@ func ApplyEffect(player *PlayerInGame, effect Effect, game *Game) {
 		player.CallbackEffects = append(player.CallbackEffects, cb)
 	}
 
-	fmt.Println(player.Nick, "APPLIED EFFECT", effect, player)
+	fmt.Println(player.Nick, "APPLIED EFFECT", effect)
 	//fmt.Println("#############################################")
 
 }
@@ -214,6 +239,9 @@ func AlgoTerritorryChange(p1 *PlayerInGame, p2 *PlayerInGame, p1dmg float32, p2d
 	loser.Territory.Surface--
 	winner.Territory.Surface++
 
+	loser.Territory.SmallCities--
+	winner.Territory.SmallCities++
+
 	return p1, p2
 }
 
@@ -223,7 +251,7 @@ func AlgoRollTurnEvent(p1 *PlayerInGame, game *Game) *PlayerInGame {
 	var totalWeight int
 	var allPossibleEents []PlayerEvent
 	for _, g := range allSingleEvents {
-		if CheckConstraint(p1, g.Constraints, nil, game) {
+		if CheckConstraint(p1, g.Constraints, nil, game, 0) {
 			totalWeight += g.Weight
 			allPossibleEents = append(allPossibleEents, g)
 		}
@@ -267,25 +295,32 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 //AlgoReinforcement calc reinforcement
 func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 	if player.Economy.Money > 0 {
-		var minRf float32 = 100.0
-		reinforcement := 1000 * player.ModifierPolicy.RecruitmentPolicy
-		////fmt.Println("REINFORCEMENT : ", reinforcement)
-		if reinforcement > player.Civilian.NbManpower {
-			reinforcement = 0.0
-		} else if reinforcement < minRf {
-			reinforcement = minRf
+		// var minRf float32 = 100.0
+		// reinforcement := 1000 * player.ModifierPolicy.TrainingPolicy
+		// ////fmt.Println("REINFORCEMENT : ", reinforcement)
+		// if reinforcement > player.Civilian.NbManpower {
+		// 	reinforcement = 0.0
+		// } else if reinforcement < minRf {
+		// 	reinforcement = minRf
+		// }
+
+		reinforcement := player.Territory.Barracks * player.Civilian.NbManpower * player.ModifierPolicy.TrainingPolicy / 100
+
+		if player.Army.InfantryEquipment > reinforcement {
+			player.Army.NbSoldier += reinforcement
+			player.Civilian.NbManpower -= reinforcement
+			player.Army.InfantryEquipment -= reinforcement
 		}
 
-		player.Army.NbSoldier += reinforcement
-		player.Civilian.NbManpower -= reinforcement
 	}
-	natGrowth := player.ModifierPolicy.ManpowerSizePolicy * 0.001 * player.Civilian.NbTotalCivil
+	natGrowth := player.Territory.Barracks * 100 * player.ModifierPolicy.ManpowerSizePolicy
 	player.Civilian.NbManpower += natGrowth
-	player.Civilian.NbTotalCivil -= natGrowth
-
-	//fmt.Println("NAT GROTH ", natGrowth)
 
 	return player
+}
+
+func AlgoGetPopulation(player *PlayerInGame) float32 {
+	return (player.Territory.SmallCities * 20000) + (player.Territory.MediumCities * 100000) + (player.Territory.BigCities * 1000000) + 2000000
 }
 
 //AlgoDamageRepartition Calculate loses
@@ -327,39 +362,75 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 }
 
 func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
-	armyUpkeep := (player.Army.NbSoldier * 25) + (player.Army.NbLigtTank * 500) + (player.Army.NbHvyTank * 2000)
-	tax := (player.Economy.TaxRate * 0.35 * player.Civilian.NbTotalCivil)
-	player.Economy.Money = player.Economy.Money - armyUpkeep + tax
 
+	if player.Economy.Money < 0 {
+		if player.Army.Morale > 10 {
+			player.Army.Morale--
+		}
+	}
+
+	if player.Economy.Loans > 0 {
+		player.Economy.Money -= player.Economy.Loans * 1000000
+	}
+	armyUpkeep := (player.Army.NbSoldier * 25) + (player.Army.NbLigtTank * 500) + (player.Army.NbHvyTank * 2000)
+	tax := (player.Economy.TaxRate * 0.35 * AlgoGetPopulation(player))
+	player.Economy.Money = player.Economy.Money - armyUpkeep + tax
+	player.PlayerInformations["TaxRevenu"].Value = tax
+	player.PlayerInformations["TaxRate"].Value = player.Economy.TaxRate
 	//Technology
 
-	player.Civilian.NbResearchPoint += player.Civilian.NbScientist * 0.05
-
+	player.Civilian.NbResearchPoint += player.Civilian.NbScientist * 0.05 * player.Modifiers["researchEfficiency"]
 	if player.Economy.Money > 0 {
-
-		player.Army.NbLigtTank += player.Civilian.NbLightTankFactory * 3 * player.Modifiers["lightTankFactoryProduction"]
-		player.Army.NbHvyTank += player.Civilian.NbHeavyTankFactory * 1 * player.Modifiers["heavyTankFactoryProduction"]
-
-		player.Economy.Money -= (player.Civilian.NbLightTankFactory * 10000) + (player.Civilian.NbHeavyTankFactory * 100000)
-
-		var nbThingToBuild float32 = 1.0
-
 		var civilianProduction = player.Civilian.NbCivilianFactory * 0.01 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
 		civilianProduction *= player.Modifiers["civilianFactoryProduction"]
 
-		if player.ModifierPolicy.BuildLgtTankFac == 1. {
-			nbThingToBuild += 1.0
-		}
-		if player.ModifierPolicy.BuildHvyTankFac == 1. {
-			nbThingToBuild--
-		}
-		if player.ModifierPolicy.BuildLgtTankFac == 1. {
-			player.Civilian.NbLightTankFactory += (civilianProduction / nbThingToBuild) * 0.5
-		}
-		if player.ModifierPolicy.BuildHvyTankFac == 1. {
-			player.Civilian.NbHeavyTankFactory += (civilianProduction / nbThingToBuild) * 0.4
-		}
-		player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.2
+		var litghTankProd = (player.Economy.LightTankProduction / 100) * 3 * player.Modifiers["lightTankFactoryProduction"] * civilianProduction
+		var heavyTankProd = (player.Economy.HeavyTankProduction / 100) * 1 * player.Modifiers["heavyTankFactoryProduction"] * civilianProduction
+		var bbProd = (player.Economy.BomberProduction / 100) * 0.5 * civilianProduction
+		var fProd = (player.Economy.FighterProduction / 100) * 1 * civilianProduction
+		var artProd = (player.Economy.ArtilleryProduction / 100) * 0.5 * civilianProduction
+		var civProd = (player.Economy.FactoryProduction / 100) * 0.01 * civilianProduction
+		var amuProd = (player.Economy.AmmunitionProduction / 100) * 50 * civilianProduction
+		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 15 * civilianProduction
+
+		player.Army.NbLigtTank += litghTankProd
+		player.Army.NbHvyTank += heavyTankProd
+		player.Army.NbAirBomb += bbProd
+		player.Army.NbAirSup += fProd
+		player.Army.NbArt += artProd
+		player.Army.Ammunition += amuProd
+		player.Army.InfantryEquipment += infProd
+		player.Civilian.NbCivilianFactory += civProd
+
+		player.PlayerInformations["lightTankProduction"].Value = litghTankProd
+		player.PlayerInformations["heavyTankProduction"].Value = heavyTankProd
+		player.PlayerInformations["bomberProduction"].Value = bbProd
+		player.PlayerInformations["fighterProduction"].Value = fProd
+
+		player.PlayerInformations["artilleryProduction"].Value = artProd
+		player.PlayerInformations["factoryProduction"].Value = civProd
+		player.PlayerInformations["infantryEquipmentProduction"].Value = amuProd
+		player.PlayerInformations["ammunitionProduction"].Value = infProd
+
+		// }
+		// if player.Economy.Money > 0 {
+		// 	var nbThingToBuild float32 = 1.0
+
+		// 	player.PlayerInformations["civilianProduction"].Value = civilianProduction
+
+		// 	if player.ModifierPolicy.BuildLgtTankFac == 1. {
+		// 		nbThingToBuild += 1.0
+		// 	}
+		// 	if player.ModifierPolicy.BuildHvyTankFac == 1. {
+		// 		nbThingToBuild--
+		// 	}
+		// 	if player.ModifierPolicy.BuildLgtTankFac == 1. {
+		// 		player.Civilian.NbLightTankFactory += (civilianProduction / nbThingToBuild) * 0.1
+		// 	}
+		// 	if player.ModifierPolicy.BuildHvyTankFac == 1. {
+		// 		player.Civilian.NbHeavyTankFactory += (civilianProduction / nbThingToBuild) * 0.05
+		// 	}
+		// 	player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.15
 
 		if player.Army.Morale > 100 && player.Economy.Money > 0 {
 			player.Army.Morale--
@@ -367,11 +438,6 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 			player.Army.Morale++
 		}
 
-	} else {
-		if player.Army.Morale > 10 {
-			player.Army.Morale--
-		}
 	}
-
 	return player
 }
