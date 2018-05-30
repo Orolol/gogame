@@ -66,6 +66,7 @@ func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cos
 		} else if t.Type == "linked" {
 			if t.Value == "production" {
 				if player.Economy.HeavyTankProduction+player.Economy.AmmunitionProduction+player.Economy.LightTankProduction+player.Economy.FactoryProduction+player.Economy.ArtilleryProduction+player.Economy.InfantryEquipmentProduction+player.Economy.BomberProduction+player.Economy.FighterProduction > 800 {
+					fmt.Println("LINKED CONSTRAINT FAIL", player.Economy)
 					return false
 				}
 			}
