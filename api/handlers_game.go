@@ -248,6 +248,18 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 
 	db.Where(&acc).First(&acc)
 
+	fmt.Println("current games", onGoingGames)
+
+	var isNewGame = true
+
+	for _, g := range onGoingGames {
+		for _, p := range g.ListPlayers {
+			if p.Nick == acc.Name {
+				isNewGame = false
+			}
+		}
+	}
+
 	var m = make(map[string]interface{})
 	m["policies"] = getDefaultPolicies()
 	m["actions"] = getDefaultActions()
@@ -262,7 +274,11 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonMsg)
 
-	matchmakingQueue <- acc
+	if isNewGame {
+		fmt.Println("NEW GAME")
+		matchmakingQueue <- acc
+	}
+
 }
 
 func SendMessage(w http.ResponseWriter, r *http.Request) {

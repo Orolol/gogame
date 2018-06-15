@@ -8,13 +8,13 @@ import (
 func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	army := utils.PlayerArmy{
 		NbSoldier:         30000,
-		NbLigtTank:        100,
-		NbHvyTank:         50,
+		NbLigtTank:        200,
+		NbHvyTank:         100,
 		NbArt:             50,
 		NbAirSup:          0,
 		NbAirBomb:         0,
-		Ammunition:        20000,
-		InfantryEquipment: 20000,
+		Ammunition:        100000,
+		InfantryEquipment: 100000,
 		Morale:            100,
 		Quality:           100}
 
@@ -28,6 +28,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		ArtilleryProduction:         100,
 		BomberProduction:            100,
 		FactoryProduction:           100,
+		AmmunitionProduction:        100,
 	}
 
 	civilian := utils.PlayerCivilian{
@@ -156,6 +157,12 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		SubType:     "INDUSTRIAL",
 		Name:        "ammunitionProduction",
 		Description: "Production of ammunition each turn",
+	}
+	infos["Factory"] = &utils.PlayerInformation{
+		Type:        "ECONOMY",
+		SubType:     "INDUSTRIAL",
+		Name:        "Factory",
+		Description: "Number of factories",
 	}
 
 	var player = utils.PlayerInGame{

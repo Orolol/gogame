@@ -120,16 +120,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Bad account"))
 	} else {
-		fmt.Println("LOGGED")
 		w.WriteHeader(http.StatusOK)
 
 		var token utils.Token
 
 		fmt.Println("LOGGED ", acc.ID)
-		fmt.Println("LOGGED ", acc.Name)
-		fmt.Println("LOGGED ", acc.Login)
-		fmt.Println("LOGGED ", acc.Password)
-		fmt.Println("LOGGED ", acc.Token)
 
 		db.Model(&acc).Related(&token)
 

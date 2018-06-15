@@ -106,18 +106,23 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	game.State = "Running"
 	queueGameOut <- game
 	queueGameOut <- game
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	for game.CurrentTurn < 9999 {
+
 		timer1 := time.NewTimer(time.Second * 2)
 		game.CurrentTurn++
-
+		fmt.Println("Turn : ", game.CurrentTurn)
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
 			j := i - (rlen - len(player1.CallbackEffects))
 			var cb = player1.CallbackEffects[j]
 			if utils.CheckConstraint(player1, cb.Constraints, nil, &game, 0) {
 				for _, e := range cb.Effects {
 					utils.ApplyEffect(player1, e, &game)
-					player1.CallbackEffects = append(player1.CallbackEffects[:j], player1.CallbackEffects[j+1:]...)
+					if len(player1.CallbackEffects) > 1 {
+						player1.CallbackEffects = append(player1.CallbackEffects[:j], player1.CallbackEffects[j+1:]...)
+					} else {
+						player1.CallbackEffects = player1.CallbackEffects[:0]
+					}
 				}
 			}
 		}
@@ -128,29 +133,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 				for _, e := range cb.Effects {
 					utils.ApplyEffect(player2, e, &game)
 					fmt.Println(1, j, player2.CallbackEffects)
-
 				}
-				player2.CallbackEffects = append(player2.CallbackEffects[:j], player2.CallbackEffects[j+1:]...)
-				fmt.Println(2)
+				if len(player1.CallbackEffects) > 1 {
+					player2.CallbackEffects = append(player2.CallbackEffects[:j], player2.CallbackEffects[j+1:]...)
+				} else {
+					player2.CallbackEffects = player2.CallbackEffects[:0]
+				}
 			}
 		}
-
-		// for i, cb := range player1.CallbackEffects {
-		// 	if utils.CheckConstraint(player1, cb.Constraints, nil, &game) {
-		// 		for _, e := range cb.Effects {
-		// 			utils.ApplyEffect(player1, e, &game)
-		// 			player1.CallbackEffects = append(player1.CallbackEffects[:i], player1.CallbackEffects[i+1:]...)
-		// 		}
-		// 	}
-		// }
-		// for i, cb := range player2.CallbackEffects {
-		// 	if utils.CheckConstraint(player2, cb.Constraints, nil, &game) {
-		// 		for _, e := range cb.Effects {
-		// 			utils.ApplyEffect(player2, e, &game)
-		// 			player2.CallbackEffects = append(player2.CallbackEffects[:i], player2.CallbackEffects[i+1:]...)
-		// 		}
-		// 	}
-		// }
 		//Event start turn
 		player1 = utils.AlgoRollTurnEvent(player1, &game)
 		player2 = utils.AlgoRollTurnEvent(player2, &game)
@@ -167,6 +157,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			p2dmg := utils.AlgoDamageDealt(preFightP2)
 			player2 = utils.AlgoDamageRepartition(player2, p1dmg)
 			player1 = utils.AlgoDamageRepartition(player1, p2dmg)
+			player1, player2 = utils.AlgoFullAerialPhase(player1, player2)
 			player1, player2 = utils.AlgoTerritorryChange(player1, player2, p1dmg, p2dmg)
 		}
 

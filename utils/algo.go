@@ -243,6 +243,20 @@ func AlgoTerritorryChange(p1 *PlayerInGame, p2 *PlayerInGame, p1dmg float32, p2d
 	loser.Territory.SmallCities--
 	winner.Territory.SmallCities++
 
+	if loser.Territory.Surface < 90 && int(loser.Territory.Surface)%2 == 0 {
+		loser.Territory.Barracks--
+		winner.Territory.Barracks++
+	}
+
+	if loser.Territory.Surface < 85 && int(loser.Territory.Surface)%4 == 0 {
+		loser.Territory.MediumCities--
+		winner.Territory.MediumCities++
+	}
+	if loser.Territory.Surface < 50 && int(loser.Territory.Surface)%10 == 0 {
+		loser.Territory.BigCities--
+		winner.Territory.BigCities++
+	}
+
 	return p1, p2
 }
 
@@ -271,6 +285,8 @@ func AlgoRollTurnEvent(p1 *PlayerInGame, game *Game) *PlayerInGame {
 	}
 	for _, e := range currentEventp1.Effects {
 		ApplyEffect(p1, e, game)
+	}
+	if currentEventp1.ActionName != "" {
 		p1.Logs = append(p1.Logs, PlayerLog{Turn: game.CurrentTurn, ActionName: currentEventp1.ActionName})
 	}
 
@@ -288,9 +304,53 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 	var dmgSoldier = player.Army.NbSoldier * 0.05 * rollp1 * player.Modifiers["soldierQuality"]
 	var dmgLightTank = player.Army.NbLigtTank * 5 * rollp2 * player.Modifiers["lightTankQuality"]
 	var dmgHvyTank = player.Army.NbHvyTank * 15 * rollp3 * player.Modifiers["heavyTankQuality"]
-	var dmg = (dmgSoldier + dmgLightTank + dmgHvyTank) * 0.2 * dmgModifier
+	var dmgAerial = AlgoAerialBomb(player)
+	var dmg = (dmgSoldier + dmgLightTank + dmgHvyTank + dmgAerial) * 0.2 * dmgModifier
 	////fmt.Println("DAMAGE ", dmg)
 	return dmg
+}
+
+func AlgoAerialCombat(player *PlayerInGame) float32 {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	var rollp1 = r1.Float32() + 4.0
+
+	dmgModifier := (player.Army.Morale / 100.0) * (player.Army.Quality / 100.0)
+
+	var dmgFighter = player.Army.NbAirSup * 30 * rollp1
+	var dmgBomber = player.Army.NbAirBomb * 5 * rollp1
+
+	return (dmgFighter + dmgBomber) * dmgModifier
+}
+
+func AlgoAerialBomb(player *PlayerInGame) float32 {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	var rollp1 = r1.Float32() + 4.0
+
+	var dmgFighter = player.Army.NbAirSup * 5 * rollp1
+	var dmgBomber = player.Army.NbAirBomb * 30 * rollp1
+
+	return dmgFighter + dmgBomber
+}
+
+func AlgoFullAerialPhase(p1 *PlayerInGame, p2 *PlayerInGame) (*PlayerInGame, *PlayerInGame) {
+	var p1AD = AlgoAerialCombat(p1)
+	var p2AD = AlgoAerialCombat(p2)
+
+	p2.Army.NbAirSup -= p1AD / 25
+	p1.Army.NbAirSup -= p2AD / 25
+
+	if p2.Army.NbAirSup < 0 {
+		p2.Army.NbAirSup = 0
+	}
+
+	if p1.Army.NbAirSup < 0 {
+		p1.Army.NbAirSup = 0
+	}
+
+	return p1, p2
+
 }
 
 //AlgoReinforcement calc reinforcement
@@ -305,16 +365,20 @@ func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 		// 	reinforcement = minRf
 		// }
 
-		reinforcement := player.Territory.Barracks * player.Civilian.NbManpower * player.ModifierPolicy.TrainingPolicy / 100
+		reinforcement := player.Territory.Barracks * 50 * player.ModifierPolicy.TrainingPolicy
 
 		if player.Army.InfantryEquipment > reinforcement {
 			player.Army.NbSoldier += reinforcement
 			player.Civilian.NbManpower -= reinforcement
 			player.Army.InfantryEquipment -= reinforcement
+		} else {
+			player.Army.NbSoldier += player.Army.InfantryEquipment
+			player.Civilian.NbManpower -= player.Army.InfantryEquipment
+			player.Army.InfantryEquipment = 0.
 		}
 
 	}
-	natGrowth := player.Territory.Barracks * 100 * player.ModifierPolicy.ManpowerSizePolicy
+	natGrowth := player.Territory.Barracks * 50 * player.ModifierPolicy.ManpowerSizePolicy
 	player.Civilian.NbManpower += natGrowth
 
 	return player
@@ -330,7 +394,6 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 	var multiHvyTank float32
 	var multiLgtTank float32
 	if player.Army.NbHvyTank > 0 {
-
 		multiHvyTank = (player.Army.NbHvyTank * 20) / totalHp
 	}
 	if player.Army.NbLigtTank > 0 {
@@ -364,11 +427,11 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 
 func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
-	if player.Economy.Money < 0 {
-		if player.Army.Morale > 10 {
-			player.Army.Morale--
-		}
-	}
+	// if player.Economy.Money < 0 {
+	// 	if player.Army.Morale > 10 {
+	// 		player.Army.Morale--
+	// 	}
+	// }
 
 	if player.Economy.Loans > 0 {
 		player.Economy.Money -= player.Economy.Loans * 1000000
@@ -382,7 +445,7 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 	player.Civilian.NbResearchPoint += player.Civilian.NbScientist * 0.05 * player.Modifiers["researchEfficiency"]
 	if player.Economy.Money > 0 {
-		var civilianProduction = player.Civilian.NbCivilianFactory * 0.01 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
+		var civilianProduction = player.Civilian.NbCivilianFactory * 0.05 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
 		civilianProduction *= player.Modifiers["civilianFactoryProduction"]
 
 		var litghTankProd = (player.Economy.LightTankProduction / 100) * 3 * player.Modifiers["lightTankFactoryProduction"] * civilianProduction
@@ -392,7 +455,7 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 		var artProd = (player.Economy.ArtilleryProduction / 100) * 0.5 * civilianProduction
 		var civProd = (player.Economy.FactoryProduction / 100) * 0.01 * civilianProduction
 		var amuProd = (player.Economy.AmmunitionProduction / 100) * 50 * civilianProduction
-		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 15 * civilianProduction
+		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 100 * civilianProduction
 
 		player.Army.NbLigtTank += litghTankProd
 		player.Army.NbHvyTank += heavyTankProd
@@ -410,8 +473,10 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 		player.PlayerInformations["artilleryProduction"].Value = artProd
 		player.PlayerInformations["factoryProduction"].Value = civProd
-		player.PlayerInformations["infantryEquipmentProduction"].Value = amuProd
-		player.PlayerInformations["ammunitionProduction"].Value = infProd
+		player.PlayerInformations["infantryEquipmentProduction"].Value = infProd
+		player.PlayerInformations["ammunitionProduction"].Value = amuProd
+
+		player.PlayerInformations["Factory"].Value = player.Civilian.NbCivilianFactory
 
 		// }
 		// if player.Economy.Money > 0 {
