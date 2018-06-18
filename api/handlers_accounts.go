@@ -16,7 +16,7 @@ import (
 /*
 Test with this curl command:
 
-curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://localhost:8080/todos
+curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://http://localhost:8080/todos
 
 */
 func SignUp(w http.ResponseWriter, r *http.Request) {

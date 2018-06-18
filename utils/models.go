@@ -143,3 +143,12 @@ type GameMsg struct {
 	Effects  []Effect
 	Costs    []Cost
 }
+
+type Translation struct {
+	ActionName  string
+	Language    string
+	ShortName   string
+	LongName    string
+	Description string
+	ToolTip     string
+}
