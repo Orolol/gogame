@@ -109,7 +109,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	time.Sleep(time.Second)
 	for game.CurrentTurn < 9999 {
 
-		timer1 := time.NewTimer(time.Second * 2)
+		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
 		fmt.Println("Turn : ", game.CurrentTurn)
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
@@ -149,7 +149,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		var preFightP1 = player1
 		var preFightP2 = player2
 
-		if game.CurrentTurn > 30 {
+		if game.CurrentTurn > 5 {
 			game.IsWar = true
 		}
 		if game.IsWar {
@@ -159,6 +159,15 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			player1 = utils.AlgoDamageRepartition(player1, p2dmg)
 			player1, player2 = utils.AlgoFullAerialPhase(player1, player2)
 			player1, player2 = utils.AlgoTerritorryChange(player1, player2, p1dmg, p2dmg)
+
+			p1FactDmg := utils.AlgoDamageDealtOnFactories(preFightP1)
+			p2FactDmg := utils.AlgoDamageDealtOnFactories(preFightP2)
+
+			player2 = utils.AlgoDamageRepartitionOnFactories(player2, p1FactDmg)
+			player1 = utils.AlgoDamageRepartitionOnFactories(player1, p2FactDmg)
+
+			// p1PopDmg := utils.AlgoDamageDealtOnPopulation(preFightP1)
+			// p2PopDmg := utils.AlgoDamageDealtOnPopulation(preFightP2)
 		}
 
 		if player1.Territory.Surface <= 0 {

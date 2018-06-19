@@ -76,6 +76,14 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["lightTankFactoryProduction"] = 1.0
 	modifiers["heavyTankFactoryProduction"] = 1.0
 
+	modifiers["bomberTargetArmy"] = 1.0
+	modifiers["bomberTargetFactories"] = 0
+	modifiers["bomberTargetPopulation"] = 0
+
+	modifiers["engageFighter"] = 0
+	modifiers["engageBomber"] = 0
+	modifiers["engageAerialForce"] = 0
+
 	var policies []utils.PolicyValue
 	//fmt.Println("GET POLICIES")
 	for _, p := range utils.GetPolicies() {
@@ -163,6 +171,85 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		SubType:     "INDUSTRIAL",
 		Name:        "Factory",
 		Description: "Number of factories",
+	}
+
+	infos["SoldierDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Soldier damage dealt",
+		Description: "Soldier damage dealt",
+	}
+
+	infos["LightTankDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Light Tank damage dealt",
+		Description: "Light Tank damage dealt",
+	}
+
+	infos["HeavyTankDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Heavy Tank damage dealt",
+		Description: "Heavy Tank damage dealt",
+	}
+
+	infos["ArtDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Artillery damage dealt",
+		Description: "Artillery damage dealt",
+	}
+
+	infos["AirSupAerialDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Figther aerial damage dealt",
+		Description: "Figther aerial damage dealt",
+	}
+	infos["AirSupGroundDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Figther ground damage dealt",
+		Description: "Figther ground damage dealt",
+	}
+	infos["AirBombAerialDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Bomber aerial damage dealt",
+		Description: "Bomber aerial damage dealt",
+	}
+	infos["AirBombGroundDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Bomber ground damage dealt",
+		Description: "Bomber ground damage dealt",
+	}
+
+	infos["TotalAerialDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Total aerial damage dealt",
+		Description: "Total aerial damage dealt",
+	}
+	infos["TotalGroundDmg"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "COMMANDMENT",
+		Name:        "Total ground damage dealt",
+		Description: "Total ground damage dealt",
+	}
+
+	infos["SoldierRecruit"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "RECRUITMENT",
+		Name:        "Total soldier recruited",
+		Description: "Total soldier recruited",
+	}
+	infos["ManpowerGrowth"] = &utils.PlayerInformation{
+		Type:        "MILITARY",
+		SubType:     "RECRUITMENT",
+		Name:        "Manpower Growth",
+		Description: "Manpower Growth",
 	}
 
 	var player = utils.PlayerInGame{

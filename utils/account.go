@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
@@ -15,6 +16,15 @@ type Account struct {
 	ELO      int
 }
 
+//GameHistory GameHistory Model
+type GameHistory struct {
+	gorm.Model
+	Winner  uint
+	Loser   uint
+	GameID  uuid.UUID
+	ELODiff int
+}
+
 //Token Authentication token
 type Token struct {
 	gorm.Model
@@ -23,10 +33,3 @@ type Token struct {
 }
 
 //GameHistory list of past game
-
-type GameHistory struct {
-	gorm.Model
-	GameEndState Game
-	Player1ID    int
-	Player2ID    int
-}

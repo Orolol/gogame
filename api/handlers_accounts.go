@@ -85,6 +85,59 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func EditAccount(w http.ResponseWriter, r *http.Request) {
+	db, err := gorm.Open("sqlite3", "test.db")
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer db.Close()
+	var acc utils.Account
+	var dbacc utils.Account
+	fmt.Println("EDIT ACC")
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if erra := r.Body.Close(); erra != nil {
+		panic(erra)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if errb := json.Unmarshal(body, &acc); errb != nil {
+		fmt.Println("FAIL CREATION ", errb)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	fmt.Println(acc)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(acc.Password), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("PASS : ", acc.Password)
+	acc.Password = string(hashedPassword)
+	fmt.Println("FINAL PASS : ", acc.Password)
+
+	if res := db.First(&dbacc, "Login = ?", acc.Login); res.Error != nil {
+		fmt.Println("ERROR EDIT", err.Error)
+		fmt.Println("ERROR EDIT", acc.Login)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	} else {
+		fmt.Println("EDIT THIS", dbacc)
+		dbacc.Name = acc.Name
+		if acc.Password != "" {
+			dbacc.Password = acc.Password
+		}
+
+		db.Save(&dbacc)
+		w.WriteHeader(http.StatusCreated)
+	}
+
+}
+
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("OK LETS LOGIN")
 	db, err := gorm.Open("sqlite3", "test.db")

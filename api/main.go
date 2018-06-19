@@ -43,8 +43,16 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 			delete(onGoingGames, gs.GameID)
 			var winner utils.Account
 			var loser utils.Account
+			var gh utils.GameHistory
 			db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
 			db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
+
+			gh.Winner = winner.ID
+			gh.Loser = loser.ID
+			gh.GameID = gs.GameID
+			gh.ELODiff = 15
+
+			db.Create(&gh)
 
 			winner.ELO += 15
 			loser.ELO -= 15
@@ -103,6 +111,7 @@ func main() {
 	}
 	defer db.Close()
 	db.AutoMigrate(&utils.Account{})
+	db.AutoMigrate(&utils.GameHistory{})
 	db.AutoMigrate(&utils.Token{})
 
 	utils.SetBaseValueDB()

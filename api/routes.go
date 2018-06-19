@@ -31,6 +31,12 @@ var routes = Routes{
 		SignUp,
 	},
 	Route{
+		"EditAccount",
+		"POST",
+		"/EditAccount",
+		EditAccount,
+	},
+	Route{
 		"Login",
 		"POST",
 		"/Login",

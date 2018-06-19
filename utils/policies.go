@@ -145,4 +145,59 @@ func SetBaseValuePolicies() {
 			},
 		}})
 
+	policies = append(policies, Policy{
+		Name:        "Bomber combat style",
+		ActionName:  "bomberCombatStyle",
+		Description: "Bomber combat style",
+		TypePolicy:  "MILITARY",
+		SubType:     "COMMANDMENT",
+		MaxChange:   10,
+		PossibleValue2: []PolicyValue{
+			PolicyValue{Name: "Target army", Value: 1, Description: "Bomber will focus the ground support", Constraints: nil, ActionName: "bomberCombatStyle",
+				Effects: []Effect{
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "bomberTargetArmy"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "bomberTargetFactory"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "bomberTargetPopulation"},
+				}, IsDefault: true,
+			},
+			PolicyValue{Name: "Target factories", Value: 0, Description: "Bomber will focus the enemy production", Constraints: nil, ActionName: "bomberCombatStyle",
+				Effects: []Effect{
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "bomberTargetArmy"},
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "bomberTargetFactory"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "bomberTargetPopulation"},
+				}, IsDefault: false,
+			},
+		}})
+
+	policies = append(policies, Policy{
+		Name:        "Engage aerial force",
+		ActionName:  "engageAerialForce",
+		Description: "Engage aerial force",
+		TypePolicy:  "MILITARY",
+		SubType:     "COMMANDMENT",
+		MaxChange:   10,
+		PossibleValue2: []PolicyValue{
+			PolicyValue{Name: "Send every planes on fight !", Value: 2, Description: "Send every planes on fight !", Constraints: nil, ActionName: "engageAerialForce",
+				Effects: []Effect{
+					Effect{ModifierType: "Modifiers", Value: 2, Operator: "=", ModifierName: "engageAerialForce"},
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "engageFighter"},
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "engageBomber"},
+				}, IsDefault: false,
+			},
+			PolicyValue{Name: "Send the fighter !", Value: 1, Description: "Send the fighter !", Constraints: nil, ActionName: "engageAerialForce",
+				Effects: []Effect{
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "engageAerialForce"},
+					Effect{ModifierType: "Modifiers", Value: 1, Operator: "=", ModifierName: "engageFighter"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "engageBomber"},
+				}, IsDefault: true,
+			},
+			PolicyValue{Name: "All planes at base", Value: 0, Description: "Bomber will focus the enemy production", Constraints: nil, ActionName: "engageAerialForce",
+				Effects: []Effect{
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "engageAerialForce"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "engageFighter"},
+					Effect{ModifierType: "Modifiers", Value: 0, Operator: "=", ModifierName: "engageBomber"},
+				}, IsDefault: true,
+			},
+		}})
+
 }
