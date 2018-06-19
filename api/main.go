@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/orolol/gogame/utils"
 )
 
@@ -39,7 +39,8 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 		json.Unmarshal(msg[2], &gs)
 
 		if gs.State == "End" {
-			db, _ := gorm.Open("sqlite3", "test.db")
+			fmt.Println("END GAME")
+			db, _ := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
 			delete(onGoingGames, gs.GameID)
 			var winner utils.Account
 			var loser utils.Account
@@ -105,8 +106,9 @@ func goSocket() {
 
 func main() {
 
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
+		fmt.Println(err)
 		panic("failed to connect database")
 	}
 	defer db.Close()

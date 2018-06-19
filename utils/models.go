@@ -152,3 +152,15 @@ type Translation struct {
 	Description string
 	ToolTip     string
 }
+
+type DisplayInfoCat struct {
+	Category string
+	Infos    []DisplayInfos
+}
+
+type DisplayInfos struct {
+	Name         string
+	Type         string
+	LowAlert     float32
+	VeryLowAlert float32
+}

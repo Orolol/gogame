@@ -114,6 +114,20 @@ func GetTranslations(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(jsonMsg))
 }
 
+func GetInfos(w http.ResponseWriter, r *http.Request) {
+	var translations *[]utils.DisplayInfoCat
+
+	translations = utils.GetInfos()
+
+	w.WriteHeader(http.StatusCreated)
+	jsonMsg, err := json.Marshal(translations)
+	if err != nil {
+		fmt.Println("fail :(")
+		fmt.Println(err)
+	}
+	w.Write([]byte(jsonMsg))
+}
+
 func GetTechnology(w http.ResponseWriter, r *http.Request) {
 	var actionApi utils.PolicyChange
 	var techno utils.Technology
@@ -254,7 +268,7 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 }
 
 func JoinGame(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
 	fmt.Println("Seems like someone want to join a game ! ", r.Body)
 	var acc utils.Account
 

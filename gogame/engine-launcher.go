@@ -175,13 +175,11 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 			game.Winner = game.ListPlayers[1]
 			game.Loser = game.ListPlayers[0]
 			queueGameOut <- game
-			queueGameOut <- game
 			break
 		} else if player2.Territory.Surface <= 0 {
 			game.State = "End"
 			game.Winner = game.ListPlayers[0]
 			game.Loser = game.ListPlayers[1]
-			queueGameOut <- game
 			queueGameOut <- game
 			break
 		} else {

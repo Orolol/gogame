@@ -6,4 +6,5 @@ func SetBaseValueDB() {
 	SetBaseValueEvents()
 	SetBaseValuePolicies()
 	SetBaseValueTranslations()
+	SetBaseValueInfos()
 }

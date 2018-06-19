@@ -20,7 +20,7 @@ curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://http://
 
 */
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -86,7 +86,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditAccount(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -140,7 +140,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("OK LETS LOGIN")
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -165,7 +165,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	db.First(&acc, "Login = ?", acc.Login)
 	errPass := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(clearPass))
 	if errPass != nil {
-		fmt.Println("Mauvais password")
+		fmt.Println("Mauvais password", errPass, acc.Password, clearPass)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Bad password"))
 	} else if acc.ID == 0 {
