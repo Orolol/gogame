@@ -87,6 +87,33 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetTranslations(w http.ResponseWriter, r *http.Request) {
+	var translations []utils.Translation
+	var language utils.Translation
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println(body)
+	if err := json.Unmarshal(body, &language); err != nil {
+		panic(err)
+	}
+
+	translations = utils.GetTranslationsByLanguage(language.Language)
+
+	w.WriteHeader(http.StatusCreated)
+	jsonMsg, err := json.Marshal(translations)
+	if err != nil {
+		fmt.Println("fail :(")
+		fmt.Println(err)
+	}
+	w.Write([]byte(jsonMsg))
+}
+
 func GetTechnology(w http.ResponseWriter, r *http.Request) {
 	var actionApi utils.PolicyChange
 	var techno utils.Technology
