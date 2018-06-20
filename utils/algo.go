@@ -500,7 +500,7 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 
 //AlgoDamageRepartition Calculate loses
 func AlgoDamageRepartitionOnFactories(player *PlayerInGame, dmgIncoming float32) *PlayerInGame {
-	loss := (dmgIncoming / (player.Civilian.NbCivilianFactory * 2000))
+	loss := (dmgIncoming / (3000))
 	player.Civilian.NbCivilianFactory -= loss
 	fmt.Println("BOMB ON FACTORIES", loss, dmgIncoming)
 	return player

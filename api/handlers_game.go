@@ -105,7 +105,7 @@ func GetTranslations(w http.ResponseWriter, r *http.Request) {
 
 	translations = utils.GetTranslationsByLanguage(language.Language)
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	jsonMsg, err := json.Marshal(translations)
 	if err != nil {
 		fmt.Println("fail :(")
@@ -119,8 +119,69 @@ func GetInfos(w http.ResponseWriter, r *http.Request) {
 
 	translations = utils.GetInfos()
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	jsonMsg, err := json.Marshal(translations)
+	if err != nil {
+		fmt.Println("fail :(")
+		fmt.Println(err)
+	}
+	w.Write([]byte(jsonMsg))
+}
+
+func GetHistory(w http.ResponseWriter, r *http.Request) {
+
+	var acc utils.Account
+	var list []utils.GameHistory
+	var apiList []utils.GameHistoryApi
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	fmt.Println(body)
+	if err := json.Unmarshal(body, &acc); err != nil {
+		panic(err)
+	}
+
+	db, err := gorm.Open("mysql", ConnexionString)
+	db.Where(&acc).First(&acc)
+	fmt.Println(acc.ID)
+	// db.Where("winner_id = ? OR loser_id = ?", acc.ID, acc.ID).Find(&list).Joins("JOIN accounts ON winner_id = accounts.ID OR loser_id = accounts.ID")
+	rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Joins("JOIN accounts as winner ON winner_id = winner.ID").Joins("JOIN accounts as loser ON loser_id = loser.ID").Rows()
+	fmt.Println("list", list, rows, err)
+	for rows.Next() {
+		var apiHist utils.GameHistoryApi
+		rows.Scan(&apiHist.Created_at, &apiHist.ELODiff, &apiHist.WinnerNick, &apiHist.LoserNick)
+		apiList = append(apiList, apiHist)
+	}
+	w.WriteHeader(http.StatusOK)
+	jsonMsg, err := json.Marshal(apiList)
+	if err != nil {
+		fmt.Println("fail :(")
+		fmt.Println(err)
+	}
+	w.Write([]byte(jsonMsg))
+}
+
+func GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
+
+	var accs []utils.Account
+	var accsApi []utils.AccountLeaderboardApi
+	db, err := gorm.Open("mysql", ConnexionString)
+	db.Order("ELO desc, Name").Find(&accs)
+
+	for _, i := range accs {
+		accsApi = append(accsApi, utils.AccountLeaderboardApi{
+			Name: i.Name,
+			ELO:  i.ELO,
+		})
+
+	}
+	w.WriteHeader(http.StatusOK)
+	jsonMsg, err := json.Marshal(accsApi)
 	if err != nil {
 		fmt.Println("fail :(")
 		fmt.Println(err)
@@ -268,7 +329,7 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 }
 
 func JoinGame(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", ConnexionString)
 	fmt.Println("Seems like someone want to join a game ! ", r.Body)
 	var acc utils.Account
 

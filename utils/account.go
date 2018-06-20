@@ -11,25 +11,48 @@ type Account struct {
 	Name     string `gorm:"not null;unique"`
 	Login    string `gorm:"not null;unique"`
 	Password string
-	Token    Token
 	TokenID  uint
 	ELO      int
+}
+
+//Account Account Model
+type AccountApi struct {
+	ID    uint
+	Login string
+	Name  string
+	Token string
+	ELO   int
+}
+
+//Account Account Model
+type GameHistoryApi struct {
+	Created_at string
+	WinnerNick string
+	LoserNick  string
+	ELODiff    int
+}
+
+//Account Account Model
+type AccountLeaderboardApi struct {
+	Name string
+	ELO  int
 }
 
 //GameHistory GameHistory Model
 type GameHistory struct {
 	gorm.Model
-	Winner  uint
-	Loser   uint
-	GameID  uuid.UUID
-	ELODiff int
+	WinnerID uint
+	LoserID  uint
+	GameID   uuid.UUID
+	ELODiff  int
 }
 
 //Token Authentication token
 type Token struct {
 	gorm.Model
-	Token  string
-	Status string
+	AccountID uint
+	Token     string
+	Status    string
 }
 
 //GameHistory list of past game

@@ -20,7 +20,7 @@ curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://http://
 
 */
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -67,7 +67,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc.Token = token
+	acc.TokenID = token.ID
 
 	if err := db.Create(&acc).Error; err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -77,7 +77,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("CREATED ", acc.Name)
 		fmt.Println("CREATED ", acc.Login)
 		fmt.Println("CREATED ", acc.Password)
-		fmt.Println("CREATED ", acc.Token)
+		fmt.Println("CREATED ", acc.TokenID)
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(stoken))
@@ -86,7 +86,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditAccount(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -140,13 +140,14 @@ func EditAccount(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("OK LETS LOGIN")
-	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		panic("failed to connect database")
 	}
 	defer db.Close()
 
 	var acc utils.Account
+	var accApi utils.AccountApi
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -164,6 +165,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	db.First(&acc, "Login = ?", acc.Login)
 	errPass := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(clearPass))
+
 	if errPass != nil {
 		fmt.Println("Mauvais password", errPass, acc.Password, clearPass)
 		w.WriteHeader(http.StatusOK)
@@ -181,15 +183,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		db.Model(&acc).Related(&token)
 
-		acc.Password = ""
-		acc.Token = token
+		accApi.ID = acc.ID
+		accApi.Login = acc.Login
+		accApi.Name = acc.Name
+		accApi.ELO = acc.ELO
+		accApi.Token = token.Token
 
-		jsonMsg, err := json.Marshal(acc)
+		jsonMsg, err := json.Marshal(accApi)
 		if err != nil {
 			fmt.Println("fail :(")
 			fmt.Println(err)
 		}
-		fmt.Println("ACC ", acc, jsonMsg)
+		fmt.Println("ACC ", accApi, jsonMsg)
 		w.Write([]byte(jsonMsg))
 	}
 }

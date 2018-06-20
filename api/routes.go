@@ -72,4 +72,16 @@ var routes = Routes{
 		"/GetInfos",
 		GetInfos,
 	},
+	Route{
+		"GetHistory",
+		"POST",
+		"/GetHistory",
+		GetHistory,
+	},
+	Route{
+		"GetLeaderBoard",
+		"POST",
+		"/GetLeaderBoard",
+		GetLeaderBoard,
+	},
 }

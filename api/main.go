@@ -17,6 +17,8 @@ import (
 
 var addr = flag.String("addr", ":5001", "http service address")
 
+var ConnexionString = "root:@/gogame?charset=utf8&parseTime=True&loc=Local"
+
 var onGoingGames = make(map[uuid.UUID]*utils.Game)
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -37,10 +39,31 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 	for msg := range queueGameState {
 		var gs utils.Game
 		json.Unmarshal(msg[2], &gs)
+		for client := range hub.clients {
+			if client.GameID == gs.GameID {
+				onGoingGames[gs.GameID] = &gs
+				w, err := client.conn.NextWriter(websocket.TextMessage)
+				if err != nil {
+					fmt.Println("ERROR ", err)
+				} else {
+					w.Write(msg[2])
+
+				}
+			} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
+				client.GameID = gs.GameID
+				onGoingGames[gs.GameID] = &gs
+				w, err := client.conn.NextWriter(websocket.TextMessage)
+				if err != nil {
+					fmt.Println("ERROR ", err)
+				} else {
+					w.Write(msg[2])
+				}
+			}
+		}
 
 		if gs.State == "End" {
 			fmt.Println("END GAME")
-			db, _ := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
+			db, _ := gorm.Open("mysql", ConnexionString)
 			delete(onGoingGames, gs.GameID)
 			var winner utils.Account
 			var loser utils.Account
@@ -48,8 +71,10 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 			db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
 			db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
 
-			gh.Winner = winner.ID
-			gh.Loser = loser.ID
+			gh.WinnerID = winner.ID
+			// gh.WinnerNick = winner.Name
+			gh.LoserID = loser.ID
+			// gh.LoserNick = loser.Name
 			gh.GameID = gs.GameID
 			gh.ELODiff = 15
 
@@ -59,26 +84,26 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 			loser.ELO -= 15
 			db.Save(winner)
 			db.Save(loser)
-		}
 
-		for client := range hub.clients {
-			if client.GameID == gs.GameID {
-				onGoingGames[gs.GameID] = &gs
-				w, err := client.conn.NextWriter(websocket.TextMessage)
-				if err != nil {
-					fmt.Println("ERROR ", err)
-				} else {
-					w.Write(msg[2])
-				}
-			} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
-				client.GameID = gs.GameID
-				onGoingGames[gs.GameID] = &gs
-				w, err := client.conn.NextWriter(websocket.TextMessage)
-				if err != nil {
-					fmt.Println("ERROR ", err)
-				} else {
-					fmt.Println("WRITE !")
-					w.Write(msg[2])
+			for client := range hub.clients {
+				if client.GameID == gs.GameID {
+					onGoingGames[gs.GameID] = &gs
+					w, err := client.conn.NextWriter(websocket.TextMessage)
+					if err != nil {
+						fmt.Println("ERROR ", err)
+					} else {
+						w.Write(msg[2])
+
+					}
+				} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
+					client.GameID = gs.GameID
+					onGoingGames[gs.GameID] = &gs
+					w, err := client.conn.NextWriter(websocket.TextMessage)
+					if err != nil {
+						fmt.Println("ERROR ", err)
+					} else {
+						w.Write(msg[2])
+					}
 				}
 			}
 		}
@@ -106,7 +131,7 @@ func goSocket() {
 
 func main() {
 
-	db, err := gorm.Open("mysql", "root:@/gogame?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
