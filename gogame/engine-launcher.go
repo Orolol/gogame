@@ -109,7 +109,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	time.Sleep(time.Second)
 	for game.CurrentTurn < 9999 {
 
-		timer1 := time.NewTimer(time.Second / 3)
+		timer1 := time.NewTimer(time.Second)
 		game.CurrentTurn++
 		fmt.Println("Turn : ", game.CurrentTurn)
 		for i, rlen := 0, len(player1.CallbackEffects); i < rlen; i++ {
