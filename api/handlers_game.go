@@ -131,6 +131,7 @@ func GetInfos(w http.ResponseWriter, r *http.Request) {
 func GetHistory(w http.ResponseWriter, r *http.Request) {
 
 	var acc utils.Account
+	var accList []utils.Account
 	var list []utils.GameHistory
 	var apiList []utils.GameHistoryApi
 
@@ -148,13 +149,25 @@ func GetHistory(w http.ResponseWriter, r *http.Request) {
 
 	db, err := gorm.Open("mysql", ConnexionString)
 	db.Where(&acc).First(&acc)
+	db.Find(&accList)
 	fmt.Println(acc.ID)
-	// db.Where("winner_id = ? OR loser_id = ?", acc.ID, acc.ID).Find(&list).Joins("JOIN accounts ON winner_id = accounts.ID OR loser_id = accounts.ID")
+	db.Where("winner_id = ? OR loser_id = ?", acc.ID, acc.ID).Find(&list).Joins("JOIN accounts ON winner_id = accounts.ID OR loser_id = accounts.ID")
 	rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Joins("JOIN accounts as winner ON winner_id = winner.ID").Joins("JOIN accounts as loser ON loser_id = loser.ID").Rows()
 	fmt.Println("list", list, rows, err)
 	for rows.Next() {
 		var apiHist utils.GameHistoryApi
 		rows.Scan(&apiHist.Created_at, &apiHist.ELODiff, &apiHist.WinnerNick, &apiHist.LoserNick)
+		fmt.Println(apiHist)
+		apiList = append(apiList, apiHist)
+	}
+
+	// rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Where("game_histories.winner_id = ? OR game_histories.loser_id = ?", acc.ID, acc.ID).Joins("JOIN accounts as winner ON winner_id = winner.ID OR winner_id = 0").Joins("JOIN accounts as loser ON loser_id = loser.ID OR loser_id = 0").Rows()
+	// rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, game_histories.winner_nick, game_histories.loser_id").Where("game_histories.winner_id = ? OR game_histories.loser_id = ?", acc.ID, acc.ID).Rows()
+	fmt.Println("list", list, rows, err)
+	for rows.Next() {
+		var apiHist utils.GameHistoryApi
+		rows.Scan(&apiHist.Created_at, &apiHist.ELODiff, &apiHist.WinnerNick, &apiHist.LoserNick)
+		fmt.Println(apiHist)
 		apiList = append(apiList, apiHist)
 	}
 	w.WriteHeader(http.StatusOK)
@@ -380,6 +393,49 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("NEW GAME")
 		matchmakingQueue <- acc
 	}
+
+}
+
+func JoinGameAi(w http.ResponseWriter, r *http.Request) {
+	db, err := gorm.Open("mysql", ConnexionString)
+	fmt.Println("Seems like someone want to join AI ! ", r.Body)
+	var acc utils.Account
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(body, &acc); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(422) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			panic(err)
+		}
+	}
+
+	db.Where(&acc).First(&acc)
+
+	fmt.Println("current games", onGoingGames)
+
+	var m = make(map[string]interface{})
+	m["policies"] = getDefaultPolicies()
+	m["actions"] = getDefaultActions()
+	m["technology"] = getDefaultTech()
+	m["events"] = getDefaultEvents()
+
+	jsonMsg, err := json.Marshal(m)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonMsg)
+
+	fmt.Println("NEW GAME")
+	matchmakingAiQueue <- acc
 
 }
 

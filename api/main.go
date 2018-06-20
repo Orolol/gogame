@@ -63,27 +63,53 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 		if gs.State == "End" {
 			fmt.Println("END GAME")
-			db, _ := gorm.Open("mysql", ConnexionString)
-			delete(onGoingGames, gs.GameID)
-			var winner utils.Account
-			var loser utils.Account
-			var gh utils.GameHistory
-			db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
-			db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
+			if gs.Conf.GameType != "AI" {
+				db, _ := gorm.Open("mysql", ConnexionString)
+				delete(onGoingGames, gs.GameID)
+				var winner utils.Account
+				var loser utils.Account
+				var gh utils.GameHistory
+				db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
+				db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
 
-			gh.WinnerID = winner.ID
-			// gh.WinnerNick = winner.Name
-			gh.LoserID = loser.ID
-			// gh.LoserNick = loser.Name
-			gh.GameID = gs.GameID
-			gh.ELODiff = 15
+				gh.WinnerID = winner.ID
+				// gh.WinnerNick = winner.Name
+				gh.LoserID = loser.ID
+				// gh.LoserNick = loser.Name
+				gh.GameID = gs.GameID
+				gh.ELODiff = 15
 
-			db.Create(&gh)
+				db.Create(&gh)
 
-			winner.ELO += 15
-			loser.ELO -= 15
-			db.Save(winner)
-			db.Save(loser)
+				winner.ELO += 15
+				loser.ELO -= 15
+				db.Save(winner)
+				db.Save(loser)
+			} else {
+				db, _ := gorm.Open("mysql", ConnexionString)
+				delete(onGoingGames, gs.GameID)
+				var winner utils.Account
+				var loser utils.Account
+				var gh utils.GameHistory
+				if gs.Winner.PlayerID != 0 {
+					db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
+
+				} else {
+					db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
+				}
+
+				gh.WinnerID = winner.ID
+				// gh.WinnerNick = winner.Name
+				gh.LoserID = loser.ID
+				// gh.LoserNick = loser.Name
+				gh.GameID = gs.GameID
+				gh.ELODiff = 0
+
+				db.Create(&gh)
+
+				db.Save(winner)
+				db.Save(loser)
+			}
 
 			for client := range hub.clients {
 				if client.GameID == gs.GameID {
@@ -144,6 +170,7 @@ func main() {
 	utils.SetBaseValueDB()
 
 	go matchmaking()
+	go matchmakingAi()
 	go goSocket()
 
 	router := NewRouter()

@@ -25,6 +25,12 @@ var routes = Routes{
 		JoinGame,
 	},
 	Route{
+		"JoinGameAi",
+		"POST",
+		"/JoinGameAi",
+		JoinGameAi,
+	},
+	Route{
 		"SignUp",
 		"POST",
 		"/SignUp",
