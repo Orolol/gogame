@@ -526,7 +526,7 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 
 	player.Civilian.NbResearchPoint += player.Civilian.NbScientist * 0.05 * player.Modifiers["researchEfficiency"]
 	if player.Economy.Money > 0 {
-		var civilianProduction = player.Civilian.NbCivilianFactory * 0.05 * (2 / player.Economy.TaxRate) * (2 / player.ModifierPolicy.ManpowerSizePolicy)
+		var civilianProduction = player.Civilian.NbCivilianFactory * 0.05 * (2 / player.Economy.TaxRate) * player.Modifiers["workersConcrptionEfficiency"]
 		civilianProduction *= player.Modifiers["civilianFactoryProduction"]
 
 		var litghTankProd = (player.Economy.LightTankProduction / 100) * 3 * player.Modifiers["lightTankFactoryProduction"] * civilianProduction
@@ -535,8 +535,8 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 		var fProd = (player.Economy.FighterProduction / 100) * 1 * civilianProduction
 		var artProd = (player.Economy.ArtilleryProduction / 100) * 0.5 * civilianProduction
 		var civProd = (player.Economy.FactoryProduction / 100) * 0.01 * civilianProduction
-		var amuProd = (player.Economy.AmmunitionProduction / 100) * 50 * civilianProduction
-		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 100 * civilianProduction
+		var amuProd = (player.Economy.AmmunitionProduction / 100) * 100 * civilianProduction
+		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 150 * civilianProduction
 
 		player.Army.NbLigtTank += litghTankProd
 		player.Army.NbHvyTank += heavyTankProd
@@ -579,7 +579,7 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 		// 	}
 		// 	player.Civilian.NbCivilianFactory += (civilianProduction / nbThingToBuild) * 0.15
 
-		if player.Army.Morale > 100 && player.Economy.Money > 0 {
+		if player.Army.Morale > 100 {
 			player.Army.Morale--
 		} else {
 			player.Army.Morale++

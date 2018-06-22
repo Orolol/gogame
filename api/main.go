@@ -86,33 +86,34 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 				db.Save(winner)
 				db.Save(loser)
 			} else {
+				fmt.Println(1)
 				db, _ := gorm.Open("mysql", ConnexionString)
 				delete(onGoingGames, gs.GameID)
 				var winner utils.Account
 				var loser utils.Account
 				var gh utils.GameHistory
+				fmt.Println(2)
 				if gs.Winner.PlayerID != 0 {
 					db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
 
 				} else {
 					db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
 				}
-
+				fmt.Println(3)
 				gh.WinnerID = winner.ID
 				// gh.WinnerNick = winner.Name
 				gh.LoserID = loser.ID
 				// gh.LoserNick = loser.Name
 				gh.GameID = gs.GameID
 				gh.ELODiff = 0
-
+				fmt.Println(4, gh)
 				db.Create(&gh)
-
-				db.Save(winner)
-				db.Save(loser)
+				fmt.Println(5)
 			}
 
 			for client := range hub.clients {
 				if client.GameID == gs.GameID {
+
 					onGoingGames[gs.GameID] = &gs
 					w, err := client.conn.NextWriter(websocket.TextMessage)
 					if err != nil {

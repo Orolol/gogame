@@ -14,14 +14,10 @@ func SetBaseValueInfos() {
 		Category: "generalInfos",
 		Infos: []DisplayInfos{
 			DisplayInfos{
-				Name:         "Surface",
+				Name:         "SmallCities",
 				Type:         "Territory",
 				LowAlert:     50,
 				VeryLowAlert: 15,
-			},
-			DisplayInfos{
-				Name: "SmallCities",
-				Type: "Territory",
 			},
 			DisplayInfos{
 				Name: "MediumCities",
@@ -46,8 +42,10 @@ func SetBaseValueInfos() {
 				VeryLowAlert: 1000000,
 			},
 			DisplayInfos{
-				Name: "Factory",
-				Type: "PlayerInformations",
+				Name:       "Factory",
+				Type:       "PlayerInformations",
+				GrowthName: "factoryProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
 				Name: "NbResearchPoint",
@@ -62,32 +60,44 @@ func SetBaseValueInfos() {
 				Type: "Separator",
 			},
 			DisplayInfos{
-				Name: "NbSoldier",
-				Type: "Army",
+				Name:       "NbSoldier",
+				Type:       "Army",
+				GrowthName: "SoldierRecruit",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
-				Name: "NbLigtTank",
-				Type: "Army",
+				Name:       "NbLigtTank",
+				Type:       "Army",
+				GrowthName: "lightTankProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
-				Name: "NbHvyTank",
-				Type: "Army",
+				Name:       "NbHvyTank",
+				Type:       "Army",
+				GrowthName: "heavyTankProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
-				Name: "NbArt",
-				Type: "Army",
+				Name:       "NbArt",
+				Type:       "Army",
+				GrowthName: "artilleryProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
 				Name: "",
 				Type: "Separator",
 			},
 			DisplayInfos{
-				Name: "NbAirSup",
-				Type: "Army",
+				Name:       "NbAirSup",
+				Type:       "Army",
+				GrowthName: "fighterProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
-				Name: "NbAirBomb",
-				Type: "Army",
+				Name:       "NbAirBomb",
+				Type:       "Army",
+				GrowthName: "bomberProduction",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
 				Name: "",
@@ -106,12 +116,22 @@ func SetBaseValueInfos() {
 				Type: "Separator",
 			},
 			DisplayInfos{
-				Name: "Ammunition",
-				Type: "Army",
+				Name:       "NbManpower",
+				Type:       "Civilian",
+				GrowthName: "ManpowerGrowth",
+				GrowthType: "PlayerInformations",
 			},
 			DisplayInfos{
-				Name: "InfantryEquipment",
-				Type: "Army",
+				Name:       "Ammunition",
+				Type:       "Army",
+				GrowthName: "ammunitionProduction",
+				GrowthType: "PlayerInformations",
+			},
+			DisplayInfos{
+				Name:       "InfantryEquipment",
+				Type:       "Army",
+				GrowthName: "infantryEquipmentProduction",
+				GrowthType: "PlayerInformations",
 			},
 		},
 	})

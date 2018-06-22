@@ -48,9 +48,9 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		TankProduction:     1}
 
 	territory := utils.PlayerTerritory{
-		Barracks:     50,
+		Barracks:     45,
 		SmallCities:  100,
-		MediumCities: 25,
+		MediumCities: 22,
 		BigCities:    5,
 		Surface:      100,
 	}

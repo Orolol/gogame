@@ -25,10 +25,10 @@ func SetBaseValueActions() {
 		SubType:     "COMMANDMENT",
 		Name:        "War Propaganda",
 		ActionName:  "actionWarPropaganda",
-		Description: "Boost morale by 20% (cost 10M) ",
+		Description: "Boost morale by 15%",
 		Cooldown:    10,
 		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 20, Target: "Player"}},
-		Costs:       []Cost{Cost{Type: "money", Value: 10000000}},
+		Costs:       []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector:    "fixed",
 	})
 	actions = append(actions, PlayerActionOrder{
@@ -36,13 +36,13 @@ func SetBaseValueActions() {
 		SubType:     "COMMANDMENT",
 		Name:        "Promote war heroes",
 		ActionName:  "promoteWarHearoes",
-		Description: "Boost morale by 5%, discipline by 5% (cost 10M) ",
+		Description: "Boost morale by 5%, quality by 5%",
 		Cooldown:    15,
 		Effects: []Effect{
 			Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 5, Target: "Player"},
-			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 0.05, Target: "Player"},
+			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 5, Target: "Player"},
 		},
-		Costs:    []Cost{Cost{Type: "money", Value: 10000000}},
+		Costs:    []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector: "fixed",
 	})
 
@@ -51,11 +51,11 @@ func SetBaseValueActions() {
 		SubType:     "COMMANDMENT",
 		Name:        "Purge of weak elements",
 		ActionName:  "purgeSoldier",
-		Description: "Executes possible traitors and weak soldier to improve morale and discipline by 15%. (cost 15% soldier and 10M)",
+		Description: "Executes possible traitors and weak soldier (10% of your soldiers) to improve quality by 15%.",
 		Cooldown:    30,
 		Effects: []Effect{
-			Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "*", Value: 0.85, Target: "Player"},
-			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 0.15, Target: "Player"},
+			Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "*", Value: 0.90, Target: "Player"},
+			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 15, Target: "Player"},
 		},
 		Costs:    []Cost{Cost{Type: "money", Value: 10000000}},
 		Selector: "fixed",
@@ -65,7 +65,7 @@ func SetBaseValueActions() {
 		SubType:     "RECRUITMENT",
 		Name:        "Emergency recruitment",
 		ActionName:  "emergencyRecruitment",
-		Description: "Recruit immediatly 15 000 soldier. (cost 50M and 10% morale)",
+		Description: "Recruit immediatly 15 000 soldier.",
 		Cooldown:    30,
 		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "+", Value: 15000, Target: "Player"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 50000000}, Cost{Type: "morale", Value: 10}},
@@ -76,7 +76,7 @@ func SetBaseValueActions() {
 		SubType:     "RECRUITMENT",
 		Name:        "Build additionnal barracks",
 		ActionName:  "buildBarracks",
-		Description: "Build a barrack (cost 20M)",
+		Description: "Build a barrack",
 		Cooldown:    5,
 		Effects:     []Effect{Effect{ModifierType: "Territory", ModifierName: "Barracks", Operator: "+", Value: 1, Target: "Player"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 20000000}},
@@ -102,7 +102,7 @@ func SetBaseValueActions() {
 		SubType:     "SABOTAGE",
 		Name:        "Send spys to assassinate key scientists",
 		ActionName:  "assassinateScientist",
-		Description: "Send spys to assassinate key scientists (cost 45M)",
+		Description: "Send spys to assassinate key scientists",
 		Cooldown:    30,
 		Effects:     []Effect{Effect{ModifierType: "Civilian", ModifierName: "NbScientist", Operator: "-", Value: 30, Target: "Opponent"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 45000000}},
@@ -113,7 +113,7 @@ func SetBaseValueActions() {
 		SubType:     "SABOTAGE",
 		Name:        "Send spys to assassinate key scientists and destroy laboratories",
 		ActionName:  "advancedAssassinateScientist",
-		Description: "Send spys to assassinate key scientists (cost 75M)",
+		Description: "Send spys to assassinate key scientists",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbScientist", Operator: "-", Value: 50, Target: "Opponent"},
@@ -130,7 +130,7 @@ func SetBaseValueActions() {
 		SubType:     "SABOTAGE",
 		Name:        "Sabotage factories",
 		ActionName:  "sabotageFactories",
-		Description: "Pay foreign workers to sabotage factories(cost 60M)",
+		Description: "Pay foreign workers to sabotage factories",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbCivilianFactory", Operator: "-", Value: 2, Target: "Opponent"},
@@ -145,7 +145,7 @@ func SetBaseValueActions() {
 		SubType:     "SABOTAGE",
 		Name:        "Workers Strikes",
 		ActionName:  "sabotageFactoriesAdvanced",
-		Description: "Pay foreign workers to sabotage factories and go on extensive stike(cost 90M)",
+		Description: "Pay foreign workers to sabotage factories and go on extensive stike",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbCivilianFactory", Operator: "-", Value: 5, Target: "Opponent"},
@@ -163,7 +163,7 @@ func SetBaseValueActions() {
 		SubType:     "SABOTAGE",
 		Name:        "Worker Uprising",
 		ActionName:  "sabotageFactoriesAdvanced",
-		Description: "Pay foreign workers to sabotage factories and provoke country wise worker uprising(cost 90M)",
+		Description: "Pay foreign workers to sabotage factories and provoke country wise worker uprising",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbCivilianFactory", Operator: "-", Value: 5, Target: "Opponent"},
@@ -176,31 +176,31 @@ func SetBaseValueActions() {
 		Costs:    []Cost{Cost{Type: "money", Value: 90000000}},
 		Selector: "fixed",
 	})
-	actions = append(actions, PlayerActionOrder{
-		Type:        "TEST",
-		Name:        "CBTEST",
-		ActionName:  "CBTEST",
-		Description: "CBTEST",
-		Cooldown:    3,
-		Costs:       []Cost{Cost{Type: "money", Value: 0}},
-		Effects: []Effect{
-			Effect{
-				ModifierType: "Modifier",
-				ModifierName: "TEST",
-				Operator:     "turn+",
-				Value:        3,
-				Target:       "Player",
-				Callbacks: []CallbackEffect{
-					CallbackEffect{
-						Constraints: []Constraint{Constraint{Type: "ModifierTurn", Operator: ">", Key: "TEST"}},
-						Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 30, Target: "Player"}},
-					},
-				},
-			},
-			Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "-", Value: 30, Target: "Player"},
-		},
-		Selector: "fixed",
-	})
+	// actions = append(actions, PlayerActionOrder{
+	// 	Type:        "TEST",
+	// 	Name:        "CBTEST",
+	// 	ActionName:  "CBTEST",
+	// 	Description: "CBTEST",
+	// 	Cooldown:    3,
+	// 	Costs:       []Cost{Cost{Type: "money", Value: 0}},
+	// 	Effects: []Effect{
+	// 		Effect{
+	// 			ModifierType: "Modifier",
+	// 			ModifierName: "TEST",
+	// 			Operator:     "turn+",
+	// 			Value:        3,
+	// 			Target:       "Player",
+	// 			Callbacks: []CallbackEffect{
+	// 				CallbackEffect{
+	// 					Constraints: []Constraint{Constraint{Type: "ModifierTurn", Operator: ">", Key: "TEST"}},
+	// 					Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 30, Target: "Player"}},
+	// 				},
+	// 			},
+	// 		},
+	// 		Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "-", Value: 30, Target: "Player"},
+	// 	},
+	// 	Selector: "fixed",
+	// })
 	// actions = append(actions, PlayerActionOrder{
 	// 	Type:        "TEST",
 	// 	Name:        "RANGE",
@@ -221,15 +221,31 @@ func SetBaseValueActions() {
 
 	actions = append(actions, PlayerActionOrder{
 		Type:        "ECONOMY",
-		SubType:     "INDUSTRIAL",
+		SubType:     "TAX",
 		Name:        "Nationalize private factory",
-		ActionName:  "actionCivConvertFactoryToLightTannationalizeFactorykFact",
+		ActionName:  "nationalizeTwoFact",
 		Description: "Convert Civilian Factory to military production. 2 new factories are available",
 		Cooldown:    10,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbCivilianFactory", Operator: "+", Value: 2, Target: "Player"},
 		},
 		Costs:    []Cost{Cost{Type: "money", Value: 1000000}},
+		Selector: "fixed",
+	})
+	actions = append(actions, PlayerActionOrder{
+		Type:        "ECONOMY",
+		SubType:     "TAX",
+		Name:        "Nationalize private factory",
+		ActionName:  "nationalizeFiveFact",
+		Description: "Convert Civilian Factory to military production. 5 new factories are available",
+		Cooldown:    10,
+		Effects: []Effect{
+			Effect{ModifierType: "Civilian", ModifierName: "NbCivilianFactory", Operator: "+", Value: 5, Target: "Player"},
+		},
+		Costs: []Cost{Cost{Type: "money", Value: 3000000}},
+		Constraints: []Constraint{
+			Constraint{Type: "tech", Value: "technoEcoT1N1"},
+		},
 		Selector: "fixed",
 	})
 	actions = append(actions, PlayerActionOrder{

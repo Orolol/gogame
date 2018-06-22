@@ -138,4 +138,164 @@ func SetBaseValueTranslations() {
 		Description: "Barracks determine how much you can train soldier each turn.",
 	})
 
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "HomeTutorial1",
+		ShortName:  "Welcome ! This is a duel strategy game. You're leading a country into a war. But you're not really the warmongering type. You prefer the comfy situation of na excel spreadsheet than the smell of firearms and dead bodies.",
+	})
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "HomeTutorial2",
+		ShortName:  "Quick tutorial : The goal is to capture the whole enemy territory, which is represented by cities of various size. Each turn, both armies are inflicting damage to the other one, and if there's one which inflicts significantly more damage than the other, the winning army capture 1% of the losing side territory, and can take some cities and barracks.",
+	})
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "HomeTutorial3",
+		ShortName:  "To help your army, you have to manage your production, research technologies, use your money to take some radical actions. Be careful, the enemy will also do this and will try to overrun you",
+	})
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "HomeTutorial4",
+		ShortName:  "",
+	})
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "HomeTutorial5",
+		ShortName:  "",
+	})
+	translations = append(translations, Translation{
+		Language:   "en",
+		ActionName: "InfosTooltip",
+		ShortName:  "This is your informations. This is a quick recap of all the most important informations about your current situation. The value in green are your production each turn. It don't take your loss in account.",
+	})
+
+	//TECHNOLOGY
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Civilian production",
+		Description: "Boost civilian factory production by 15%",
+		ActionName:  "technoIndusT1N1",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Civilian production T2",
+		Description: "Boost civilian factory production by 15%",
+		ActionName:  "technoIndusT2N1",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Civilian production T3",
+		Description: "Boost civilian factory production by 25%",
+		ActionName:  "technoIndusT3N1",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Tank production",
+		Description: "Boost Tank factory production by 15%",
+		ActionName:  "technoIndusT1N2",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Tank production T2",
+		Description: "Boost Tank factory production by 15%",
+		ActionName:  "technoIndusT2N2",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Tank production T3",
+		Description: "Boost Tank factory production by 15%",
+		ActionName:  "technoIndusT3N2",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost Aircraft production",
+		Description: "Boost Aircraft factory production by 15%",
+		ActionName:  "technoIndusT1N3",
+	})
+
+	//MIL TECHNOLOGY
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost soldier damage",
+		Description: "Boost soldier damage by 10%",
+		ActionName:  "technoMilT1N1",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost soldier damage",
+		Description: "Boost soldier damage by 15%",
+		ActionName:  "technoMilT2N1",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost soldier damage",
+		Description: "Boost soldier damage by 20%",
+		ActionName:  "technoMilT3N1",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost light tank damage",
+		Description: "Boost light tank damage by 10%",
+		ActionName:  "technoMilT1N2",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost light tank damage",
+		Description: "Boost light tank damage by 15%",
+		ActionName:  "technoMilT2N2",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Boost light tank damage",
+		Description: "Boost light tank damage by 20%",
+		ActionName:  "technoMilT3N2",
+	})
+
+	//ECO
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Administration Reform - Tax",
+		Description: "Reform tax administration to ensure you gather tax more efficiently",
+		ActionName:  "technoEcoT1N1",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Administration Reform - Reasearch",
+		Description: "Reform Reasearch administration to ensure your scientist work in better conditions",
+		ActionName:  "technoEcoT2N1",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Intelligence deployment",
+		Description: "Unlock some intelligence action, like more effective sabotage",
+		ActionName:  "technoEcoT1N2",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Advanced intelligence deployment",
+		Description: "Unlock some intelligence action, like more effective sabotage and assasination",
+		ActionName:  "technoEcoT2N2",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Financial devlopment",
+		Description: "Unlock some financial action, like larger loans",
+		ActionName:  "technoEcoT1N3",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Advanced Financial devlopment",
+		Description: "Unlock some financial action, like larger loans",
+		ActionName:  "technoEcoT2N3",
+	})
+
 }
