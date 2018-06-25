@@ -3,33 +3,23 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/orolol/gogame/utils"
 )
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome!\n")
+func Index(c *gin.Context) {
+	c.String(http.StatusOK, "Welcome")
 
 }
 
-func ChangePolicy(w http.ResponseWriter, r *http.Request) {
+func ChangePolicy(c *gin.Context) {
 	var actionApi utils.PolicyChange
 	var pol utils.Policy
 	var gMsg utils.GameMsg
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(body, &actionApi); err != nil {
-		panic(err)
-	}
+	c.ShouldBind(&actionApi)
 	fmt.Println("CHANGE POLICY, ", actionApi)
 	var isOkAction bool = true
 	var game *utils.Game
@@ -87,65 +77,29 @@ func ChangePolicy(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetTranslations(w http.ResponseWriter, r *http.Request) {
+func GetTranslations(c *gin.Context) {
+
 	var translations []utils.Translation
-	var language utils.Translation
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-
-	fmt.Println(body)
-	if err := json.Unmarshal(body, &language); err != nil {
-		panic(err)
-	}
-
-	translations = utils.GetTranslationsByLanguage(language.Language)
-
-	w.WriteHeader(http.StatusOK)
-	jsonMsg, err := json.Marshal(translations)
-	if err != nil {
-		fmt.Println("fail :(")
-		fmt.Println(err)
-	}
-	w.Write([]byte(jsonMsg))
+	language := c.Param("language")
+	translations = utils.GetTranslationsByLanguage(language)
+	c.JSON(http.StatusOK, translations)
 }
 
-func GetInfos(w http.ResponseWriter, r *http.Request) {
+func GetInfos(c *gin.Context) {
 	var translations *[]utils.DisplayInfoCat
 
 	translations = utils.GetInfos()
-
-	w.WriteHeader(http.StatusOK)
-	jsonMsg, err := json.Marshal(translations)
-	if err != nil {
-		fmt.Println("fail :(")
-		fmt.Println(err)
-	}
-	w.Write([]byte(jsonMsg))
+	c.JSON(http.StatusOK, translations)
 }
 
-func GetHistory(w http.ResponseWriter, r *http.Request) {
+func GetHistory(c *gin.Context) {
 
 	var acc utils.Account
 	var accList []utils.Account
 	var list []utils.GameHistory
 	var apiList []utils.GameHistoryApi
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	fmt.Println(body)
-	if err := json.Unmarshal(body, &acc); err != nil {
-		panic(err)
-	}
+	c.ShouldBind(&acc)
 
 	db, err := gorm.Open("mysql", ConnexionString)
 	db.Where(&acc).First(&acc)
@@ -170,20 +124,14 @@ func GetHistory(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(apiHist)
 		apiList = append(apiList, apiHist)
 	}
-	w.WriteHeader(http.StatusOK)
-	jsonMsg, err := json.Marshal(apiList)
-	if err != nil {
-		fmt.Println("fail :(")
-		fmt.Println(err)
-	}
-	w.Write([]byte(jsonMsg))
+	c.JSON(http.StatusOK, apiList)
 }
 
-func GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
+func GetLeaderBoard(c *gin.Context) {
 
 	var accs []utils.Account
 	var accsApi []utils.AccountLeaderboardApi
-	db, err := gorm.Open("mysql", ConnexionString)
+	db, _ := gorm.Open("mysql", ConnexionString)
 	db.Order("ELO desc, Name").Find(&accs)
 
 	for _, i := range accs {
@@ -193,30 +141,16 @@ func GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
 		})
 
 	}
-	w.WriteHeader(http.StatusOK)
-	jsonMsg, err := json.Marshal(accsApi)
-	if err != nil {
-		fmt.Println("fail :(")
-		fmt.Println(err)
-	}
-	w.Write([]byte(jsonMsg))
+	c.JSON(http.StatusOK, accsApi)
 }
 
-func GetTechnology(w http.ResponseWriter, r *http.Request) {
+func GetTechnology(c *gin.Context) {
 	var actionApi utils.PolicyChange
 	var techno utils.Technology
 	var gMsg utils.GameMsg
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(body, &actionApi); err != nil {
-		panic(err)
-	}
+	c.ShouldBind(&actionApi)
+
 	fmt.Println(onGoingGames)
 	var isOkAction bool = true
 	var game *utils.Game
@@ -266,20 +200,13 @@ func GetTechnology(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Actions(w http.ResponseWriter, r *http.Request) {
+func Actions(c *gin.Context) {
 	var actionApi utils.PolicyChange
 	var action utils.PlayerActionOrder
 	var gMsg utils.GameMsg
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(body, &actionApi); err != nil {
-		panic(err)
-	}
+
+	c.ShouldBind(&actionApi)
+
 	fmt.Println(onGoingGames)
 	var isOkAction bool = true
 	if game, ok := onGoingGames[actionApi.GameID]; ok {
@@ -341,25 +268,11 @@ func Actions(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func JoinGame(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("mysql", ConnexionString)
-	fmt.Println("Seems like someone want to join a game ! ", r.Body)
+func JoinGame(c *gin.Context) {
+	db, _ := gorm.Open("mysql", ConnexionString)
 	var acc utils.Account
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(body, &acc); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
-		}
-	}
+	c.ShouldBind(&acc)
 
 	db.Where(&acc).First(&acc)
 
@@ -381,40 +294,17 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	m["technology"] = getDefaultTech()
 	m["events"] = getDefaultEvents()
 
-	jsonMsg, err := json.Marshal(m)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonMsg)
-
 	if isNewGame {
 		fmt.Println("NEW GAME")
 		matchmakingQueue <- acc
 	}
-
+	c.JSON(http.StatusOK, m)
 }
 
-func JoinGameAi(w http.ResponseWriter, r *http.Request) {
-	db, err := gorm.Open("mysql", ConnexionString)
-	fmt.Println("Seems like someone want to join AI ! ", r.Body)
+func JoinGameAi(c *gin.Context) {
+	db, _ := gorm.Open("mysql", ConnexionString)
 	var acc utils.Account
-
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(body, &acc); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
-		}
-	}
+	c.ShouldBind(&acc)
 
 	db.Where(&acc).First(&acc)
 
@@ -426,49 +316,7 @@ func JoinGameAi(w http.ResponseWriter, r *http.Request) {
 	m["technology"] = getDefaultTech()
 	m["events"] = getDefaultEvents()
 
-	jsonMsg, err := json.Marshal(m)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonMsg)
-
 	fmt.Println("NEW GAME")
 	matchmakingAiQueue <- acc
-
-}
-
-func SendMessage(w http.ResponseWriter, r *http.Request) {
-	var gc utils.GameMsg
-	fmt.Println("Handle send msg")
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-
-	if err != nil {
-		panic(err)
-	}
-	if err = r.Body.Close(); err != nil {
-		panic(err)
-	}
-	if err = json.Unmarshal(body, &gc); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		if err = json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
-		}
-	}
-
-	jsonMsg, err := json.Marshal(gc)
-	fmt.Println(string(jsonMsg))
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("SEND GAME MSG!")
-	ZMQPusher.SendChan <- [][]byte{[]byte("MSG"), []byte(jsonMsg)}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusCreated)
-	// if err := json.NewEncoder(w).Encode(t); err != nil {
-	// 	panic(err)
-	// }
+	c.JSON(http.StatusOK, m)
 }

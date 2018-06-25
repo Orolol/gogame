@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -145,7 +144,7 @@ func goSocket() {
 
 	go hub.run()
 	go GameStateRouter(hub, queueGameState)
-	http.HandleFunc("/", serveHome)
+	// http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 		fmt.Println(hub)
@@ -173,10 +172,10 @@ func main() {
 	go matchmaking()
 	go matchmakingAi()
 	go goSocket()
-
-	router := NewRouter()
-	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
-	originsOk := handlers.AllowedOrigins([]string{"*", "localhost"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
-	log.Fatal(http.ListenAndServe(":8081", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
+	initRoutes()
+	// router := NewRouter()
+	// headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
+	// originsOk := handlers.AllowedOrigins([]string{"*", "localhost"})
+	// methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	// log.Fatal(http.ListenAndServe(":8081", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }

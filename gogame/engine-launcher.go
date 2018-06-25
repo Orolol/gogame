@@ -256,7 +256,7 @@ func FromChanToZMQ(queue chan utils.Game) {
 		//fmt.Println("Read Game from Queue and send to ZMQ")
 		jsonMsg, err := json.Marshal(msg)
 		if err != nil {
-			//fmt.Println("fail :(")
+			//
 			//fmt.Println(err)
 		}
 

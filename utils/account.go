@@ -8,20 +8,24 @@ import (
 //Account Account Model
 type Account struct {
 	gorm.Model
-	Name     string `gorm:"not null;unique"`
-	Login    string `gorm:"not null;unique"`
-	Password string
-	TokenID  uint
-	ELO      int
+	Name       string `gorm:"not null;unique"`
+	Login      string `gorm:"not null;unique"`
+	Password   string
+	ProfilePic string `gorm:"default:'pp1'"`
+	Step       int    `gorm:"default:'0'"`
+	TokenID    uint
+	ELO        int
 }
 
 //Account Account Model
 type AccountApi struct {
-	ID    uint
-	Login string
-	Name  string
-	Token string
-	ELO   int
+	ID         uint
+	Login      string
+	Name       string
+	Token      string
+	ELO        int
+	ProfilePic string
+	Step       int
 }
 
 //Account Account Model
@@ -53,6 +57,12 @@ type Token struct {
 	AccountID uint
 	Token     string
 	Status    string
+}
+
+type ProfilePic struct {
+	Availablity string
+	Name        string
+	Directory   string
 }
 
 //GameHistory list of past game

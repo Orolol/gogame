@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/orolol/gogame/utils"
 )
@@ -19,7 +17,7 @@ Test with this curl command:
 curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://http://localhost:8080/todos
 
 */
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUp(c *gin.Context) {
 	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		panic("failed to connect database")
@@ -28,20 +26,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	var acc utils.Account
 	fmt.Println("CREATE ACC")
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if erra := r.Body.Close(); erra != nil {
-		panic(erra)
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	if errb := json.Unmarshal(body, &acc); errb != nil {
-		fmt.Println("FAIL CREATION ", errb)
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
+	c.ShouldBind(&acc)
 
 	fmt.Println(acc)
 
@@ -63,14 +48,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	token := utils.Token{Token: stoken, Status: "active"}
 
 	if err := db.Create(&token).Error; err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, "Error during account creation")
 		return
 	}
 
 	acc.TokenID = token.ID
 
 	if err := db.Create(&acc).Error; err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, "Error during account creation")
 		return
 	} else {
 		fmt.Println("CREATED ", acc.ID)
@@ -79,13 +64,12 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("CREATED ", acc.Password)
 		fmt.Println("CREATED ", acc.TokenID)
 
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(stoken))
+		c.String(http.StatusCreated, stoken)
 	}
 
 }
 
-func EditAccount(w http.ResponseWriter, r *http.Request) {
+func EditAccount(c *gin.Context) {
 	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
 		panic("failed to connect database")
@@ -95,20 +79,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request) {
 	var dbacc utils.Account
 	fmt.Println("EDIT ACC")
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if erra := r.Body.Close(); erra != nil {
-		panic(erra)
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	if errb := json.Unmarshal(body, &acc); errb != nil {
-		fmt.Println("FAIL CREATION ", errb)
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
+	c.ShouldBind(&acc)
 
 	fmt.Println(acc)
 
@@ -121,24 +92,23 @@ func EditAccount(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("FINAL PASS : ", acc.Password)
 
 	if res := db.First(&dbacc, "Login = ?", acc.Login); res.Error != nil {
-		fmt.Println("ERROR EDIT", err.Error)
-		fmt.Println("ERROR EDIT", acc.Login)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, "Error during account edition")
 		return
 	} else {
-		fmt.Println("EDIT THIS", dbacc)
 		dbacc.Name = acc.Name
+		dbacc.ProfilePic = acc.ProfilePic
+		dbacc.Step = acc.Step
 		if acc.Password != "" {
 			dbacc.Password = acc.Password
 		}
 
 		db.Save(&dbacc)
-		w.WriteHeader(http.StatusCreated)
+		c.Status(http.StatusCreated)
 	}
 
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login(c *gin.Context) {
 	fmt.Println("OK LETS LOGIN")
 	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
@@ -149,17 +119,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var acc utils.Account
 	var accApi utils.AccountApi
 
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-
-	if err := json.Unmarshal(body, &acc); err != nil {
-		fmt.Println("erf")
-	}
+	c.ShouldBind(&acc)
 
 	clearPass := acc.Password
 
@@ -168,14 +128,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if errPass != nil {
 		fmt.Println("Mauvais password", errPass, acc.Password, clearPass)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Bad password"))
+		c.String(http.StatusOK, "Bad password")
 	} else if acc.ID == 0 {
 		fmt.Println("Mauvais account")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Bad account"))
+		c.String(http.StatusOK, "Bad password")
 	} else {
-		w.WriteHeader(http.StatusOK)
+		c.Status(http.StatusOK)
 
 		var token utils.Token
 
@@ -188,13 +146,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		accApi.Name = acc.Name
 		accApi.ELO = acc.ELO
 		accApi.Token = token.Token
-
-		jsonMsg, err := json.Marshal(accApi)
-		if err != nil {
-			fmt.Println("fail :(")
-			fmt.Println(err)
-		}
-		fmt.Println("ACC ", accApi, jsonMsg)
-		w.Write([]byte(jsonMsg))
+		accApi.ProfilePic = acc.ProfilePic
+		accApi.Step = acc.Step
+		c.JSON(http.StatusOK, accApi)
 	}
+}
+
+func GetPP(c *gin.Context) {
+	var list []utils.ProfilePic
+	list = append(list,
+		utils.ProfilePic{Availablity: "all", Name: "pp1"},
+	)
+	list = append(list,
+		utils.ProfilePic{Availablity: "all", Name: "pp2"},
+	)
+
+	c.JSON(http.StatusOK, list)
 }
