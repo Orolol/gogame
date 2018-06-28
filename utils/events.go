@@ -40,7 +40,7 @@ func SetBaseValueEvents() {
 	events = append(events, PlayerEvent{
 		Name:        "Famous Colonel die",
 		Description: "One your most famous Colonel just died while defending position",
-		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "*", Value: 0.95}},
+		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "-", Value: 5}},
 		ActionName:  "event1",
 		Weight:      5,
 		Type:        "Single",
@@ -48,7 +48,7 @@ func SetBaseValueEvents() {
 	events = append(events, PlayerEvent{
 		Name:        "A new hero",
 		Description: "A soldier just accomplish an incredible feat of heroism.",
-		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "*", Value: 1.05}},
+		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 5}},
 		ActionName:  "event2",
 		Weight:      5,
 		Type:        "Single",
@@ -65,7 +65,7 @@ func SetBaseValueEvents() {
 		Name:        "War enthusiasm",
 		Description: "People rush your conscription centers ! You have a surge in fresh soldier and a morale boost",
 		Effects: []Effect{
-			Effect{ModifierName: "Morale", Operator: "+", Value: 0.05, ModifierType: "Army"},
+			Effect{ModifierName: "Morale", Operator: "+", Value: 5, ModifierType: "Army"},
 			Effect{ModifierName: "NbSoldier", Operator: "+", Value: 5000, ModifierType: "Army"},
 		},
 		ActionName: "event4",

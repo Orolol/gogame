@@ -21,7 +21,7 @@ func SetBaseValueTechnologies() {
 
 	//TECHNOLOGY
 	technologies = append(technologies, Technology{
-		Name:           "Boost Civilian production",
+		Name:           "Civilian production",
 		Description:    "Boost civilian factory production by 15%",
 		Costs:          []Cost{Cost{Type: "science", Value: 100}},
 		Effects:        []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
@@ -31,7 +31,7 @@ func SetBaseValueTechnologies() {
 	})
 
 	technologies = append(technologies, Technology{
-		Name:        "Boost Civilian production T2",
+		Name:        "Civilian production T2",
 		Description: "Boost civilian factory production by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 450}},
 		Effects:     []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
@@ -44,7 +44,7 @@ func SetBaseValueTechnologies() {
 	})
 
 	technologies = append(technologies, Technology{
-		Name:        "Boost Civilian production T3",
+		Name:        "Civilian production T3",
 		Description: "Boost civilian factory production by 25%",
 		Costs:       []Cost{Cost{Type: "science", Value: 1200}},
 		Effects:     []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.25}},
@@ -57,7 +57,7 @@ func SetBaseValueTechnologies() {
 	})
 
 	technologies = append(technologies, Technology{
-		Name:        "Boost Tank production",
+		Name:        "Tank production",
 		Description: "Boost Tank factory production by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 100}},
 		Effects: []Effect{
@@ -69,7 +69,7 @@ func SetBaseValueTechnologies() {
 		TypeTechnology: "INDUSTRIAL",
 	})
 	technologies = append(technologies, Technology{
-		Name:        "Boost Tank production T2",
+		Name:        "Tank production T2",
 		Description: "Boost Tank factory production by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 300}},
 		Effects: []Effect{
@@ -85,7 +85,7 @@ func SetBaseValueTechnologies() {
 	})
 
 	technologies = append(technologies, Technology{
-		Name:        "Boost Tank production T3",
+		Name:        "Tank production T3",
 		Description: "Boost Tank factory production by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 1000}},
 		Effects: []Effect{
@@ -100,7 +100,7 @@ func SetBaseValueTechnologies() {
 		TypeTechnology: "INDUSTRIAL",
 	})
 	technologies = append(technologies, Technology{
-		Name:           "Boost Aircraft production",
+		Name:           "Aircraft production",
 		Description:    "Boost Aircraft factory production by 15%",
 		Costs:          []Cost{Cost{Type: "science", Value: 100}},
 		Effects:        []Effect{Effect{ModifierName: "aircraftFactoryProduction", Operator: "*", Value: 1.15}},
@@ -112,16 +112,16 @@ func SetBaseValueTechnologies() {
 	//MIL TECHNOLOGY
 
 	technologies = append(technologies, Technology{
-		Name:           "Boost soldier damage",
+		Name:           "soldier damage",
 		Description:    "Boost soldier damage by 10%",
 		Costs:          []Cost{Cost{Type: "science", Value: 200}},
 		Effects:        []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.10}},
 		ActionName:     "technoMilT1N1",
 		Tier:           1,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 	technologies = append(technologies, Technology{
-		Name:        "Boost soldier damage",
+		Name:        "soldier damage",
 		Description: "Boost soldier damage by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 800}},
 		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.15}},
@@ -130,10 +130,10 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT1N1"},
 		},
 		Tier:           2,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 	technologies = append(technologies, Technology{
-		Name:        "Boost soldier damage",
+		Name:        "soldier damage",
 		Description: "Boost soldier damage by 20%",
 		Costs:       []Cost{Cost{Type: "science", Value: 1600}},
 		Effects:     []Effect{Effect{ModifierName: "soldierQuality", Operator: "*", Value: 1.20}},
@@ -142,20 +142,20 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT2N1"},
 		},
 		Tier:           3,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 
 	technologies = append(technologies, Technology{
-		Name:           "Boost light tank damage",
+		Name:           "light tank damage",
 		Description:    "Boost light tank damage by 10%",
 		Costs:          []Cost{Cost{Type: "science", Value: 200}},
 		Effects:        []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.10}},
 		ActionName:     "technoMilT1N2",
 		Tier:           1,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 	technologies = append(technologies, Technology{
-		Name:        "Boost light tank damage",
+		Name:        "light tank damage",
 		Description: "Boost light tank damage by 15%",
 		Costs:       []Cost{Cost{Type: "science", Value: 800}},
 		Effects:     []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.15}},
@@ -164,10 +164,10 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT1N2"},
 		},
 		Tier:           2,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 	technologies = append(technologies, Technology{
-		Name:        "Boost light tank damage",
+		Name:        "light tank damage",
 		Description: "Boost light tank damage by 20%",
 		Costs:       []Cost{Cost{Type: "science", Value: 1600}},
 		Effects:     []Effect{Effect{ModifierName: "lightTankQuality", Operator: "*", Value: 1.20}},
@@ -176,7 +176,7 @@ func SetBaseValueTechnologies() {
 			Constraint{Type: "tech", Value: "technoMilT2N2"},
 		},
 		Tier:           3,
-		TypeTechnology: "MILITARY",
+		TypeTechnology: "GROUND ARMY",
 	})
 
 	//ECO

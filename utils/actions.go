@@ -27,7 +27,7 @@ func SetBaseValueActions() {
 		ActionName:  "actionWarPropaganda",
 		Description: "Boost morale by 15%",
 		Cooldown:    10,
-		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 20, Target: "Player"}},
+		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 20, Target: "Player", ActionName: "addMorale"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector:    "fixed",
 	})
@@ -39,8 +39,8 @@ func SetBaseValueActions() {
 		Description: "Boost morale by 5%, quality by 5%",
 		Cooldown:    15,
 		Effects: []Effect{
-			Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 5, Target: "Player"},
-			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 5, Target: "Player"},
+			Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 5, Target: "Player", ActionName: "addMorale"},
+			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 5, Target: "Player", ActionName: "addQuality"},
 		},
 		Costs:    []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector: "fixed",
@@ -54,8 +54,8 @@ func SetBaseValueActions() {
 		Description: "Executes possible traitors and weak soldier (10% of your soldiers) to improve quality by 15%.",
 		Cooldown:    30,
 		Effects: []Effect{
-			Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "*", Value: 0.90, Target: "Player"},
-			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 15, Target: "Player"},
+			Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "*", Value: 0.90, Target: "Player", ActionName: "sacrificeSoldier", ToolTipValue: 10},
+			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 15, Target: "Player", ActionName: "addQuality"},
 		},
 		Costs:    []Cost{Cost{Type: "money", Value: 10000000}},
 		Selector: "fixed",
@@ -111,9 +111,9 @@ func SetBaseValueActions() {
 	actions = append(actions, PlayerActionOrder{
 		Type:        "INTELLIGENCE",
 		SubType:     "SABOTAGE",
-		Name:        "Send spys to assassinate key scientists and destroy laboratories",
+		Name:        "Assassinate scientists and destroy laboratories",
 		ActionName:  "advancedAssassinateScientist",
-		Description: "Send spys to assassinate key scientists",
+		Description: "Send spys to assassinate key scientists and destroy laboratories",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Civilian", ModifierName: "NbScientist", Operator: "-", Value: 50, Target: "Opponent"},
@@ -176,48 +176,6 @@ func SetBaseValueActions() {
 		Costs:    []Cost{Cost{Type: "money", Value: 90000000}},
 		Selector: "fixed",
 	})
-	// actions = append(actions, PlayerActionOrder{
-	// 	Type:        "TEST",
-	// 	Name:        "CBTEST",
-	// 	ActionName:  "CBTEST",
-	// 	Description: "CBTEST",
-	// 	Cooldown:    3,
-	// 	Costs:       []Cost{Cost{Type: "money", Value: 0}},
-	// 	Effects: []Effect{
-	// 		Effect{
-	// 			ModifierType: "Modifier",
-	// 			ModifierName: "TEST",
-	// 			Operator:     "turn+",
-	// 			Value:        3,
-	// 			Target:       "Player",
-	// 			Callbacks: []CallbackEffect{
-	// 				CallbackEffect{
-	// 					Constraints: []Constraint{Constraint{Type: "ModifierTurn", Operator: ">", Key: "TEST"}},
-	// 					Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 30, Target: "Player"}},
-	// 				},
-	// 			},
-	// 		},
-	// 		Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "-", Value: 30, Target: "Player"},
-	// 	},
-	// 	Selector: "fixed",
-	// })
-	// actions = append(actions, PlayerActionOrder{
-	// 	Type:        "TEST",
-	// 	Name:        "RANGE",
-	// 	ActionName:  "RANGE",
-	// 	Description: "RANGE",
-	// 	Cooldown:    3,
-	// 	Costs:       []Cost{Cost{Type: "money", Value: 0}},
-	// 	Constraints: []Constraint{
-	// 		Constraint{Type: "custom", Value: "0", Operator: ">"},
-	// 		Constraint{Type: "custom", Value: "50", Operator: "<"},
-	// 	},
-	// 	Effects: []Effect{
-	// 		Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "-", Value: 0, Target: "Player"},
-	// 	},
-	// 	Selector:  "range",
-	// 	BaseValue: 20,
-	// })
 
 	actions = append(actions, PlayerActionOrder{
 		Type:        "ECONOMY",

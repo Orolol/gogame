@@ -32,6 +32,13 @@ func SetBaseValueTranslations() {
 
 	translations = append(translations, Translation{
 		Language:    "en",
+		ActionName:  "Money",
+		ShortName:   "Money",
+		LongName:    "Amount of money",
+		Description: "How much money you have. You can spend money on actions and money is used to pay your army upkeep. if you fall below 0, you'll be unable to produce anything.",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
 		ActionName:  "NbSoldier",
 		ShortName:   "Soldiers",
 		LongName:    "Number of soldiers",
@@ -164,9 +171,9 @@ func SetBaseValueTranslations() {
 		ShortName:  "",
 	})
 	translations = append(translations, Translation{
-		Language:   "en",
-		ActionName: "InfosTooltip",
-		ShortName:  "This is your informations. This is a quick recap of all the most important informations about your current situation. The value in green are your production each turn. It don't take your loss in account.",
+		Language:    "en",
+		ActionName:  "InfosTooltip",
+		Description: "This is your informations. This is a quick recap of all the most important informations about your current situation. The value in green are your production each turn. It don't take your loss in account.",
 	})
 
 	//TECHNOLOGY
@@ -296,6 +303,26 @@ func SetBaseValueTranslations() {
 		ShortName:   "Advanced Financial devlopment",
 		Description: "Unlock some financial action, like larger loans",
 		ActionName:  "technoEcoT2N3",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Add ? morale <img class='icon' src='morale.png' />",
+		Description: "Add ? morale <img class='icon' src='morale.png' />, which then decay to get back to 100. Morale is an overall boost to damage and help prevent loss.",
+		ActionName:  "addMorale",
+	})
+
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Add ? quality <img class='icon' src='quality.png' />",
+		Description: "Add ? quality <img class='icon' src='quality.png' /> .Quality is an overall boost to damage and help prevent loss. unlike Morale, Quality doesn't decay over time.",
+		ActionName:  "addQuality",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Sacrifice ?% of your soldiers",
+		Description: "Sometimes, victory need sacrifice.",
+		ActionName:  "sacrificeSoldier",
 	})
 
 }

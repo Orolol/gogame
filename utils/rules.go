@@ -77,6 +77,8 @@ type Effect struct {
 	Operator     string
 	Value        float32
 	Target       string
+	ActionName   string
+	ToolTipValue float32
 	Callbacks    []CallbackEffect
 }
 

@@ -165,4 +165,5 @@ type DisplayInfos struct {
 	VeryLowAlert float32
 	GrowthName   string
 	GrowthType   string
+	Display      int
 }

@@ -108,48 +108,22 @@ func EditAccount(c *gin.Context) {
 
 }
 
-func Login(c *gin.Context) {
-	fmt.Println("OK LETS LOGIN")
-	db, err := gorm.Open("mysql", ConnexionString)
-	if err != nil {
-		panic("failed to connect database")
-	}
-	defer db.Close()
-
+func GetProfileInfos(c *gin.Context) {
 	var acc utils.Account
 	var accApi utils.AccountApi
 
+	db, _ := gorm.Open("mysql", ConnexionString)
+
 	c.ShouldBind(&acc)
+	db.Find(&acc)
 
-	clearPass := acc.Password
-
-	db.First(&acc, "Login = ?", acc.Login)
-	errPass := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(clearPass))
-
-	if errPass != nil {
-		fmt.Println("Mauvais password", errPass, acc.Password, clearPass)
-		c.String(http.StatusOK, "Bad password")
-	} else if acc.ID == 0 {
-		fmt.Println("Mauvais account")
-		c.String(http.StatusOK, "Bad password")
-	} else {
-		c.Status(http.StatusOK)
-
-		var token utils.Token
-
-		fmt.Println("LOGGED ", acc.ID)
-
-		db.Model(&acc).Related(&token)
-
-		accApi.ID = acc.ID
-		accApi.Login = acc.Login
-		accApi.Name = acc.Name
-		accApi.ELO = acc.ELO
-		accApi.Token = token.Token
-		accApi.ProfilePic = acc.ProfilePic
-		accApi.Step = acc.Step
-		c.JSON(http.StatusOK, accApi)
-	}
+	accApi.ID = acc.ID
+	accApi.Login = acc.Login
+	accApi.Name = acc.Name
+	accApi.ELO = acc.ELO
+	accApi.ProfilePic = acc.ProfilePic
+	accApi.Step = acc.Step
+	c.JSON(http.StatusOK, accApi)
 }
 
 func GetPP(c *gin.Context) {

@@ -20,12 +20,14 @@ func SetBaseValueInfos() {
 				VeryLowAlert: 15,
 			},
 			DisplayInfos{
-				Name: "MediumCities",
-				Type: "Territory",
+				Name:    "MediumCities",
+				Type:    "Territory",
+				Display: 1,
 			},
 			DisplayInfos{
-				Name: "BigCities",
-				Type: "Territory",
+				Name:    "BigCities",
+				Type:    "Territory",
+				Display: 1,
 			},
 			DisplayInfos{
 				Name: "Barracks",
@@ -52,8 +54,9 @@ func SetBaseValueInfos() {
 				Type: "Civilian",
 			},
 			DisplayInfos{
-				Name: "NbScientist",
-				Type: "Civilian",
+				Name:    "NbScientist",
+				Type:    "Civilian",
+				Display: 1,
 			},
 			DisplayInfos{
 				Name: "",
@@ -120,18 +123,21 @@ func SetBaseValueInfos() {
 				Type:       "Civilian",
 				GrowthName: "ManpowerGrowth",
 				GrowthType: "PlayerInformations",
+				Display:    1,
 			},
 			DisplayInfos{
 				Name:       "Ammunition",
 				Type:       "Army",
 				GrowthName: "ammunitionProduction",
 				GrowthType: "PlayerInformations",
+				Display:    1,
 			},
 			DisplayInfos{
 				Name:       "InfantryEquipment",
 				Type:       "Army",
 				GrowthName: "infantryEquipmentProduction",
 				GrowthType: "PlayerInformations",
+				Display:    1,
 			},
 		},
 	})
