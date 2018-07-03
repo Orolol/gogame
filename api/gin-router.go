@@ -31,7 +31,6 @@ func initRoutes() {
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour,
 		Authenticator: func(userId string, password string, c *gin.Context) (interface{}, bool) {
-			fmt.Println("AUTH", userId, password)
 			var acc utils.Account
 			var accApi utils.AccountApi
 			db, _ := gorm.Open("mysql", ConnexionString)
@@ -60,7 +59,6 @@ func initRoutes() {
 			return nil, false
 		},
 		Authorizator: func(user interface{}, c *gin.Context) bool {
-			fmt.Println("AUTHORIZATOR", user)
 			if v, ok := user.(string); ok && v == "admin" {
 				return true
 			} else {
@@ -113,6 +111,7 @@ func initRoutes() {
 		auth.POST("/ChangePolicy", ChangePolicy)
 		auth.POST("/GetTechnology", GetTechnology)
 		auth.POST("/Actions", Actions)
+		auth.GET("/GetEnemyInfos/:id", GetEnemyInfos)
 
 		auth.POST("/GetHistory", GetHistory)
 		auth.POST("/GetLeaderBoard", GetLeaderBoard)

@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/orolol/gogame/utils"
@@ -77,21 +78,15 @@ func EditAccount(c *gin.Context) {
 	defer db.Close()
 	var acc utils.Account
 	var dbacc utils.Account
-	fmt.Println("EDIT ACC")
 
 	c.ShouldBind(&acc)
-
-	fmt.Println(acc)
-
+	claims := jwt.ExtractClaims(c)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(acc.Password), bcrypt.DefaultCost)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("PASS : ", acc.Password)
 	acc.Password = string(hashedPassword)
-	fmt.Println("FINAL PASS : ", acc.Password)
-
-	if res := db.First(&dbacc, "Login = ?", acc.Login); res.Error != nil {
+	if res := db.First(&dbacc, "Login = ?", claims["id"]); res.Error != nil {
 		c.String(http.StatusInternalServerError, "Error during account edition")
 		return
 	} else {
@@ -101,7 +96,6 @@ func EditAccount(c *gin.Context) {
 		if acc.Password != "" {
 			dbacc.Password = acc.Password
 		}
-
 		db.Save(&dbacc)
 		c.Status(http.StatusCreated)
 	}
@@ -111,11 +105,9 @@ func EditAccount(c *gin.Context) {
 func GetProfileInfos(c *gin.Context) {
 	var acc utils.Account
 	var accApi utils.AccountApi
-
+	claims := jwt.ExtractClaims(c)
 	db, _ := gorm.Open("mysql", ConnexionString)
-
-	c.ShouldBind(&acc)
-	db.Find(&acc)
+	db.Where("Login = ?", claims["id"]).First(&acc)
 
 	accApi.ID = acc.ID
 	accApi.Login = acc.Login
@@ -123,6 +115,23 @@ func GetProfileInfos(c *gin.Context) {
 	accApi.ELO = acc.ELO
 	accApi.ProfilePic = acc.ProfilePic
 	accApi.Step = acc.Step
+	c.JSON(http.StatusOK, accApi)
+}
+func GetEnemyInfos(c *gin.Context) {
+	var acc utils.Account
+	var accApi utils.AccountApi
+	idquer := c.Param("id")
+	c.ShouldBind(&acc)
+
+	db, _ := gorm.Open("mysql", ConnexionString)
+	db.Where("ID = ?", idquer).First(&acc)
+	fmt.Println("acc", acc)
+	accApi.Name = acc.Name
+	accApi.ELO = acc.ELO
+	accApi.ProfilePic = acc.ProfilePic
+	fmt.Println("Name", accApi.Name)
+	fmt.Println("ELO", accApi.ELO)
+	fmt.Println("ProfilePic", accApi.ProfilePic)
 	c.JSON(http.StatusOK, accApi)
 }
 

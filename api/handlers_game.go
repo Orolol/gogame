@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/orolol/gogame/utils"
@@ -99,20 +100,26 @@ func GetHistory(c *gin.Context) {
 	var list []utils.GameHistory
 	var apiList []utils.GameHistoryApi
 
-	c.ShouldBind(&acc)
-
 	db, err := gorm.Open("mysql", ConnexionString)
+
+	claims := jwt.ExtractClaims(c)
+	db.Where("Login = ?", claims["id"]).First(&acc)
 	db.Where(&acc).First(&acc)
 	db.Find(&accList)
 	fmt.Println(acc.ID)
 	db.Where("winner_id = ? OR loser_id = ?", acc.ID, acc.ID).Find(&list).Joins("JOIN accounts ON winner_id = accounts.ID OR loser_id = accounts.ID")
-	rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Joins("JOIN accounts as winner ON winner_id = winner.ID").Joins("JOIN accounts as loser ON loser_id = loser.ID").Rows()
-	fmt.Println("list", list, rows, err)
+	rows, err := db.Table("game_histories").Where("winner_id = ? OR loser_id = ?", acc.ID, acc.ID).Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Joins("JOIN accounts as winner ON winner_id = winner.ID").Joins("JOIN accounts as loser ON loser_id = loser.ID").Rows()
+	fmt.Println("list", list)
+	fmt.Println("rows", rows)
+	fmt.Println("err", err)
 	for rows.Next() {
 		var apiHist utils.GameHistoryApi
 		rows.Scan(&apiHist.Created_at, &apiHist.ELODiff, &apiHist.WinnerNick, &apiHist.LoserNick)
 		fmt.Println(apiHist)
-		apiList = append(apiList, apiHist)
+		if apiHist.WinnerNick == acc.Name || apiHist.LoserNick == acc.Name {
+			apiList = append(apiList, apiHist)
+		}
+
 	}
 
 	// rows, err := db.Table("game_histories").Select("game_histories.created_at, game_histories.elo_diff, winner.Name, loser.Name").Where("game_histories.winner_id = ? OR game_histories.loser_id = ?", acc.ID, acc.ID).Joins("JOIN accounts as winner ON winner_id = winner.ID OR winner_id = 0").Joins("JOIN accounts as loser ON loser_id = loser.ID OR loser_id = 0").Rows()
@@ -268,13 +275,21 @@ func Actions(c *gin.Context) {
 
 }
 
+func LeaveQueue(c *gin.Context) {
+
+	db, _ := gorm.Open("mysql", ConnexionString)
+	var acc utils.Account
+
+	claims := jwt.ExtractClaims(c)
+	db.Where("Login = ?", claims["id"]).First(&acc)
+}
+
 func JoinGame(c *gin.Context) {
 	db, _ := gorm.Open("mysql", ConnexionString)
 	var acc utils.Account
 
-	c.ShouldBind(&acc)
-
-	db.Where(&acc).First(&acc)
+	claims := jwt.ExtractClaims(c)
+	db.Where("Login = ?", claims["id"]).First(&acc)
 
 	fmt.Println("current games", onGoingGames)
 
@@ -304,9 +319,8 @@ func JoinGame(c *gin.Context) {
 func JoinGameAi(c *gin.Context) {
 	db, _ := gorm.Open("mysql", ConnexionString)
 	var acc utils.Account
-	c.ShouldBind(&acc)
-
-	db.Where(&acc).First(&acc)
+	claims := jwt.ExtractClaims(c)
+	db.Where("Login = ?", claims["id"]).First(&acc)
 
 	fmt.Println("current games", onGoingGames)
 

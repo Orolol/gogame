@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/kortemy/elo-go"
 	"github.com/orolol/gogame/utils"
 )
 
@@ -34,7 +35,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
-
 	for msg := range queueGameState {
 		var gs utils.Game
 		json.Unmarshal(msg[2], &gs)
@@ -62,7 +62,34 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 
 		if gs.State == "End" {
 			fmt.Println("END GAME")
+
+			for client := range hub.clients {
+				if client.GameID == gs.GameID {
+
+					onGoingGames[gs.GameID] = &gs
+					w, err := client.conn.NextWriter(websocket.TextMessage)
+					if err != nil {
+						fmt.Println("ERROR ", err)
+					} else {
+						w.Write(msg[2])
+
+					}
+				} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
+					client.GameID = gs.GameID
+					onGoingGames[gs.GameID] = &gs
+					w, err := client.conn.NextWriter(websocket.TextMessage)
+					if err != nil {
+						fmt.Println("ERROR ", err)
+					} else {
+						w.Write(msg[2])
+					}
+				}
+
+			}
+
 			if gs.Conf.GameType != "AI" {
+				fmt.Println("END GAME", gs.GameID)
+				fmt.Println("onGoingGames", onGoingGames)
 				db, _ := gorm.Open("mysql", ConnexionString)
 				delete(onGoingGames, gs.GameID)
 				var winner utils.Account
@@ -71,19 +98,34 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 				db.Where("ID = ? ", gs.Winner.PlayerID).First(&winner)
 				db.Where("ID = ? ", gs.Loser.PlayerID).First(&loser)
 
+				rankA := winner.ELO
+				rankB := loser.ELO
+				elo := elogo.NewElo()
+
+				// Expected chance that A defeats B
+				// use ExpectedScoreWithFactors(rankA, rankB, deviation) to use custom factor for this method
+				elo.ExpectedScore(rankA, rankB) // 0.3599350001971149
+
+				// Results for A in the outcome of A defeats B
+				score := float64(1)                  // Use 1 in case A wins, 0 in case B wins, 0.5 in case of a draw)
+				elo.RatingDelta(rankA, rankB, score) // 20
+				elo.Rating(rankA, rankB, score)      // 1520
+				outcomeA, outcomeB := elo.Outcome(rankA, rankB, score)
+
 				gh.WinnerID = winner.ID
 				// gh.WinnerNick = winner.Name
 				gh.LoserID = loser.ID
 				// gh.LoserNick = loser.Name
 				gh.GameID = gs.GameID
-				gh.ELODiff = 15
+				gh.ELODiff = outcomeA.Delta
 
 				db.Create(&gh)
 
-				winner.ELO += 15
-				loser.ELO -= 15
+				winner.ELO = outcomeA.Rating
+				loser.ELO = outcomeB.Rating
 				db.Save(winner)
 				db.Save(loser)
+				fmt.Println("onGoingGames AFTER", onGoingGames)
 			} else {
 				fmt.Println(1)
 				db, _ := gorm.Open("mysql", ConnexionString)
@@ -108,29 +150,6 @@ func GameStateRouter(hub *Hub, queueGameState chan [][]byte) {
 				fmt.Println(4, gh)
 				db.Create(&gh)
 				fmt.Println(5)
-			}
-
-			for client := range hub.clients {
-				if client.GameID == gs.GameID {
-
-					onGoingGames[gs.GameID] = &gs
-					w, err := client.conn.NextWriter(websocket.TextMessage)
-					if err != nil {
-						fmt.Println("ERROR ", err)
-					} else {
-						w.Write(msg[2])
-
-					}
-				} else if client.PlayerID == gs.ListPlayers[0].PlayerID || client.PlayerID == gs.ListPlayers[1].PlayerID {
-					client.GameID = gs.GameID
-					onGoingGames[gs.GameID] = &gs
-					w, err := client.conn.NextWriter(websocket.TextMessage)
-					if err != nil {
-						fmt.Println("ERROR ", err)
-					} else {
-						w.Write(msg[2])
-					}
-				}
 			}
 		}
 	}

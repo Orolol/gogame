@@ -8,9 +8,10 @@ import (
 	"github.com/orolol/gogame/utils"
 )
 
-func matchmaking() {
+var poolPendingPlayerAI = []utils.Account{}
+var poolPendingPlayer = []utils.Account{}
 
-	poolPendingPlayer := []utils.Account{}
+func matchmaking() {
 
 	for account := range matchmakingQueue {
 		fmt.Println("Recieving new match making msg ", account)
@@ -38,23 +39,21 @@ func matchmaking() {
 
 func matchmakingAi() {
 
-	poolPendingPlayer := []utils.Account{}
-
 	for account := range matchmakingAiQueue {
 		fmt.Println("Recieving new AI MATCH ", account)
-		fmt.Println("1 CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
+		fmt.Println("1 CURRENT MACTHMAKING QUEUE ", poolPendingPlayerAI)
 		var isOk = true
-		for _, p := range poolPendingPlayer {
+		for _, p := range poolPendingPlayerAI {
 			if p.ID == account.ID {
 				fmt.Println("Already in queue")
 				isOk = false
 			}
 		}
 		if isOk {
-			poolPendingPlayer = append(poolPendingPlayer, account)
-			CreateAiGame(poolPendingPlayer[0])
-			poolPendingPlayer = []utils.Account{}
-			fmt.Println("AFTER CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
+			poolPendingPlayerAI = append(poolPendingPlayerAI, account)
+			CreateAiGame(poolPendingPlayerAI[0])
+			poolPendingPlayerAI = []utils.Account{}
+			fmt.Println("AFTER CURRENT MACTHMAKING QUEUE ", poolPendingPlayerAI)
 		}
 
 	}
