@@ -27,7 +27,7 @@ func SetBaseValueActions() {
 		ActionName:  "actionWarPropaganda",
 		Description: "Boost morale by 15%",
 		Cooldown:    10,
-		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 20, Target: "Player", ActionName: "addMorale"}},
+		Effects:     []Effect{Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 10, Target: "Player", ActionName: "addMorale"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector:    "fixed",
 	})
@@ -40,7 +40,7 @@ func SetBaseValueActions() {
 		Cooldown:    15,
 		Effects: []Effect{
 			Effect{ModifierType: "Army", ModifierName: "Morale", Operator: "+", Value: 5, Target: "Player", ActionName: "addMorale"},
-			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 5, Target: "Player", ActionName: "addQuality"},
+			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 2, Target: "Player", ActionName: "addQuality"},
 		},
 		Costs:    []Cost{Cost{Type: "money", Value: 15000000}},
 		Selector: "fixed",
@@ -51,7 +51,7 @@ func SetBaseValueActions() {
 		SubType:     "COMMANDMENT",
 		Name:        "Purge of weak elements",
 		ActionName:  "purgeSoldier",
-		Description: "Executes possible traitors and weak soldier (10% of your soldiers) to improve quality by 15%.",
+		Description: "Executes possible traitors and weak soldier (10% of your soldiers) to improve quality by 10%.",
 		Cooldown:    30,
 		Effects: []Effect{
 			Effect{ModifierType: "Army", ModifierName: "NbSoldier", Operator: "*", Value: 0.90, Target: "Player", ActionName: "sacrificeSoldier", ToolTipValue: 10},

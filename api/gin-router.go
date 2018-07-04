@@ -107,6 +107,7 @@ func initRoutes() {
 		auth.POST("/GetProfileInfos", GetProfileInfos)
 		auth.POST("/JoinGame", JoinGame)
 		auth.POST("/JoinGameAi", JoinGameAi)
+		auth.GET("/LeaveQueue", LeaveQueue)
 		auth.POST("/EditAccount", EditAccount)
 		auth.POST("/ChangePolicy", ChangePolicy)
 		auth.POST("/GetTechnology", GetTechnology)

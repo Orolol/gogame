@@ -81,11 +81,13 @@ func EditAccount(c *gin.Context) {
 
 	c.ShouldBind(&acc)
 	claims := jwt.ExtractClaims(c)
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(acc.Password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
+	if acc.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(acc.Password), bcrypt.DefaultCost)
+		if err != nil {
+			panic(err)
+		}
+		acc.Password = string(hashedPassword)
 	}
-	acc.Password = string(hashedPassword)
 	if res := db.First(&dbacc, "Login = ?", claims["id"]); res.Error != nil {
 		c.String(http.StatusInternalServerError, "Error during account edition")
 		return

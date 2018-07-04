@@ -282,6 +282,9 @@ func LeaveQueue(c *gin.Context) {
 
 	claims := jwt.ExtractClaims(c)
 	db.Where("Login = ?", claims["id"]).First(&acc)
+	c.JSON(http.StatusOK, acc)
+	leaveMatchmakingQueue <- acc
+
 }
 
 func JoinGame(c *gin.Context) {

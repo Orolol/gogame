@@ -37,6 +37,31 @@ func matchmaking() {
 
 }
 
+func leaveMatchmaking() {
+	for account := range leaveMatchmakingQueue {
+		fmt.Println("Recieving leaving ", account)
+		fmt.Println("CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
+		var toremove int = 0
+		var isremove = false
+		for i, p := range poolPendingPlayer {
+			if p.ID == account.ID {
+				toremove = i
+				isremove = true
+			}
+		}
+		if isremove {
+			poolPendingPlayer = remove(poolPendingPlayer, toremove)
+		}
+		fmt.Println("CURRENT MACTHMAKING QUEUE ", poolPendingPlayer)
+
+	}
+}
+
+func remove(s []utils.Account, i int) []utils.Account {
+	s[len(s)-1], s[i] = s[i], s[len(s)-1]
+	return s[:len(s)-1]
+}
+
 func matchmakingAi() {
 
 	for account := range matchmakingAiQueue {
@@ -103,4 +128,5 @@ func createMatchMakingChanAi() chan utils.Account {
 }
 
 var matchmakingQueue = createMatchMakingChan()
+var leaveMatchmakingQueue = createMatchMakingChan()
 var matchmakingAiQueue = createMatchMakingChanAi()
