@@ -84,6 +84,9 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["engageBomber"] = 0
 	modifiers["engageAerialForce"] = 0
 
+	modifiers["dmgAerialBonus"] = 1
+	modifiers["dmgBombBonus"] = 1
+
 	var policies []utils.PolicyValue
 	//fmt.Println("GET POLICIES")
 	for _, p := range utils.GetPolicies() {
@@ -251,6 +254,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		Name:        "Manpower Growth",
 		Description: "Manpower Growth",
 	}
+	var cb = utils.GetCountry(acc.SelectedCountry)
 
 	var player = utils.PlayerInGame{
 		PlayerID:           int(acc.ID),
@@ -263,6 +267,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		Territory:          territory,
 		Policies:           policies,
 		PlayerInformations: infos,
+		Country:            cb,
 	}
 
 	return player

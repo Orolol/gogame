@@ -16,6 +16,7 @@ type Policy struct {
 	SubType        string
 	DefaultValue   string
 	MaxChange      float32
+	Restrictions   []Restriction
 }
 
 type PolicyValue struct {
@@ -46,17 +47,18 @@ type PlayerActionOrderApi struct {
 
 //SQL type for Actions
 type PlayerActionOrder struct {
-	Name        string `gorm:"not null;unique"`
-	ActionName  string
-	Constraints []Constraint
-	Description string
-	Costs       []Cost
-	Cooldown    int
-	Effects     []Effect
-	Type        string
-	SubType     string
-	Selector    string
-	BaseValue   float32
+	Name         string `gorm:"not null;unique"`
+	ActionName   string
+	Constraints  []Constraint
+	Description  string
+	Costs        []Cost
+	Cooldown     int
+	Effects      []Effect
+	Type         string
+	SubType      string
+	Selector     string
+	BaseValue    float32
+	Restrictions []Restriction
 }
 
 //Technology SQL type for technology
@@ -68,6 +70,7 @@ type Technology struct {
 	Costs          []Cost
 	ActionName     string
 	Constraints    []Constraint
+	Restrictions   []Restriction
 	Effects        []Effect
 }
 
@@ -93,6 +96,12 @@ type Cost struct {
 }
 
 type Constraint struct {
+	Type     string
+	Key      string
+	Value    string
+	Operator string
+}
+type Restriction struct {
 	Type     string
 	Key      string
 	Value    string

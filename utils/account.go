@@ -8,24 +8,26 @@ import (
 //Account Account Model
 type Account struct {
 	gorm.Model
-	Name       string `gorm:"not null;unique"`
-	Login      string `gorm:"not null;unique"`
-	Password   string
-	ProfilePic string `gorm:"default:'pp1'"`
-	Step       int    `gorm:"default:'0'"`
-	TokenID    uint
-	ELO        int
+	Name            string `gorm:"not null;unique"`
+	Login           string `gorm:"not null;unique"`
+	Password        string
+	ProfilePic      string `gorm:"default:'pp1'"`
+	Step            int    `gorm:"default:'0'"`
+	TokenID         uint
+	ELO             int
+	SelectedCountry string
 }
 
 //Account Account Model
 type AccountApi struct {
-	ID         uint
-	Login      string
-	Name       string
-	Token      string
-	ELO        int
-	ProfilePic string
-	Step       int
+	ID              uint
+	Login           string
+	Name            string
+	Token           string
+	ELO             int
+	ProfilePic      string
+	Step            int
+	SelectedCountry string
 }
 
 //Account Account Model

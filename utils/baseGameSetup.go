@@ -7,4 +7,5 @@ func SetBaseValueDB() {
 	SetBaseValuePolicies()
 	SetBaseValueTranslations()
 	SetBaseValueInfos()
+	SetBaseValueCountries()
 }

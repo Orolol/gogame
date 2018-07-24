@@ -100,8 +100,9 @@ func CreateGame(p1, p2 utils.Account) {
 func CreateAiGame(p1 utils.Account) {
 
 	var p2 = utils.Account{
-		Login: "AI",
-		ELO:   1500,
+		Login:           "AI",
+		ELO:             1500,
+		SelectedCountry: "Germany",
 	}
 
 	gc := utils.GameConf{GameType: "AI", NbPlayers: 2, Players: []utils.Account{p1, p2}}

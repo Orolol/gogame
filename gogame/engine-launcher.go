@@ -107,6 +107,14 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 	queueGameOut <- game
 	queueGameOut <- game
 	time.Sleep(time.Second)
+
+	for _, e := range player1.Country.Effects {
+		utils.ApplyEffect(player1, e, &game)
+	}
+	for _, e := range player2.Country.Effects {
+		utils.ApplyEffect(player2, e, &game)
+	}
+
 	for game.CurrentTurn < 9999 {
 
 		timer1 := time.NewTimer(time.Second * 1)
@@ -213,20 +221,15 @@ func GameManagerF(queueGameOut chan utils.Game, queueCreation chan [][]byte) {
 		case "CREATE":
 			var gc utils.GameConf
 			json.Unmarshal(msg[2], &gc)
-			//fmt.Println("GAME CREATE : ", gc)
 			queueGameInc := make(chan utils.GameMsg, 100)
 			game := createGame(gc, queueGameInc)
 			go runGame(game, queueGameInc, queueGameOut)
 			GameList[game.GameID] = queueGameInc
-			//fmt.Println("CURRENT LIST OF GAME ", GameList)
 		case "MSG":
 			var gs utils.GameMsg
 			json.Unmarshal(msg[2], &gs)
-			//fmt.Println("GameMSG : ", gs)
 			if val, ok := GameList[gs.GameID]; ok {
 				val <- gs
-			} else {
-				//fmt.Println("Game not found ", gs.GameID)
 			}
 
 		}

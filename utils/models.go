@@ -48,6 +48,15 @@ type PlayerInGame struct {
 	CallbackEffects    []CallbackEffect
 	Policies           []PolicyValue
 	PlayerInformations map[string]*PlayerInformation
+	Country            Country
+}
+
+type Country struct {
+	Name         string
+	Effects      []Effect
+	Description  string
+	Flag         string
+	Restrictions []Restriction
 }
 
 // type PlayerInformations struct {

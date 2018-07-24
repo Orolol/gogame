@@ -289,15 +289,14 @@ func LeaveQueue(c *gin.Context) {
 
 func JoinGame(c *gin.Context) {
 	db, _ := gorm.Open("mysql", ConnexionString)
-	var acc utils.Account
+	var joinGame JoinGameApi
+	c.ShouldBind(&joinGame)
 
+	var acc utils.Account
 	claims := jwt.ExtractClaims(c)
 	db.Where("Login = ?", claims["id"]).First(&acc)
-
 	fmt.Println("current games", onGoingGames)
-
 	var isNewGame = true
-
 	for _, g := range onGoingGames {
 		for _, p := range g.ListPlayers {
 			if p.Nick == acc.Name {
@@ -305,7 +304,7 @@ func JoinGame(c *gin.Context) {
 			}
 		}
 	}
-
+	acc.SelectedCountry = joinGame.SelectedCountry
 	var m = make(map[string]interface{})
 	m["policies"] = getDefaultPolicies()
 	m["actions"] = getDefaultActions()
@@ -321,19 +320,58 @@ func JoinGame(c *gin.Context) {
 
 func JoinGameAi(c *gin.Context) {
 	db, _ := gorm.Open("mysql", ConnexionString)
+	var joinGame JoinGameApi
+	c.ShouldBind(&joinGame)
+
 	var acc utils.Account
 	claims := jwt.ExtractClaims(c)
 	db.Where("Login = ?", claims["id"]).First(&acc)
 
+	acc.SelectedCountry = joinGame.SelectedCountry
+
 	fmt.Println("current games", onGoingGames)
+	var isNewGame = true
+	for _, g := range onGoingGames {
+		for _, p := range g.ListPlayers {
+			if p.Nick == acc.Name {
+				isNewGame = false
+			}
+		}
+	}
 
 	var m = make(map[string]interface{})
+
+	var okTech []utils.Technology
+	fmt.Println("CHECK TECHS")
+	for _, t := range getDefaultTech() {
+		if utils.CheckRestrictionBefore(&acc, t.Restrictions) {
+
+			okTech = append(okTech, t)
+		} else {
+			fmt.Println("RESTRICTED", t, t.Restrictions)
+		}
+	}
+
 	m["policies"] = getDefaultPolicies()
 	m["actions"] = getDefaultActions()
-	m["technology"] = getDefaultTech()
+	m["technology"] = okTech
 	m["events"] = getDefaultEvents()
+	if isNewGame {
+		fmt.Println("NEW GAME")
+		matchmakingAiQueue <- acc
+	}
 
-	fmt.Println("NEW GAME")
-	matchmakingAiQueue <- acc
 	c.JSON(http.StatusOK, m)
+}
+
+type JoinGameApi struct {
+	ID              int
+	SelectedCountry string
+}
+
+func getCountries(c *gin.Context) {
+
+	var countries = utils.GetCountries()
+	c.JSON(http.StatusOK, countries)
+
 }

@@ -98,6 +98,7 @@ func initRoutes() {
 	r.POST("/SignUp", SignUp)
 	r.GET("/GetTranslations/:language", GetTranslations)
 	r.GET("/GetInfos", GetInfos)
+	r.GET("/getCountries", getCountries)
 	r.GET("/GetPP", GetPP)
 
 	auth.Use(authMiddleware.MiddlewareFunc())

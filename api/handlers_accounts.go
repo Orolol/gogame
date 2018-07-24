@@ -117,6 +117,7 @@ func GetProfileInfos(c *gin.Context) {
 	accApi.ELO = acc.ELO
 	accApi.ProfilePic = acc.ProfilePic
 	accApi.Step = acc.Step
+	accApi.SelectedCountry = acc.SelectedCountry
 	c.JSON(http.StatusOK, accApi)
 }
 func GetEnemyInfos(c *gin.Context) {

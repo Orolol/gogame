@@ -7,6 +7,36 @@ import (
 	"time"
 )
 
+//CheckRestriction Check if restrictions is respected.
+func CheckRestrictionInGame(player *PlayerInGame, restrictions []Restriction, game *Game) bool {
+	for _, r := range restrictions {
+
+		switch t := r.Type; t {
+		case "country":
+
+			if player.Country.Name != r.Value {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+//CheckRestriction Check if restrictions is respected.
+func CheckRestrictionBefore(acc *Account, restrictions []Restriction) bool {
+	for _, r := range restrictions {
+		fmt.Println('r', r)
+		switch t := r.Type; t {
+		case "country":
+			fmt.Println("COUNTRY CHECK", acc.SelectedCountry, r.Value)
+			if acc.SelectedCountry != r.Value {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 //CheckConstraint Check if constraint is respected.
 func CheckConstraint(player *PlayerInGame, constraints []Constraint, costs []Cost, game *Game, valueToCheck float32) bool {
 	//fmt.Println("CONSTRAINT CHECK ", constraints, player.Nick)
@@ -336,8 +366,8 @@ func AlgoAerialCombat(player *PlayerInGame) float32 {
 
 	dmgModifier := (player.Army.Morale / 100.0) * (player.Army.Quality / 100.0)
 
-	var dmgFighter = player.Army.NbAirSup * 10 * rollp1 * player.Modifiers["engageFighter"]
-	var dmgBomber = player.Army.NbAirBomb * 2 * rollp1 * player.Modifiers["engageBomber"]
+	var dmgFighter = player.Army.NbAirSup * 10 * rollp1 * player.Modifiers["engageFighter"] * player.Modifiers["dmgAerialBonus"]
+	var dmgBomber = player.Army.NbAirBomb * 2 * rollp1 * player.Modifiers["engageBomber"] * player.Modifiers["dmgAerialBonus"]
 
 	player.PlayerInformations["AirSupAerialDmg"].Value = dmgFighter
 	player.PlayerInformations["AirBombAerialDmg"].Value = dmgBomber
@@ -354,8 +384,8 @@ func AlgoAerialBomb(player *PlayerInGame) float32 {
 	var dmgFighter = player.Army.NbAirSup * 5 * rollp1 * player.Modifiers["engageFighter"]
 	var dmgBomber = player.Army.NbAirBomb * 20 * rollp1 * player.Modifiers["engageBomber"]
 
-	player.PlayerInformations["AirSupGroundDmg"].Value = dmgFighter * player.Modifiers["bomberTargetArmy"]
-	player.PlayerInformations["AirBombGroundDmg"].Value = dmgBomber * player.Modifiers["bomberTargetArmy"]
+	player.PlayerInformations["AirSupGroundDmg"].Value = dmgFighter * player.Modifiers["bomberTargetArmy"] * player.Modifiers["dmgBombBonus"]
+	player.PlayerInformations["AirBombGroundDmg"].Value = dmgBomber * player.Modifiers["bomberTargetArmy"] * player.Modifiers["dmgBombBonus"]
 
 	return dmgFighter + dmgBomber
 }

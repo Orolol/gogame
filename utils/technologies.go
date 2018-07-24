@@ -30,6 +30,20 @@ func SetBaseValueTechnologies() {
 		TypeTechnology: "INDUSTRIAL",
 	})
 
+	//TECHNOLOGY
+	technologies = append(technologies, Technology{
+		Name:           "Civilian production France Only",
+		Description:    "Boost civilian factory production by 15%",
+		Costs:          []Cost{Cost{Type: "science", Value: 100}},
+		Effects:        []Effect{Effect{ModifierName: "civilianFactoryProduction", Operator: "*", Value: 1.15}},
+		ActionName:     "FRAtechnoIndusT1N1",
+		Tier:           1,
+		TypeTechnology: "FRANCE",
+		Restrictions: []Restriction{
+			Restriction{Type: "country", Value: "France"},
+		},
+	})
+
 	technologies = append(technologies, Technology{
 		Name:        "Civilian production T2",
 		Description: "Boost civilian factory production by 15%",
