@@ -17,7 +17,7 @@ import (
 
 var addr = flag.String("addr", ":5001", "http service address")
 
-var ConnexionString = "root:@/gogame?charset=utf8&parseTime=True&loc=Local"
+var ConnexionString = "gogame:See9ubeo#@/gogame?charset=utf8&parseTime=True&loc=Local"
 
 var onGoingGames = make(map[uuid.UUID]*utils.Game)
 

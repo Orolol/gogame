@@ -157,7 +157,7 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 		var preFightP1 = player1
 		var preFightP2 = player2
 
-		if game.CurrentTurn > 5 {
+		if game.CurrentTurn > 20 {
 			game.IsWar = true
 		}
 		if game.IsWar {

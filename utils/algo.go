@@ -331,9 +331,9 @@ func AlgoDamageDealt(player *PlayerInGame) float32 {
 	var rollp2 = r1.Float32() + 4.0
 	var rollp3 = r1.Float32() + 4.0
 	dmgModifier := (player.Army.Morale / 100.0) * (player.Army.Quality / 100.0)
-	var dmgSoldier = player.Army.NbSoldier * 0.05 * rollp1 * player.Modifiers["soldierQuality"]
-	var dmgLightTank = player.Army.NbLigtTank * 5 * rollp2 * player.Modifiers["lightTankQuality"]
-	var dmgHvyTank = player.Army.NbHvyTank * 15 * rollp3 * player.Modifiers["heavyTankQuality"]
+	var dmgSoldier = player.Army.NbSoldier * 0.05 * rollp1 * (player.Modifiers["soldierQuality"] / 100)
+	var dmgLightTank = player.Army.NbLigtTank * 5 * rollp2 * (player.Modifiers["lightTankQuality"] / 100)
+	var dmgHvyTank = player.Army.NbHvyTank * 15 * rollp3 * (player.Modifiers["heavyTankQuality"] / 100)
 	var dmgAerial = AlgoAerialBomb(player) * player.Modifiers["bomberTargetArmy"]
 	var dmg = (dmgSoldier + dmgLightTank + dmgHvyTank + dmgAerial) * 0.2 * dmgModifier
 
@@ -366,8 +366,8 @@ func AlgoAerialCombat(player *PlayerInGame) float32 {
 
 	dmgModifier := (player.Army.Morale / 100.0) * (player.Army.Quality / 100.0)
 
-	var dmgFighter = player.Army.NbAirSup * 10 * rollp1 * player.Modifiers["engageFighter"] * player.Modifiers["dmgAerialBonus"]
-	var dmgBomber = player.Army.NbAirBomb * 2 * rollp1 * player.Modifiers["engageBomber"] * player.Modifiers["dmgAerialBonus"]
+	var dmgFighter = player.Army.NbAirSup * 10 * rollp1 * player.Modifiers["engageFighter"] * (player.Modifiers["dmgAerialBonus"] / 100)
+	var dmgBomber = player.Army.NbAirBomb * 2 * rollp1 * player.Modifiers["engageBomber"] * (player.Modifiers["dmgAerialBonus"] / 100)
 
 	player.PlayerInformations["AirSupAerialDmg"].Value = dmgFighter
 	player.PlayerInformations["AirBombAerialDmg"].Value = dmgBomber
@@ -384,8 +384,8 @@ func AlgoAerialBomb(player *PlayerInGame) float32 {
 	var dmgFighter = player.Army.NbAirSup * 5 * rollp1 * player.Modifiers["engageFighter"]
 	var dmgBomber = player.Army.NbAirBomb * 20 * rollp1 * player.Modifiers["engageBomber"]
 
-	player.PlayerInformations["AirSupGroundDmg"].Value = dmgFighter * player.Modifiers["bomberTargetArmy"] * player.Modifiers["dmgBombBonus"]
-	player.PlayerInformations["AirBombGroundDmg"].Value = dmgBomber * player.Modifiers["bomberTargetArmy"] * player.Modifiers["dmgBombBonus"]
+	player.PlayerInformations["AirSupGroundDmg"].Value = dmgFighter * player.Modifiers["bomberTargetArmy"] * (player.Modifiers["dmgBombBonus"] / 100)
+	player.PlayerInformations["AirBombGroundDmg"].Value = dmgBomber * player.Modifiers["bomberTargetArmy"] * (player.Modifiers["dmgBombBonus"] / 100)
 
 	return dmgFighter + dmgBomber
 }
@@ -531,8 +531,11 @@ func AlgoDamageRepartition(player *PlayerInGame, dmgIncoming float32) *PlayerInG
 //AlgoDamageRepartition Calculate loses
 func AlgoDamageRepartitionOnFactories(player *PlayerInGame, dmgIncoming float32) *PlayerInGame {
 	loss := (dmgIncoming / (3000))
-	player.Civilian.NbCivilianFactory -= loss
-	fmt.Println("BOMB ON FACTORIES", loss, dmgIncoming)
+	if player.Civilian.NbCivilianFactory-loss > 0 {
+		player.Civilian.NbCivilianFactory -= loss
+	} else {
+		player.Civilian.NbCivilianFactory = 0
+	}
 	return player
 }
 

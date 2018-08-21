@@ -385,9 +385,41 @@ func SetBaseValueTranslations() {
 	})
 	translations = append(translations, Translation{
 		Language:    "en",
+		ShortName:   "Add ? quality <img class='icon' src='quality.png' /> for heavy tank.",
+		Description: "Add ? quality <img class='icon' src='quality.png' /> .Quality is an overall boost to damage and help prevent loss. unlike Morale, Quality doesn't decay over time.",
+		ActionName:  "heavyTankQuality",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
 		ShortName:   "Sacrifice ?% of your soldiers",
 		Description: "Sometimes, victory need sacrifice.",
 		ActionName:  "sacrificeSoldier",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "You deal ?% more damage in aerial combat",
+		Description: "Total air domination",
+		ActionName:  "dmgAerialBonus",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Your bomber are ?% more effective",
+		Description: "Rain of fire",
+		ActionName:  "dmgBombBonus",
+	})
+
+	//Countries
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "Germany",
+		Description: "Specialized in heavy tanks and high quality army.",
+		ActionName:  "Germany",
+	})
+	translations = append(translations, Translation{
+		Language:    "en",
+		ShortName:   "France",
+		Description: "Specialized in aircraft. Have some technology related to tax.",
+		ActionName:  "France",
 	})
 
 }

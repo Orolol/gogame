@@ -63,9 +63,9 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 
 	modifiers["researchEfficiency"] = 1.0
 
-	modifiers["soldierQuality"] = 1.0
-	modifiers["lightTankQuality"] = 1.0
-	modifiers["heavyTankQuality"] = 1.0
+	modifiers["soldierQuality"] = 100
+	modifiers["lightTankQuality"] = 100
+	modifiers["heavyTankQuality"] = 100
 
 	modifiers["soldierArmor"] = 1.0
 	modifiers["lightTankArmor"] = 1.0
@@ -84,8 +84,8 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 	modifiers["engageBomber"] = 0
 	modifiers["engageAerialForce"] = 0
 
-	modifiers["dmgAerialBonus"] = 1
-	modifiers["dmgBombBonus"] = 1
+	modifiers["dmgAerialBonus"] = 100
+	modifiers["dmgBombBonus"] = 100
 
 	var policies []utils.PolicyValue
 	//fmt.Println("GET POLICIES")
@@ -316,27 +316,6 @@ func setBuildHvyTank(player *utils.PlayerInGame, values float32) {
 
 // 	}
 // }
-
-func actionWarPropaganda(player *utils.PlayerInGame, values float32) {
-	player.Army.Morale += 15
-
-}
-func emergencyRecruitment(player *utils.PlayerInGame, values float32) {
-	player.Army.Morale -= 10
-	player.Army.NbSoldier += player.Civilian.NbManpower * 0.1
-
-}
-func purgeSoldier(player *utils.PlayerInGame, values float32) {
-	player.Army.Morale += 15
-	player.Modifiers["soldierQuality"] *= 1.15
-	player.Army.NbSoldier *= 0.85
-
-}
-func buyForeignTanks(player *utils.PlayerInGame, values float32) {
-	player.Army.NbHvyTank += 50
-	player.Army.NbLigtTank += 150
-
-}
 
 func genericApplyEffect(player *utils.PlayerInGame, opponent *utils.PlayerInGame, effects []utils.Effect, game *utils.Game) {
 	for _, e := range effects {

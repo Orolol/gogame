@@ -23,10 +23,10 @@ func SetBaseValueCountries() {
 	Countries = append(Countries, Country{
 		Name:        "France",
 		Flag:        "fra.png",
-		Description: "Specialized in aircraft ",
+		Description: "Specialized in aircraft. Have some technology related to tax.",
 		Effects: []Effect{
-			Effect{ModifierType: "Modifiers", ModifierName: "dmgAerialBonus", Operator: "+", Value: 0.1, Target: "Player", ActionName: "dmgAerialBonus"},
-			Effect{ModifierType: "Modifiers", ModifierName: "dmgBombBonus", Operator: "+", Value: 0.1, Target: "Player", ActionName: "dmgBombBonus"},
+			Effect{ModifierType: "Modifiers", ModifierName: "dmgAerialBonus", Operator: "+", Value: 10, Target: "Player", ActionName: "dmgAerialBonus"},
+			Effect{ModifierType: "Modifiers", ModifierName: "dmgBombBonus", Operator: "+", Value: 10, Target: "Player", ActionName: "dmgBombBonus"},
 		},
 	})
 	Countries = append(Countries, Country{
@@ -35,7 +35,7 @@ func SetBaseValueCountries() {
 		Description: "Specialized in heavy tanks and high quality army.",
 		Effects: []Effect{
 			Effect{ModifierType: "Army", ModifierName: "Quality", Operator: "+", Value: 5, Target: "Player", ActionName: "addQuality"},
-			Effect{ModifierType: "Modifiers", ModifierName: "heavyTankQuality", Operator: "+", Value: 0.1, Target: "Player", ActionName: "heavyTankQuality"},
+			Effect{ModifierType: "Modifiers", ModifierName: "heavyTankQuality", Operator: "+", Value: 10, Target: "Player", ActionName: "heavyTankQuality"},
 		},
 	})
 
