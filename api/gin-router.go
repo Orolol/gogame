@@ -100,6 +100,8 @@ func initRoutes() {
 	r.GET("/GetInfos", GetInfos)
 	r.GET("/getCountries", getCountries)
 	r.GET("/GetPP", GetPP)
+	r.GET("/GetServerInfos", GetServerInfos)
+	r.GET("/GetNews", GetNews)
 
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{

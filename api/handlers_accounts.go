@@ -149,3 +149,8 @@ func GetPP(c *gin.Context) {
 
 	c.JSON(http.StatusOK, list)
 }
+
+func GetNews(c *gin.Context) {
+	var list = utils.GetNews()
+	c.JSON(http.StatusOK, list)
+}

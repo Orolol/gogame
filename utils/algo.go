@@ -381,8 +381,8 @@ func AlgoAerialBomb(player *PlayerInGame) float32 {
 	r1 := rand.New(s1)
 	var rollp1 = r1.Float32() + 4.0
 
-	var dmgFighter = player.Army.NbAirSup * 5 * rollp1 * player.Modifiers["engageFighter"]
-	var dmgBomber = player.Army.NbAirBomb * 20 * rollp1 * player.Modifiers["engageBomber"]
+	var dmgFighter = player.Army.NbAirSup * 2 * rollp1 * player.Modifiers["engageFighter"]
+	var dmgBomber = player.Army.NbAirBomb * 12 * rollp1 * player.Modifiers["engageBomber"]
 
 	player.PlayerInformations["AirSupGroundDmg"].Value = dmgFighter * player.Modifiers["bomberTargetArmy"] * (player.Modifiers["dmgBombBonus"] / 100)
 	player.PlayerInformations["AirBombGroundDmg"].Value = dmgBomber * player.Modifiers["bomberTargetArmy"] * (player.Modifiers["dmgBombBonus"] / 100)
@@ -400,12 +400,6 @@ func AlgoFullAerialPhase(p1 *PlayerInGame, p2 *PlayerInGame) (*PlayerInGame, *Pl
 	p1engBomb = p1.Army.NbAirBomb * p1.Modifiers["engageBomber"]
 	p2engFight = p2.Army.NbAirSup * p2.Modifiers["engageFighter"]
 	p2engBomb = p2.Army.NbAirBomb * p2.Modifiers["engageBomber"]
-
-	// fmt.Println("AERIAL SUP P1", p1.Army.NbAirSup, p1AD)
-	// fmt.Println("AERIAL SUP P2", p2.Army.NbAirSup, p2AD)
-
-	// fmt.Println("AERIAL BOMB P1", p1.Army.NbAirBomb, p1AD)
-	// fmt.Println("AERIAL BOMB P2", p2.Army.NbAirBomb, p2AD)
 
 	var lossp1sup, lossp2sup, lossp2bomb, lossp1bomb float32
 
@@ -569,7 +563,7 @@ func AlgoEconomicEndTurn(player *PlayerInGame) *PlayerInGame {
 		var artProd = (player.Economy.ArtilleryProduction / 100) * 0.5 * civilianProduction
 		var civProd = (player.Economy.FactoryProduction / 100) * 0.01 * civilianProduction
 		var amuProd = (player.Economy.AmmunitionProduction / 100) * 100 * civilianProduction
-		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 150 * civilianProduction
+		var infProd = (player.Economy.InfantryEquipmentProduction / 100) * 300 * civilianProduction
 
 		player.Army.NbLigtTank += litghTankProd
 		player.Army.NbHvyTank += heavyTankProd

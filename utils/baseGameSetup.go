@@ -8,4 +8,6 @@ func SetBaseValueDB() {
 	SetBaseValueTranslations()
 	SetBaseValueInfos()
 	SetBaseValueCountries()
+	SetBaseValueNews()
+	InitAIEasy()
 }

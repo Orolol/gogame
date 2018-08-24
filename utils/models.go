@@ -176,3 +176,16 @@ type DisplayInfos struct {
 	GrowthType   string
 	Display      int
 }
+type ServerInfos struct {
+	Region         string
+	PlayersOnline  int
+	PlayersWaiting int
+	IsOnline       bool
+	OnGoingGames   int
+}
+
+type News struct {
+	Title     string
+	Date      string
+	Paragrahs []string
+}

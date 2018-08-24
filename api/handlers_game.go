@@ -93,6 +93,18 @@ func GetInfos(c *gin.Context) {
 	c.JSON(http.StatusOK, translations)
 }
 
+func GetServerInfos(c *gin.Context) {
+	var infos = utils.ServerInfos{
+		IsOnline:       true,
+		Region:         "EU",
+		PlayersOnline:  1,
+		PlayersWaiting: len(poolPendingPlayer),
+		OnGoingGames:   len(onGoingGames),
+	}
+	fmt.Println("GO SERVER INFOS", infos)
+	c.JSON(http.StatusOK, infos)
+}
+
 func GetHistory(c *gin.Context) {
 
 	var acc utils.Account

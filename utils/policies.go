@@ -31,27 +31,27 @@ func SetBaseValuePolicies() {
 					Effect{ModifierType: "Policy", Value: 1, Operator: "=", ModifierName: "TrainingPolicy"},
 				}, IsDefault: true,
 			},
-			PolicyValue{Name: "Long", Value: 1.5, Description: "Make sure everyone know how to fight", ActionName: "setPopRecPolicy", Constraints: nil,
+			PolicyValue{Name: "Long", Value: 2, Description: "Make sure everyone know how to fight", ActionName: "setPopRecPolicy", Constraints: nil,
 				Effects: []Effect{
 					Effect{ModifierType: "Policy", Value: 1.5, Operator: "=", ModifierName: "TrainingPolicy"},
 					Effect{ModifierType: "Modifiers", Value: 0.98, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 				},
 			},
-			PolicyValue{Name: "Hurry", Value: 2.5, Description: "Army need fresh recruit !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
+			PolicyValue{Name: "Hurry", Value: 3, Description: "Army need fresh recruit !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
 				Effect{ModifierType: "Policy", Value: 2.5, Operator: "=", ModifierName: "TrainingPolicy"},
 				Effect{ModifierType: "Modifiers", Value: 0.95, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 			},
 			},
-			PolicyValue{Name: "No time !", Value: 5, Description: "If they can handle a rifle, send them !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
+			PolicyValue{Name: "No time !", Value: 4, Description: "If they can handle a rifle, send them !", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
 				Effect{ModifierType: "Policy", Value: 5, Operator: "=", ModifierName: "TrainingPolicy"},
 				Effect{ModifierType: "Modifiers", Value: 0.90, Operator: "=", ModifierName: "soldierRecruitmentExperience"},
 			},
 			},
-			PolicyValue{Name: "Send everyone !", Value: 10, Description: "Drag the full country", ActionName: "setPopRecPolicy", Constraints: []Constraint{
+			PolicyValue{Name: "Send everyone !", Value: 5, Description: "Drag the full country", ActionName: "setPopRecPolicy", Constraints: []Constraint{
 				Constraint{Type: "isWar"},
 			}, Effects: []Effect{
 				Effect{ModifierType: "Policy", Value: 10, Operator: "=", ModifierName: "TrainingPolicy"},

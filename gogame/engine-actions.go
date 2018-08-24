@@ -14,7 +14,7 @@ func InitializePlayerDefaultValue(acc utils.Account) utils.PlayerInGame {
 		NbAirSup:          0,
 		NbAirBomb:         0,
 		Ammunition:        100000,
-		InfantryEquipment: 100000,
+		InfantryEquipment: 200000,
 		Morale:            100,
 		Quality:           100}
 

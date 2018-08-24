@@ -76,9 +76,9 @@ func SetBaseValueActions() {
 		SubType:     "RECRUITMENT",
 		Name:        "Build additionnal barracks",
 		ActionName:  "buildBarracks",
-		Description: "Build a barrack",
+		Description: "Build two barrack",
 		Cooldown:    5,
-		Effects:     []Effect{Effect{ModifierType: "Territory", ModifierName: "Barracks", Operator: "+", Value: 1, Target: "Player"}},
+		Effects:     []Effect{Effect{ModifierType: "Territory", ModifierName: "Barracks", Operator: "+", Value: 2, Target: "Player"}},
 		Costs:       []Cost{Cost{Type: "money", Value: 20000000}},
 		Selector:    "fixed",
 	})

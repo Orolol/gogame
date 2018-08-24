@@ -149,6 +149,10 @@ func runGame(game utils.Game, queue chan utils.GameMsg, queueGameOut chan utils.
 				}
 			}
 		}
+
+		if game.Conf.GameType == "AI" {
+			utils.RollAiAction(player2, &game)
+		}
 		//Event start turn
 		player1 = utils.AlgoRollTurnEvent(player1, &game)
 		player2 = utils.AlgoRollTurnEvent(player2, &game)
