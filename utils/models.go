@@ -189,3 +189,7 @@ type News struct {
 	Date      string
 	Paragrahs []string
 }
+
+type Configuration struct {
+	Connection_String string
+}

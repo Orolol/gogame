@@ -436,12 +436,6 @@ func AlgoFullAerialPhase(p1 *PlayerInGame, p2 *PlayerInGame) (*PlayerInGame, *Pl
 		p1.Army.NbAirBomb -= lossp1bomb
 	}
 
-	// fmt.Println("AFTER AERIAL SUP P1", p1.Army.NbAirSup, p1AD, lossp1sup)
-	// fmt.Println("AFTER AERIAL SUP P2", p2.Army.NbAirSup, p2AD, lossp2sup)
-
-	// fmt.Println("AFTER AERIAL BOMB P1", p1.Army.NbAirBomb, p1AD, lossp1bomb)
-	// fmt.Println("AFTER AERIAL BOMB P2", p2.Army.NbAirBomb, p2AD, lossp2bomb)
-
 	return p1, p2
 
 }
@@ -449,15 +443,6 @@ func AlgoFullAerialPhase(p1 *PlayerInGame, p2 *PlayerInGame) (*PlayerInGame, *Pl
 //AlgoReinforcement calc reinforcement
 func AlgoReinforcement(player *PlayerInGame) *PlayerInGame {
 	if player.Economy.Money > 0 {
-		// var minRf float32 = 100.0
-		// reinforcement := 1000 * player.ModifierPolicy.TrainingPolicy
-		// ////fmt.Println("REINFORCEMENT : ", reinforcement)
-		// if reinforcement > player.Civilian.NbManpower {
-		// 	reinforcement = 0.0
-		// } else if reinforcement < minRf {
-		// 	reinforcement = minRf
-		// }
-
 		reinforcement := player.Territory.Barracks * 50 * player.ModifierPolicy.TrainingPolicy
 
 		player.PlayerInformations["SoldierRecruit"].Value = reinforcement

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -17,7 +18,7 @@ import (
 
 var addr = flag.String("addr", ":5001", "http service address")
 
-var ConnexionString = "gogame:See9ubeo#@/gogame?charset=utf8&parseTime=True&loc=Local"
+var ConnexionString string
 
 var onGoingGames = make(map[uuid.UUID]*utils.Game)
 
@@ -170,6 +171,21 @@ func goSocket() {
 }
 
 func main() {
+
+	var configuration utils.Configuration
+	var filename = "config.json"
+
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ConnexionString = configuration.Connection_String
 
 	db, err := gorm.Open("mysql", ConnexionString)
 	if err != nil {
